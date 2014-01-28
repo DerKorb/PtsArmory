@@ -23,7 +23,7 @@
 #
 # Where possible this follows conventions established by the Satoshi client.
 # Does not require armory to be installed or running, this is a standalone application.
-# Requires bitcoind process to be running before starting armory-daemon.
+# Requires protosharesd process to be running before starting armory-daemon.
 # Requires an armory watch-only wallet to be in the same folder as the
 # armory-daemon script.
 # Works with testnet, use --testnet flag when starting the script.
@@ -37,7 +37,7 @@
 # provided immense amounts of help with this. This app is mostly chunks
 # of code taken from armory and refurbished into an rpc client.
 # See the bitcontalk thread for more details about this software:
-# https://bitcointalk.org/index.php?topic=92496.0
+# https://protosharestalk.org/index.php?topic=92496.0
 #####
 
 from twisted.internet import reactor
@@ -68,7 +68,7 @@ ARMORYD_CONF_FILE = os.path.join(ARMORY_HOME_DIR, 'armoryd.conf')
 
 
 
-# From https://en.bitcoin.it/wiki/Proper_Money_Handling_(JSON-RPC)
+# From https://en.protoshares.it/wiki/Proper_Money_Handling_(JSON-RPC)
 def JSONtoAmount(value):
     return long(round(float(value) * 1e8))
 def AmountToJSON(amount):
@@ -129,10 +129,10 @@ class Armory_Json_Rpc_Server(jsonrpc.JSONRPC):
       return AmountToJSON(balance)
 
    #############################################################################
-   def jsonrpc_sendtoaddress(self, bitcoinaddress, amount):
+   def jsonrpc_sendtoaddress(self, protosharesaddress, amount):
       if CLI_OPTIONS.offline:
          raise ValueError('Cannot create transactions when offline')
-      addr160 = addrStr_to_hash160(bitcoinaddress)
+      addr160 = addrStr_to_hash160(protosharesaddress)
       amtCoin = JSONtoAmount(amount)
       return self.create_unsigned_transaction([[addr160, amtCoin]])
 
@@ -219,7 +219,7 @@ class Armory_Json_Rpc_Server(jsonrpc.JSONRPC):
                   change160 = recip160
 
 
-         # amtCoins: amt of BTC transacted, always positive (how big are outputs minus change?)
+         # amtCoins: amt of PTS transacted, always positive (how big are outputs minus change?)
          # netCoins: net effect on wallet (positive or negative)
          # feeCoins: how much fee was paid for this tx 
 
@@ -448,9 +448,9 @@ class Armory_Json_Rpc_Server(jsonrpc.JSONRPC):
    def jsonrpc_getinfo(self):
       isReady = TheBDM.getBDMState() == 'BlockchainReady'
       info = { \
-               'version':           getVersionInt(BTCARMORY_VERSION),
+               'version':           getVersionInt(PTSARMORY_VERSION),
                'protocolversion':   0,  
-               'walletversion':     getVersionInt(PYBTCWALLET_VERSION),
+               'walletversion':     getVersionInt(PYPTSWALLET_VERSION),
                'bdmstate':          TheBDM.getBDMState(),
                'balance':           AmountToJSON(self.wallet.getBalance()) if isReady else -1,
                'blocks':            TheBDM.getTopBlockHeight(),
@@ -584,10 +584,10 @@ class Armory_Json_Rpc_Server(jsonrpc.JSONRPC):
       return out
 
    #############################################################################
-   # https://bitcointalk.org/index.php?topic=92496.msg1126310#msg1126310
+   # https://protosharestalk.org/index.php?topic=92496.msg1126310#msg1126310
    def create_unsigned_transaction(self, recipValPairs):
       # Get unspent TxOutList and select the coins
-      #addr160_recipient = addrStr_to_hash160(bitcoinaddress_str)
+      #addr160_recipient = addrStr_to_hash160(protosharesaddress_str)
 
       totalSend = long( sum([rv[1] for rv in recipValPairs]) )
       fee = 0
@@ -664,7 +664,7 @@ class Armory_Daemon(object):
          LOGERROR('Wallet does not exist!  (%s)', wltpath)
          return
 
-      self.wallet = PyBtcWallet().readWalletFile(wltpath)
+      self.wallet = PyPtsWallet().readWalletFile(wltpath)
 
       LOGINFO("Initialising RPC server on port %d", ARMORY_RPC_PORT)
       resource = Armory_Json_Rpc_Server(self.wallet)
@@ -712,14 +712,14 @@ class Armory_Daemon(object):
          LOGINFO('Blockchain load and wallet sync finished')
          LOGINFO('Wallet balance: %s' % coin2str(self.wallet.getBalance('Spendable')))
 
-         # This is CONNECT call for armoryd to talk to bitcoind
-         LOGINFO('Set up connection to bitcoind')
+         # This is CONNECT call for armoryd to talk to protosharesd
+         LOGINFO('Set up connection to protosharesd')
          self.NetworkingFactory = ArmoryClientFactory( \
                         func_loseConnect = self.showOfflineMsg, \
                         func_madeConnect = self.showOnlineMsg, \
                         func_newTx       = self.execOnNewTx, \
                         func_newBlock    = self.execOnNewBlock)
-         reactor.connectTCP('127.0.0.1', BITCOIN_PORT, self.NetworkingFactory)
+         reactor.connectTCP('127.0.0.1', PROTOSHARES_PORT, self.NetworkingFactory)
 
       reactor.run()
 
@@ -873,7 +873,7 @@ class Armory_Daemon(object):
 
 
 """
-# This is from jgarzik's python-bitcoinrpc tester
+# This is from jgarzik's python-protosharesrpc tester
 import decimal
 import json
 from jsonrpc import ServiceProxy

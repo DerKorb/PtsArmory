@@ -42,7 +42,7 @@ if not os.path.exists('./armoryengine.py') or \
 vstr = ''
 with open('armoryengine.py') as f:
    for line in f.readlines():
-      if line.startswith('BTCARMORY_VERSION'):
+      if line.startswith('PTSARMORY_VERSION'):
          vstr = line[line.index('(')+1:line.index(')')]
          vquad = tuple([int(v) for v in vstr.replace(' ','').split(',')])
          print vquad, len(vquad)

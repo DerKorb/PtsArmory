@@ -8,7 +8,7 @@
 #include <iostream>
 #include <vector>
 #include "BinaryData.h"
-#include "BtcUtils.h"
+#include "PtsUtils.h"
 
 
 
@@ -170,7 +170,7 @@ public:
 
       // var_int + vector<bool>  - Num Bits + BitList
       bw.put_var_int(vBits.size());
-      bw.put_BinaryData( BtcUtils::PackBits(vBits) );
+      bw.put_BinaryData( PtsUtils::PackBits(vBits) );
 
       return bw.getData();
    }
@@ -205,7 +205,7 @@ public:
       uint32_t numBits = (uint32_t)brr.get_var_int();
       BinaryData vBytes;
       brr.get_BinaryData(vBytes, (numBits+7)/8);
-      list<bool> vBits = BtcUtils::UnpackBits(vBytes, numBits);
+      list<bool> vBits = PtsUtils::UnpackBits(vBytes, numBits);
 
       recurseUnserializeTree(root_, vBits, vHash);
       recurseCalcHash(root_);

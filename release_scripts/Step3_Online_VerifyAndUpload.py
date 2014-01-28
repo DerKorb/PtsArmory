@@ -4,7 +4,7 @@
 # manually check, after this script completes, that signed_release_unpack:
 #   dpkg-sig --verify *.deb
 #   gpg -v *.asc
-#   cd BitcoinArmory; git tag -v v0.90-beta  (or whatever the tag is)
+#   cd ProtosharesArmory; git tag -v v0.90-beta  (or whatever the tag is)
 import sys
 import os
 import time
@@ -105,7 +105,7 @@ logprint(err)
 #####
 logprint('*'*80)
 logprint('Checking signed tag on repo:')
-os.chdir('%s/BitcoinArmory' % unpackDir)
+os.chdir('%s/ProtosharesArmory' % unpackDir)
 out,err = execAndWait('git tag -v v%s' % verFullStr)
 os.chdir(startDir)
 logprint(out)
@@ -207,4 +207,4 @@ if yn.lower().startswith('y'):
 logprint('')
 logprint('Not actually pushing the signed tag; do it manually --')
 logprint('Copy the following command to push the tag:')
-logprint('   cd %s/BitcoinArmory; git push origin v%s' % (unpackDir, verFullStr))
+logprint('   cd %s/ProtosharesArmory; git push origin v%s' % (unpackDir, verFullStr))

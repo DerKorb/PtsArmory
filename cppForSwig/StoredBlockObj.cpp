@@ -221,7 +221,7 @@ void StoredHeader::unserialize(BinaryDataRef header80B)
       return;
    }
    dataCopy_.copyFrom(header80B);
-   BtcUtils::getHash256(header80B, thisHash_);
+   PtsUtils::getHash256(header80B, thisHash_);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -247,14 +247,14 @@ void StoredHeader::unserializeFullBlock(BinaryRefReader brr,
    createFromBlockHeader(bh);
    numTx_ = nTx;
    
-   numBytes_ = HEADER_SIZE + BtcUtils::calcVarIntSize(numTx_);
+   numBytes_ = HEADER_SIZE + PtsUtils::calcVarIntSize(numTx_);
    if(dataCopy_.getSize() != HEADER_SIZE)
    {
       LOGERR << "Unserializing header did not produce 80-byte object!";
       return;
    }
 
-   BtcUtils::getHash256(dataCopy_, thisHash_);
+   PtsUtils::getHash256(dataCopy_, thisHash_);
 
    for(uint32_t tx=0; tx<nTx; tx++)
    {
@@ -448,7 +448,7 @@ void StoredHeader::unserializeDBValue( DB_SELECT         db,
       BinaryData hgtx = brr.get_BinaryData(4);
       blockHeight_ = DBUtils.hgtxToHeight(hgtx);
       duplicateID_ = DBUtils.hgtxToDupID(hgtx);
-      BtcUtils::getHash256(dataCopy_, thisHash_);
+      PtsUtils::getHash256(dataCopy_, thisHash_);
    }
    else if(db==BLKDATA)
    {
@@ -463,7 +463,7 @@ void StoredHeader::unserializeDBValue( DB_SELECT         db,
    
       // Unserialize the raw header into the SBH object
       brr.get_BinaryData(dataCopy_, HEADER_SIZE);
-      BtcUtils::getHash256(dataCopy_, thisHash_);
+      PtsUtils::getHash256(dataCopy_, thisHash_);
       numTx_    = brr.get_uint32_t();
       numBytes_ = brr.get_uint32_t();
 
@@ -642,7 +642,7 @@ void StoredTx::unserialize(BinaryDataRef data, bool fragged)
 void StoredTx::unserialize(BinaryRefReader & brr, bool fragged)
 {
    vector<uint32_t> offsetsIn, offsetsOut; 
-   uint32_t nbytes = BtcUtils::StoredTxCalcLength(brr.getCurrPtr(),
+   uint32_t nbytes = PtsUtils::StoredTxCalcLength(brr.getCurrPtr(),
                                                   fragged,
                                                   &offsetsIn,
                                                   &offsetsOut);
@@ -669,7 +669,7 @@ void StoredTx::unserialize(BinaryRefReader & brr, bool fragged)
       numBytes_ = nbytes;
       uint32_t span = offsetsOut[numTxOut_] - offsetsOut[0];
       fragBytes_ = numBytes_ - span;
-      BtcUtils::getHash256(dataCopy_, thisHash_);
+      PtsUtils::getHash256(dataCopy_, thisHash_);
    }
 }
 
@@ -839,7 +839,7 @@ BinaryData StoredTx::getSerializedTxFragged(void) const
 
    BinaryWriter bw;
    vector<uint32_t> outOffsets;
-   BtcUtils::StoredTxCalcLength(dataCopy_.getPtr(), false, NULL, &outOffsets);
+   PtsUtils::StoredTxCalcLength(dataCopy_.getPtr(), false, NULL, &outOffsets);
    uint32_t firstOut  = outOffsets[0];
    uint32_t afterLast = outOffsets[outOffsets.size()-1];
    uint32_t span = afterLast - firstOut;
@@ -913,7 +913,7 @@ void StoredTxOut::unserialize(BinaryRefReader & brr)
       return;
    }
 
-   uint32_t numBytes = BtcUtils::TxOutCalcLength(brr.getCurrPtr());
+   uint32_t numBytes = PtsUtils::TxOutCalcLength(brr.getCurrPtr());
 
    if(brr.getSizeRemaining() < numBytes)
    {
@@ -1182,7 +1182,7 @@ BinaryData StoredTxOut::getScrAddress(void) const
    BinaryRefReader brr(dataCopy_);
    brr.advance(8);
    uint32_t scrsz = (uint32_t)brr.get_var_int();
-   return BtcUtils::getTxOutScrAddr(brr.get_BinaryDataRef(scrsz));
+   return PtsUtils::getTxOutScrAddr(brr.get_BinaryDataRef(scrsz));
 }
 
 ////////////////////////////////////////////////////////////////////////////////

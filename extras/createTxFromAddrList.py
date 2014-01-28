@@ -20,9 +20,9 @@ def createTxFromAddrList(walletObj, addrList, recipAmtPairList, \
    a list of addresses in that wallet, and then a list of recipients and
    amounts to send each one.  
 
-   !!! YOU MUST SPECIFY ALL BITCOIN VALUES IN SATOSHIS !!!
+   !!! YOU MUST SPECIFY ALL PROTOSHARES VALUES IN SATOSHIS !!!
    You can either write it out explicitly -- 150000000
-   Or use floats and convert to long      -- long(1.5*ONE_BTC)
+   Or use floats and convert to long      -- long(1.5*ONE_PTS)
 
    You must also specify an address to which you want change sent.  It will 
    only be used if necessary (i.e. if you don't specify your recip list to 
@@ -64,7 +64,7 @@ def createTxFromAddrList(walletObj, addrList, recipAmtPairList, \
    # Display what we found
    totalUtxo = sumTxOutList(utxoList)
    totalSpend   = sum([pair[1] for pair in recipList])
-   print 'Available:  %d unspent outputs from %d addresses: %s BTC' % \
+   print 'Available:  %d unspent outputs from %d addresses: %s PTS' % \
                   (len(utxoList), len(addrList), coin2str(totalUtxo, ndec=2))
 
    # Print more detailed information
@@ -88,7 +88,7 @@ def createTxFromAddrList(walletObj, addrList, recipAmtPairList, \
 
    if minValidFee>fee:
       print '***WARNING:'
-      print 'This transaction requires a fee of at least %s BTC' % coin2str(minValidFee)
+      print 'This transaction requires a fee of at least %s PTS' % coin2str(minValidFee)
       print 'Sending of this transaction *will fail*.  Will you increase the fee?'
       confirm = raw_input('Increase Fee [Y/n]:')
       if 'n' in confirm.lower():
@@ -127,16 +127,16 @@ if __name__ == '__main__':
    walletFile = 'armory_29KADwa1D_.wallet'
    if not os.path.exists(walletFile):
       raise FileExistsError, 'Wallet file does not exist! [%s]' % walletFile
-   wlt = PyBtcWallet().readWalletFile(walletFile)
+   wlt = PyPtsWallet().readWalletFile(walletFile)
 
    # Only use these addresses for this tx
    addrList = ['1dyRSCSJdRiPgGYNTSE31Lodvs3Peiiqx', \
                '131t9NSPV3U1DdyQsEEcEzyyYsWrAcm1ZX']
    
    # Send money to these three outputs (change will be added if/where necessary)
-   recipList =[('12V6i8PHhxyYWSEeYsXNr9kzwca1GrW5T8',  long(0.2*ONE_BTC)), \
-               ('14CDNme1pFJxLKitdSMqTNETPeLzs1V4RD',  long(0.5*ONE_BTC)), \
-               ('16GsZYhzJiv5BHTQaosrwpSpf9Unw3eLuC',  long(1.1*ONE_BTC))   ]
+   recipList =[('12V6i8PHhxyYWSEeYsXNr9kzwca1GrW5T8',  long(0.2*ONE_PTS)), \
+               ('14CDNme1pFJxLKitdSMqTNETPeLzs1V4RD',  long(0.5*ONE_PTS)), \
+               ('16GsZYhzJiv5BHTQaosrwpSpf9Unw3eLuC',  long(1.1*ONE_PTS))   ]
    
    # Works with or without a change address specified
    #sendChangeTo = '151kQbcEdBDehW5gt3fahrHwfBBtEjSSAx'

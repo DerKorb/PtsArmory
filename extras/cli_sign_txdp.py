@@ -25,7 +25,7 @@ if not os.path.exists(wltfile):
 if not os.path.exists(txdpfile):
    print 'Transaction file was not found: %s' % txdpfile
 
-wlt  = PyBtcWallet().readWalletFile(wltfile)
+wlt  = PyPtsWallet().readWalletFile(wltfile)
 txdp = PyTxDistProposal().unserializeAscii( open(txdpfile,'r').read())
 
 for a160 in txdp.inAddr20Lists:
@@ -38,22 +38,22 @@ print '*************************************************************************
 print 'PLEASE VERIFY THE TRANSACTION DETAILS BEFORE SIGNING'
 print '********************************************************************************'
 
-btcIn  = sum(txdp.inputValues)
-btcOut = sum([o.value for o in txdp.pytxObj.outputs])
-btcFee = btcIn - btcOut
+ptsIn  = sum(txdp.inputValues)
+ptsOut = sum([o.value for o in txdp.pytxObj.outputs])
+ptsFee = ptsIn - ptsOut
 
-print '   INPUTS:  (%s)' % coin2str(btcIn).strip()
+print '   INPUTS:  (%s)' % coin2str(ptsIn).strip()
 for i,a160 in enumerate(txdp.inAddr20Lists):
    print    '      %s          -->\t%s' % (hash160_to_addrStr(a160[0]), coin2str(txdp.inputValues[i]))
 
-print '   OUTPUTS: (%s)' % coin2str(btcOut).strip()
+print '   OUTPUTS: (%s)' % coin2str(ptsOut).strip()
 for i,txout in enumerate(txdp.pytxObj.outputs):
    a160 = TxOutScriptExtractAddr160(txout.binScript)
    if wlt.hasAddr(a160):
       print '      %s (change) <--\t%s' % (hash160_to_addrStr(a160), coin2str(txout.value))
    else:
       print '      %s          <--\t%s' % (hash160_to_addrStr(a160), coin2str(txout.value))
-print '      %s          <--\t%s' % ('Fee'.ljust(34), coin2str(btcFee))
+print '      %s          <--\t%s' % ('Fee'.ljust(34), coin2str(ptsFee))
 
 confirm = raw_input('\nDoes this look right?  [y/N]: ')
 if not confirm.lower().startswith('y'):

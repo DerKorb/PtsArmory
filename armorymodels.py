@@ -27,9 +27,9 @@ LEDGERCOLS  = enum('NumConf', 'UnixTime', 'DateStr', 'TxDir', 'WltName', 'Commen
 ADDRESSCOLS  = enum('ChainIdx', 'Address', 'Comment', 'NumTx', 'Balance')
 ADDRBOOKCOLS = enum('Address', 'WltID', 'NumSent', 'Comment')
 
-TXINCOLS  = enum('WltID', 'Sender', 'Btc', 'OutPt', 'OutIdx', 'FromBlk', \
+TXINCOLS  = enum('WltID', 'Sender', 'Pts', 'OutPt', 'OutIdx', 'FromBlk', \
                                        'ScrType', 'Sequence', 'Script')
-TXOUTCOLS = enum('WltID', 'Recip', 'Btc', 'ScrType', 'Script')
+TXOUTCOLS = enum('WltID', 'Recip', 'Pts', 'ScrType', 'Script')
 
 
 class AllWalletsDispModel(QAbstractTableModel):
@@ -209,7 +209,7 @@ class LedgerDispModelSimple(QAbstractTableModel):
                if isCB:
                   tooltipStr = '%d/120 confirmations'%nConf
                   tooltipStr += ( '\n\nThis is a "generation" transaction from\n'
-                                 'Bitcoin mining.  These transactions take\n'
+                                 'Protoshares mining.  These transactions take\n'
                                  '120 confirmations (approximately one day)\n'
                                  'before they are available to be spent.')
                else:
@@ -224,16 +224,16 @@ class LedgerDispModelSimple(QAbstractTableModel):
             #toSelf = self.index(index.row(), COL.toSelf).data().toBool()
             toSelf = rowData[COL.toSelf]
             if toSelf:
-               return QVariant('Bitcoins sent and received by the same wallet')
+               return QVariant('Protoshares sent and received by the same wallet')
             else:
                #txdir = str(index.model().data(index).toString()).strip()
                txdir = rowData[COL.TxDir]
                if rowData[COL.isCoinbase]:
-                  return QVariant('You mined these Bitcoins!')
+                  return QVariant('You mined these Protoshares!')
                if float(txdir.strip())<0:
-                  return QVariant('Bitcoins sent')
+                  return QVariant('Protoshares sent')
                else:
-                  return QVariant('Bitcoins received')
+                  return QVariant('Protoshares received')
          if col==COL.Amount:
             if self.main.settings.get('DispRmFee'):
                return QVariant('The net effect on the balance of this wallet '
@@ -298,9 +298,9 @@ class LedgerDispSortProxy(QSortFilterProxyModel):
          tRight = getDouble(idxRight, COL.UnixTime)
          return (tLeft<tRight)
       if thisCol==COL.Amount:
-         btcLeft  = getDouble(idxLeft,  COL.Amount)
-         btcRight = getDouble(idxRight, COL.Amount)
-         return (abs(btcLeft) < abs(btcRight))
+         ptsLeft  = getDouble(idxLeft,  COL.Amount)
+         ptsRight = getDouble(idxRight, COL.Amount)
+         return (abs(ptsLeft) < abs(ptsRight))
       else:
          return super(LedgerDispSortProxy, self).lessThan(idxLeft, idxRight)
 
@@ -637,7 +637,7 @@ class TxInDispModel(QAbstractTableModel):
    def columnCount(self, index=QModelIndex()):
       return 9
 
-   #TXINCOLS  = enum('WltID', 'Sender', 'Btc', 'OutPt', 'OutIdx', 'FromBlk', 'ScrType', 'Sequence', 'Script')
+   #TXINCOLS  = enum('WltID', 'Sender', 'Pts', 'OutPt', 'OutIdx', 'FromBlk', 'ScrType', 'Sequence', 'Script')
    def data(self, index, role=Qt.DisplayRole):
       COLS = TXINCOLS
       row,col = index.row(), index.column()
@@ -650,7 +650,7 @@ class TxInDispModel(QAbstractTableModel):
             return QVariant(int(Qt.AlignLeft | Qt.AlignVCenter))
          elif col in (COLS.OutIdx, COLS.FromBlk, COLS.Sequence, COLS.ScrType):
             return QVariant(int(Qt.AlignHCenter | Qt.AlignVCenter))
-         elif col in (COLS.Btc,):
+         elif col in (COLS.Pts,):
             return QVariant(int(Qt.AlignRight | Qt.AlignVCenter))
       elif role==Qt.BackgroundColorRole:
          if self.dispTable[row][COLS.WltID]:
@@ -662,7 +662,7 @@ class TxInDispModel(QAbstractTableModel):
             else:
                return QVariant( Colors.TblWltMine )
       elif role==Qt.FontRole:
-         if col==COLS.Btc:
+         if col==COLS.Pts:
             return GETFONT('Fixed')
 
       return QVariant()
@@ -673,7 +673,7 @@ class TxInDispModel(QAbstractTableModel):
          if orientation==Qt.Horizontal:
             if section==COLS.WltID:    return QVariant('Wallet ID')
             if section==COLS.Sender:   return QVariant('Sender')
-            if section==COLS.Btc:      return QVariant('Amount')
+            if section==COLS.Pts:      return QVariant('Amount')
             if section==COLS.OutPt:    return QVariant('Prev. Tx Hash')
             if section==COLS.OutIdx:   return QVariant('Index')
             if section==COLS.FromBlk:  return QVariant('From Block#')
@@ -684,7 +684,7 @@ class TxInDispModel(QAbstractTableModel):
          if orientation==Qt.Horizontal:
             if section in (COLS.WltID, COLS.Sender, COLS.OutPt):
                return QVariant(int(Qt.AlignLeft | Qt.AlignVCenter))
-            elif section in (COLS.OutIdx, COLS.FromBlk, COLS.Btc, COLS.Sequence, COLS.ScrType):
+            elif section in (COLS.OutIdx, COLS.FromBlk, COLS.Pts, COLS.Sequence, COLS.ScrType):
                return QVariant(int(Qt.AlignHCenter | Qt.AlignVCenter))
          return QVariant(int(Qt.AlignHCenter | Qt.AlignVCenter))
 
@@ -717,7 +717,7 @@ class TxOutDispModel(QAbstractTableModel):
    def columnCount(self, index=QModelIndex()):
       return 5
 
-   #TXOUTCOLS = enum('WltID', 'Recip', 'Btc', 'ScrType')
+   #TXOUTCOLS = enum('WltID', 'Recip', 'Pts', 'ScrType')
    def data(self, index, role=Qt.DisplayRole):
       COLS = TXOUTCOLS
       row,col = index.row(), index.column()
@@ -734,22 +734,22 @@ class TxOutDispModel(QAbstractTableModel):
          if col==COLS.Script:  return QVariant(binary_to_hex(txout.binScript))
          if stype==TXOUT_SCRIPT_STANDARD:
             if col==COLS.Recip:   return QVariant(TxOutScriptExtractAddrStr(txout.binScript))
-            if col==COLS.Btc:     return QVariant(coin2str(txout.getValue(),maxZeros=2))
+            if col==COLS.Pts:     return QVariant(coin2str(txout.getValue(),maxZeros=2))
          if stype==TXOUT_SCRIPT_COINBASE:
             if col==COLS.Recip:   return QVariant(TxOutScriptExtractAddrStr(txout.binScript))
-            if col==COLS.Btc:     return QVariant(coin2str(txout.getValue(),maxZeros=2))
+            if col==COLS.Pts:     return QVariant(coin2str(txout.getValue(),maxZeros=2))
          if stype==TXOUT_SCRIPT_MULTISIG:
             if col==COLS.Recip:   return QVariant('[[Multiple]]')
-            if col==COLS.Btc:     return QVariant(coin2str(txout.getValue(),maxZeros=2))
+            if col==COLS.Pts:     return QVariant(coin2str(txout.getValue(),maxZeros=2))
          if stype==TXOUT_SCRIPT_UNKNOWN:
             if col==COLS.Recip:   return QVariant('[[Non-Standard]]')
-            if col==COLS.Btc:     return QVariant(coin2str(txout.getValue(),maxZeros=2))
+            if col==COLS.Pts:     return QVariant(coin2str(txout.getValue(),maxZeros=2))
          if stype==TXOUT_SCRIPT_OP_EVAL:
             if col==COLS.Recip:   return QVariant('[[OP-EVAL]]')
-            if col==COLS.Btc:     return QVariant(coin2str(txout.getValue(),maxZeros=2))
+            if col==COLS.Pts:     return QVariant(coin2str(txout.getValue(),maxZeros=2))
       elif role==Qt.TextAlignmentRole:
          if col==COLS.Recip:   return QVariant(int(Qt.AlignLeft | Qt.AlignVCenter))
-         if col==COLS.Btc:     return QVariant(int(Qt.AlignRight | Qt.AlignVCenter))
+         if col==COLS.Pts:     return QVariant(int(Qt.AlignRight | Qt.AlignVCenter))
          if col==COLS.ScrType: return QVariant(int(Qt.AlignHCenter | Qt.AlignVCenter))
       elif role==Qt.ForegroundRole:
          if row in self.idxGray:
@@ -764,7 +764,7 @@ class TxOutDispModel(QAbstractTableModel):
             else:
                return QVariant( Colors.TblWltMine )
       elif role==Qt.FontRole:
-         if col==COLS.Btc:
+         if col==COLS.Pts:
             return GETFONT('Fixed')
 
       return QVariant()
@@ -775,13 +775,13 @@ class TxOutDispModel(QAbstractTableModel):
          if orientation==Qt.Horizontal:
             if section==COLS.WltID:   return QVariant('Wallet ID')
             if section==COLS.Recip:   return QVariant('Recipient')
-            if section==COLS.Btc:     return QVariant('Amount')
+            if section==COLS.Pts:     return QVariant('Amount')
             if section==COLS.ScrType: return QVariant('Script Type')
       elif role==Qt.TextAlignmentRole:
          if orientation==Qt.Horizontal:
             if section==COLS.WltID:   return QVariant(Qt.AlignLeft | Qt.AlignVCenter)
             if section==COLS.Recip:   return QVariant(Qt.AlignLeft | Qt.AlignVCenter)
-            if section==COLS.Btc:     return QVariant(Qt.AlignHCenter | Qt.AlignVCenter)
+            if section==COLS.Pts:     return QVariant(Qt.AlignHCenter | Qt.AlignVCenter)
             if section==COLS.ScrType: return QVariant(Qt.AlignHCenter | Qt.AlignVCenter)
          return QVariant(int(Qt.AlignHCenter | Qt.AlignVCenter))
 
@@ -907,7 +907,7 @@ class HeaderDataModel(QAbstractTableModel):
       if role==Qt.DisplayRole:
          if col== HEAD_DATE: return QVariant(someStr)
       elif role==Qt.TextAlignmentRole:
-         if col in (HEAD_BLKNUM, HEAD_DIFF, HEAD_NUMTX, HEAD_BTC):
+         if col in (HEAD_BLKNUM, HEAD_DIFF, HEAD_NUMTX, HEAD_PTS):
             return QVariant(int(Qt.AlignRight | Qt.AlignVCenter))
          else: 
             return QVariant(int(Qt.AlignLeft | Qt.AlignVCenter))
@@ -925,34 +925,34 @@ class HeaderDataModel(QAbstractTableModel):
 
 
 ################################################################################
-# Below is PyBtcEngine testing code -- A blockchain explorer may be a nice 
+# Below is PyPtsEngine testing code -- A blockchain explorer may be a nice 
 # feature in the future, but not right now -- IGNORE THIS SECTION
 ################################################################################
 
-HEAD_BLKNUM, HEAD_HASH, HEAD_DIFF, HEAD_NUMTX, HEAD_BTC, HEAD_DATE = range(6)
-TX_INDEX, TX_HASH, TX_BTC, TX_SRC, TX_RECIP, TX_SIZE = range(6)
-TXIN_SRC, TXIN_BTC, TXIN_SBLK, TXIN_STYPE, TXIN_SEQ, = range(5)
-TXOUT_RECIP, TXOUT_BTC, TXOUT_STYPE, = range(3)
+HEAD_BLKNUM, HEAD_HASH, HEAD_DIFF, HEAD_NUMTX, HEAD_PTS, HEAD_DATE = range(6)
+TX_INDEX, TX_HASH, TX_PTS, TX_SRC, TX_RECIP, TX_SIZE = range(6)
+TXIN_SRC, TXIN_PTS, TXIN_SBLK, TXIN_STYPE, TXIN_SEQ, = range(5)
+TXOUT_RECIP, TXOUT_PTS, TXOUT_STYPE, = range(3)
 
 headColLabels = {HEAD_BLKNUM: 'Block#', \
                  HEAD_HASH:   'Hash', \
                  HEAD_DIFF:   'Difficulty', \
                  HEAD_NUMTX:  '#Tx', \
-                 HEAD_BTC:    'Total BTC', \
+                 HEAD_PTS:    'Total PTS', \
                  HEAD_DATE:   'Date & Time'}
 txColLabels   = {TX_INDEX:    'Index', \
                  TX_HASH:     'Hash', \
-                 TX_BTC:      'BTC', \
+                 TX_PTS:      'PTS', \
                  TX_SRC:      'Source', \
                  TX_RECIP:    'Recipient', \
                  TX_SIZE:     'Size' }
 txinColLabels = {TXIN_SRC:    'Sender', \
-                 TXIN_BTC:    'BTC', \
+                 TXIN_PTS:    'PTS', \
                  TXIN_SBLK:   'From#', \
                  TXIN_STYPE:  'Script Type'}
                  #TXIN_SEQ:    'Sequence'}
 txoutColLabels ={TXOUT_RECIP: 'Recipient',\
-                 TXOUT_BTC:   'BTC', \
+                 TXOUT_PTS:   'PTS', \
                  TXOUT_STYPE: 'Script Type'}
 
 
@@ -974,7 +974,7 @@ class HeaderDataModel(QAbstractTableModel):
    def columnCount(self, index=QModelIndex()):
       return len(headColLabels)
 
-   def sumBtcInHeader(self, header):
+   def sumPtsInHeader(self, header):
       txlist = header.getTxRefPtrList()
       total = 0
       for tx in txlist:
@@ -1001,12 +1001,12 @@ class HeaderDataModel(QAbstractTableModel):
             return QVariant("%0.2f" % cppHeader.getDifficulty())
          elif col== HEAD_NUMTX:
             return QVariant("%d  " % cppHeader.getNumTx())
-         elif col== HEAD_BTC:
-            return QVariant("%0.4f" % float(self.sumBtcInHeader(cppHeader)/1e8))
+         elif col== HEAD_PTS:
+            return QVariant("%0.4f" % float(self.sumPtsInHeader(cppHeader)/1e8))
          elif col== HEAD_DATE:
             return QVariant(unixTimeToFormatStr(cppHeader.getTimestamp()))
       elif role==Qt.TextAlignmentRole:
-         if col in (HEAD_BLKNUM, HEAD_DIFF, HEAD_NUMTX, HEAD_BTC):
+         if col in (HEAD_BLKNUM, HEAD_DIFF, HEAD_NUMTX, HEAD_PTS):
             return QVariant(int(Qt.AlignRight | Qt.AlignVCenter))
          else: 
             return QVariant(int(Qt.AlignLeft | Qt.AlignVCenter))
@@ -1079,7 +1079,7 @@ class TxDataModel(QAbstractTableModel):
             return QVariant('%d  ' % int(row+1))
          elif col== TX_HASH:
             return QVariant(binary_to_hex(cppTx.getThisHash(), self.endianSelect))
-         elif col== TX_BTC:
+         elif col== TX_PTS:
             return QVariant("%0.4f" % float(cppTx.getSumOfOutputs()/1e8))
          elif col== TX_SRC:
             return QVariant(self.getTxSrcStr(cppTx))
@@ -1088,7 +1088,7 @@ class TxDataModel(QAbstractTableModel):
          elif col== TX_SIZE:
             return QVariant("%0.2f kB" % float(cppTx.getSize()/1024.))
       elif role==Qt.TextAlignmentRole:
-         if col in (TX_INDEX, TX_BTC, TX_SIZE):
+         if col in (TX_INDEX, TX_PTS, TX_SIZE):
             return QVariant(int(Qt.AlignRight | Qt.AlignVCenter))
          else: 
             return QVariant(int(Qt.AlignLeft | Qt.AlignVCenter))
@@ -1137,7 +1137,7 @@ class TxInDataModel(QAbstractTableModel):
                return QVariant("COINBASE")
             addr20 = self.bdm.getSenderAddr20(cppTxIn)
             return QVariant(hash160_to_addrStr(addr20))
-         elif col== TXIN_BTC:
+         elif col== TXIN_PTS:
             if cppTxIn.isCoinbase():
                return QVariant("%0.4f" % float(self.tx.getSumOfOutputs()/1e8))
             return QVariant("%0.4f" % float(self.bdm.getSentValue(cppTxIn)/1e8))
@@ -1164,7 +1164,7 @@ class TxInDataModel(QAbstractTableModel):
       elif role==Qt.TextAlignmentRole:
          if col in (TXIN_STYPE, TXIN_SBLK):
             return QVariant(int(Qt.AlignHCenter | Qt.AlignVCenter))
-         elif col in (TXIN_BTC,):
+         elif col in (TXIN_PTS,):
             return QVariant(int(Qt.AlignRight | Qt.AlignVCenter))
          else: 
             return QVariant(int(Qt.AlignLeft | Qt.AlignVCenter))
@@ -1208,7 +1208,7 @@ class TxOutDataModel(QAbstractTableModel):
             return QVariant()
          if col == TXOUT_RECIP:
             return QVariant(hash160_to_addrStr(cppTxOut.getRecipientAddr()))
-         elif col== TXOUT_BTC:
+         elif col== TXOUT_PTS:
             return QVariant("%0.4f" % float(cppTxOut.getValue()/1e8))
          elif col== TXOUT_STYPE:
             if cppTxOut.isScriptStdHash160():
@@ -1224,7 +1224,7 @@ class TxOutDataModel(QAbstractTableModel):
       elif role==Qt.TextAlignmentRole:
          if col in (TXOUT_STYPE,):
             return QVariant(int(Qt.AlignHCenter | Qt.AlignVCenter))
-         elif col in (TXOUT_BTC,):
+         elif col in (TXOUT_PTS,):
             return QVariant(int(Qt.AlignRight | Qt.AlignVCenter))
          else: 
             return QVariant(int(Qt.AlignLeft | Qt.AlignVCenter))

@@ -19,9 +19,9 @@ OS_WINDOWS = 'win32'  in opsys.lower() or 'windows' in opsys.lower()
 
 try:
    pid_armory   = int(sys.argv[1])
-   pid_bitcoind = int(sys.argv[2])
+   pid_protosharesd = int(sys.argv[2])
 except:
-   print 'USAGE: %d armorypid bitcoindpid' % sys.argv[0]
+   print 'USAGE: %d armorypid protosharesdpid' % sys.argv[0]
    exit(0)
 
 
@@ -50,7 +50,7 @@ def kill(pid):
       if not check_pid(pid):
          return
 
-      print 'Regular TERMINATE of bitcoind failed; issuing SIGKILL (hard)'
+      print 'Regular TERMINATE of protosharesd failed; issuing SIGKILL (hard)'
       time.sleep(1)
       os.kill(pid, signal.SIGKILL)
 
@@ -74,7 +74,7 @@ def killProcessTree(pid):
 
 # Verify the two PIDs are valid
 proc_name_armory   = check_pid(pid_armory)
-proc_name_bitcoind = check_pid(pid_bitcoind)
+proc_name_protosharesd = check_pid(pid_protosharesd)
 
 if proc_name_armory:
    print 'ArmoryQt is running in pid=%d (%s)' % (pid_armory, proc_name_armory)
@@ -82,10 +82,10 @@ else:
    print 'ArmoryQt IS NOT RUNNING!'
 
 
-if proc_name_bitcoind:
-   print 'bitcoind is running in pid=%d (%s)' % (pid_bitcoind, proc_name_bitcoind)
+if proc_name_protosharesd:
+   print 'protosharesd is running in pid=%d (%s)' % (pid_protosharesd, proc_name_protosharesd)
 else:
-   print 'bitcoind IS NOT RUNNING!'
+   print 'protosharesd IS NOT RUNNING!'
 
 
 while True:
@@ -95,18 +95,18 @@ while True:
       #print 'ArmoryQt died!'
       break
 
-   if not check_pid(pid_bitcoind, proc_name_bitcoind):
-      #print 'bitcoind disappeared -- guardian exiting'
+   if not check_pid(pid_protosharesd, proc_name_protosharesd):
+      #print 'protosharesd disappeared -- guardian exiting'
       exit(0)
    
 
-if check_pid(pid_bitcoind, proc_name_bitcoind):
+if check_pid(pid_protosharesd, proc_name_protosharesd):
 
-   # Depending on how popen was called, bitcoind may be a child of 
-   # pid_bitcoind.  But psutil makes it easy to find those child procs
+   # Depending on how popen was called, protosharesd may be a child of 
+   # pid_protosharesd.  But psutil makes it easy to find those child procs
    # and kill them.
-   killProcessTree(pid_bitcoind)
-   kill(pid_bitcoind)
+   killProcessTree(pid_protosharesd)
+   kill(pid_protosharesd)
 
 
 

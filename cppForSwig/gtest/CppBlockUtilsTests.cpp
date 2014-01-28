@@ -5,7 +5,7 @@
 
 #include "../log.h"
 #include "../BinaryData.h"
-#include "../BtcUtils.h"
+#include "../PtsUtils.h"
 #include "../BlockObj.h"
 #include "../StoredBlockObj.h"
 #include "../PartialMerkle.h"
@@ -21,7 +21,7 @@
 
 
 /* This didn't work at all
-class BitcoinEnvironment : public ::testing::Environment 
+class ProtosharesEnvironment : public ::testing::Environment 
 {
 public:
    // Override this to define how to set up the environment.
@@ -214,8 +214,8 @@ public:
 };
 
 
-::testing::Environment* const btcenv = 
-               ::testing::AddGlobalTestEnvironment(new BitcoinEnvironment);
+::testing::Environment* const ptsenv = 
+               ::testing::AddGlobalTestEnvironment(new ProtosharesEnvironment);
 */
 
 
@@ -1430,7 +1430,7 @@ TEST(BinaryReadWriteTest, ReaderEndian)
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-class BtcUtilsTest : public ::testing::Test
+class PtsUtilsTest : public ::testing::Test
 {
 protected:
    virtual void SetUp(void) 
@@ -1469,7 +1469,7 @@ protected:
 
 
 
-TEST_F(BtcUtilsTest, ReadVarInt)
+TEST_F(PtsUtilsTest, ReadVarInt)
 {
    BinaryData vi0 = READHEX("00");
    BinaryData vi1 = READHEX("21");
@@ -1487,68 +1487,68 @@ TEST_F(BtcUtilsTest, ReadVarInt)
    pair<uint64_t, uint8_t> a;
 
    brr.setNewData(vi0);
-   a = BtcUtils::readVarInt(brr);
+   a = PtsUtils::readVarInt(brr);
    EXPECT_EQ(a.first,   v);
    EXPECT_EQ(a.second,  1);
 
    brr.setNewData(vi1);
-   a = BtcUtils::readVarInt(brr);
+   a = PtsUtils::readVarInt(brr);
    EXPECT_EQ(a.first,   w);
    EXPECT_EQ(a.second,  1);
 
    brr.setNewData(vi3);
-   a = BtcUtils::readVarInt(brr);
+   a = PtsUtils::readVarInt(brr);
    EXPECT_EQ(a.first,   x);
    EXPECT_EQ(a.second,  3);
 
    brr.setNewData(vi5);
-   a = BtcUtils::readVarInt(brr);
+   a = PtsUtils::readVarInt(brr);
    EXPECT_EQ(a.first,   y);
    EXPECT_EQ(a.second,  5);
 
    brr.setNewData(vi9);
-   a = BtcUtils::readVarInt(brr);
+   a = PtsUtils::readVarInt(brr);
    EXPECT_EQ(a.first,   z);
    EXPECT_EQ(a.second,  9);
 
    // Just the length
-   EXPECT_EQ(BtcUtils::readVarIntLength(vi0.getPtr()), 1);
-   EXPECT_EQ(BtcUtils::readVarIntLength(vi1.getPtr()), 1);
-   EXPECT_EQ(BtcUtils::readVarIntLength(vi3.getPtr()), 3);
-   EXPECT_EQ(BtcUtils::readVarIntLength(vi5.getPtr()), 5);
-   EXPECT_EQ(BtcUtils::readVarIntLength(vi9.getPtr()), 9);
+   EXPECT_EQ(PtsUtils::readVarIntLength(vi0.getPtr()), 1);
+   EXPECT_EQ(PtsUtils::readVarIntLength(vi1.getPtr()), 1);
+   EXPECT_EQ(PtsUtils::readVarIntLength(vi3.getPtr()), 3);
+   EXPECT_EQ(PtsUtils::readVarIntLength(vi5.getPtr()), 5);
+   EXPECT_EQ(PtsUtils::readVarIntLength(vi9.getPtr()), 9);
 
-   EXPECT_EQ(BtcUtils::calcVarIntSize(v), 1);
-   EXPECT_EQ(BtcUtils::calcVarIntSize(w), 1);
-   EXPECT_EQ(BtcUtils::calcVarIntSize(x), 3);
-   EXPECT_EQ(BtcUtils::calcVarIntSize(y), 5);
-   EXPECT_EQ(BtcUtils::calcVarIntSize(z), 9);
+   EXPECT_EQ(PtsUtils::calcVarIntSize(v), 1);
+   EXPECT_EQ(PtsUtils::calcVarIntSize(w), 1);
+   EXPECT_EQ(PtsUtils::calcVarIntSize(x), 3);
+   EXPECT_EQ(PtsUtils::calcVarIntSize(y), 5);
+   EXPECT_EQ(PtsUtils::calcVarIntSize(z), 9);
 }
 
 
-TEST_F(BtcUtilsTest, Num2Str)
+TEST_F(PtsUtilsTest, Num2Str)
 {
-   EXPECT_EQ(BtcUtils::numToStrWCommas(0),         string("0"));
-   EXPECT_EQ(BtcUtils::numToStrWCommas(100),       string("100"));
-   EXPECT_EQ(BtcUtils::numToStrWCommas(-100),      string("-100"));
-   EXPECT_EQ(BtcUtils::numToStrWCommas(999),       string("999"));
-   EXPECT_EQ(BtcUtils::numToStrWCommas(1234),      string("1,234"));
-   EXPECT_EQ(BtcUtils::numToStrWCommas(-1234),     string("-1,234"));
-   EXPECT_EQ(BtcUtils::numToStrWCommas(12345678),  string("12,345,678"));
-   EXPECT_EQ(BtcUtils::numToStrWCommas(-12345678), string("-12,345,678"));
+   EXPECT_EQ(PtsUtils::numToStrWCommas(0),         string("0"));
+   EXPECT_EQ(PtsUtils::numToStrWCommas(100),       string("100"));
+   EXPECT_EQ(PtsUtils::numToStrWCommas(-100),      string("-100"));
+   EXPECT_EQ(PtsUtils::numToStrWCommas(999),       string("999"));
+   EXPECT_EQ(PtsUtils::numToStrWCommas(1234),      string("1,234"));
+   EXPECT_EQ(PtsUtils::numToStrWCommas(-1234),     string("-1,234"));
+   EXPECT_EQ(PtsUtils::numToStrWCommas(12345678),  string("12,345,678"));
+   EXPECT_EQ(PtsUtils::numToStrWCommas(-12345678), string("-12,345,678"));
 }
 
 
 
-TEST_F(BtcUtilsTest, PackBits)
+TEST_F(PtsUtilsTest, PackBits)
 {
    list<bool>::iterator iter, iter2;
    list<bool> bitList;
 
-   bitList = BtcUtils::UnpackBits( READHEX("00"), 0);
+   bitList = PtsUtils::UnpackBits( READHEX("00"), 0);
    EXPECT_EQ(bitList.size(), 0);
 
-   bitList = BtcUtils::UnpackBits( READHEX("00"), 3);
+   bitList = PtsUtils::UnpackBits( READHEX("00"), 3);
    EXPECT_EQ(bitList.size(), 3);
    iter = bitList.begin(); 
    EXPECT_FALSE(*iter);  iter++;
@@ -1556,7 +1556,7 @@ TEST_F(BtcUtilsTest, PackBits)
    EXPECT_FALSE(*iter);  iter++;
    
    
-   bitList = BtcUtils::UnpackBits( READHEX("00"), 8);
+   bitList = PtsUtils::UnpackBits( READHEX("00"), 8);
    EXPECT_EQ(bitList.size(), 8);
    iter = bitList.begin(); 
    EXPECT_FALSE(*iter);  iter++;
@@ -1568,7 +1568,7 @@ TEST_F(BtcUtilsTest, PackBits)
    EXPECT_FALSE(*iter);  iter++;
    EXPECT_FALSE(*iter);  iter++;
 
-   bitList = BtcUtils::UnpackBits( READHEX("017f"), 8);
+   bitList = PtsUtils::UnpackBits( READHEX("017f"), 8);
    EXPECT_EQ(bitList.size(), 8);
    iter = bitList.begin(); 
    EXPECT_FALSE(*iter);  iter++;
@@ -1581,7 +1581,7 @@ TEST_F(BtcUtilsTest, PackBits)
    EXPECT_TRUE( *iter);  iter++;
 
 
-   bitList = BtcUtils::UnpackBits( READHEX("017f"), 12);
+   bitList = PtsUtils::UnpackBits( READHEX("017f"), 12);
    EXPECT_EQ(bitList.size(), 12);
    iter = bitList.begin(); 
    EXPECT_FALSE(*iter);  iter++;
@@ -1597,7 +1597,7 @@ TEST_F(BtcUtilsTest, PackBits)
    EXPECT_TRUE( *iter);  iter++;
    EXPECT_TRUE( *iter);  iter++;
 
-   bitList = BtcUtils::UnpackBits( READHEX("017f"), 16);
+   bitList = PtsUtils::UnpackBits( READHEX("017f"), 16);
    EXPECT_EQ(bitList.size(), 16);
    iter = bitList.begin(); 
    EXPECT_FALSE(*iter);  iter++;
@@ -1619,67 +1619,67 @@ TEST_F(BtcUtilsTest, PackBits)
 
 
    BinaryData packed;
-   packed = BtcUtils::PackBits(bitList);
+   packed = PtsUtils::PackBits(bitList);
    EXPECT_EQ(packed, READHEX("017f"));
 
-   bitList = BtcUtils::UnpackBits( READHEX("017f"), 12);
-   packed = BtcUtils::PackBits(bitList);
+   bitList = PtsUtils::UnpackBits( READHEX("017f"), 12);
+   packed = PtsUtils::PackBits(bitList);
    EXPECT_EQ(packed, READHEX("0170"));
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(BtcUtilsTest, SimpleHash)
+TEST_F(PtsUtilsTest, SimpleHash)
 {
    BinaryData hashOut; 
 
    // sha256(sha256(X));
-   BtcUtils::getHash256(rawHead_.getPtr(), rawHead_.getSize(), hashOut);
+   PtsUtils::getHash256(rawHead_.getPtr(), rawHead_.getSize(), hashOut);
    EXPECT_EQ(hashOut, headHashLE_);
    EXPECT_EQ(hashOut, headHashBE_.copySwapEndian());
 
-   BtcUtils::getHash256_NoSafetyCheck(rawHead_.getPtr(), rawHead_.getSize(), hashOut);
+   PtsUtils::getHash256_NoSafetyCheck(rawHead_.getPtr(), rawHead_.getSize(), hashOut);
    EXPECT_EQ(hashOut, headHashLE_);
    EXPECT_EQ(hashOut, headHashBE_.copySwapEndian());
 
-   hashOut = BtcUtils::getHash256(rawHead_.getPtr(), rawHead_.getSize());
+   hashOut = PtsUtils::getHash256(rawHead_.getPtr(), rawHead_.getSize());
    EXPECT_EQ(hashOut, headHashLE_);
 
-   BtcUtils::getHash256(rawHead_, hashOut);
+   PtsUtils::getHash256(rawHead_, hashOut);
    EXPECT_EQ(hashOut, headHashLE_);
 
-   BtcUtils::getHash256(rawHead_.getRef(), hashOut);
+   PtsUtils::getHash256(rawHead_.getRef(), hashOut);
    EXPECT_EQ(hashOut, headHashLE_);
 
-   hashOut = BtcUtils::getHash256(rawHead_);
+   hashOut = PtsUtils::getHash256(rawHead_);
    EXPECT_EQ(hashOut, headHashLE_);
 
    
    // ripemd160(sha256(X));
-   BtcUtils::getHash160(satoshiPubKey_.getPtr(), satoshiPubKey_.getSize(), hashOut);
+   PtsUtils::getHash160(satoshiPubKey_.getPtr(), satoshiPubKey_.getSize(), hashOut);
    EXPECT_EQ(hashOut, satoshiHash160_);
 
-   BtcUtils::getHash160(satoshiPubKey_.getPtr(), satoshiPubKey_.getSize(), hashOut);
+   PtsUtils::getHash160(satoshiPubKey_.getPtr(), satoshiPubKey_.getSize(), hashOut);
    EXPECT_EQ(hashOut, satoshiHash160_);
 
-   hashOut = BtcUtils::getHash160(satoshiPubKey_.getPtr(), satoshiPubKey_.getSize());
+   hashOut = PtsUtils::getHash160(satoshiPubKey_.getPtr(), satoshiPubKey_.getSize());
    EXPECT_EQ(hashOut, satoshiHash160_);
 
-   BtcUtils::getHash160(satoshiPubKey_, hashOut);
+   PtsUtils::getHash160(satoshiPubKey_, hashOut);
    EXPECT_EQ(hashOut, satoshiHash160_);
 
-   BtcUtils::getHash160(satoshiPubKey_.getRef(), hashOut);
+   PtsUtils::getHash160(satoshiPubKey_.getRef(), hashOut);
    EXPECT_EQ(hashOut, satoshiHash160_);
 
-   hashOut = BtcUtils::getHash160(satoshiPubKey_);
+   hashOut = PtsUtils::getHash160(satoshiPubKey_);
    EXPECT_EQ(hashOut, satoshiHash160_);
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(BtcUtilsTest, TxOutScriptID_Hash160)
+TEST_F(PtsUtilsTest, TxOutScriptID_Hash160)
 {
    //TXOUT_SCRIPT_STDHASH160,
    //TXOUT_SCRIPT_STDPUBKEY65,
@@ -1691,63 +1691,63 @@ TEST_F(BtcUtilsTest, TxOutScriptID_Hash160)
    BinaryData script = READHEX("76a914a134408afa258a50ed7a1d9817f26b63cc9002cc88ac");
    BinaryData a160   = READHEX(  "a134408afa258a50ed7a1d9817f26b63cc9002cc");
    BinaryData unique = READHEX("00a134408afa258a50ed7a1d9817f26b63cc9002cc");
-   TXOUT_SCRIPT_TYPE scrType = BtcUtils::getTxOutScriptType(script);
+   TXOUT_SCRIPT_TYPE scrType = PtsUtils::getTxOutScriptType(script);
    EXPECT_EQ(scrType, TXOUT_SCRIPT_STDHASH160 );
-   EXPECT_EQ(BtcUtils::getTxOutRecipientAddr(script), a160 );
-   EXPECT_EQ(BtcUtils::getTxOutRecipientAddr(script, scrType), a160 );
-   EXPECT_EQ(BtcUtils::getTxOutScrAddr(script), unique );
-   EXPECT_EQ(BtcUtils::getTxOutScrAddr(script, scrType), unique );
+   EXPECT_EQ(PtsUtils::getTxOutRecipientAddr(script), a160 );
+   EXPECT_EQ(PtsUtils::getTxOutRecipientAddr(script, scrType), a160 );
+   EXPECT_EQ(PtsUtils::getTxOutScrAddr(script), unique );
+   EXPECT_EQ(PtsUtils::getTxOutScrAddr(script, scrType), unique );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(BtcUtilsTest, TxOutScriptID_PubKey65)
+TEST_F(PtsUtilsTest, TxOutScriptID_PubKey65)
 {
    BinaryData script = READHEX(
       "4104b0bd634234abbb1ba1e986e884185c61cf43e001f9137f23c2c409273eb1"
       "6e6537a576782eba668a7ef8bd3b3cfb1edb7117ab65129b8a2e681f3c1e0908ef7bac");
    BinaryData a160   = READHEX(  "e24b86bff5112623ba67c63b6380636cbdf1a66d");
    BinaryData unique = READHEX("00e24b86bff5112623ba67c63b6380636cbdf1a66d");
-   TXOUT_SCRIPT_TYPE scrType = BtcUtils::getTxOutScriptType(script);
+   TXOUT_SCRIPT_TYPE scrType = PtsUtils::getTxOutScriptType(script);
    EXPECT_EQ(scrType, TXOUT_SCRIPT_STDPUBKEY65 );
-   EXPECT_EQ(BtcUtils::getTxOutRecipientAddr(script), a160 );
-   EXPECT_EQ(BtcUtils::getTxOutRecipientAddr(script, scrType), a160 );
-   EXPECT_EQ(BtcUtils::getTxOutScrAddr(script), unique );
-   EXPECT_EQ(BtcUtils::getTxOutScrAddr(script, scrType), unique );
+   EXPECT_EQ(PtsUtils::getTxOutRecipientAddr(script), a160 );
+   EXPECT_EQ(PtsUtils::getTxOutRecipientAddr(script, scrType), a160 );
+   EXPECT_EQ(PtsUtils::getTxOutScrAddr(script), unique );
+   EXPECT_EQ(PtsUtils::getTxOutScrAddr(script, scrType), unique );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(BtcUtilsTest, TxOutScriptID_PubKey33)
+TEST_F(PtsUtilsTest, TxOutScriptID_PubKey33)
 {
    BinaryData script = READHEX(
       "21024005c945d86ac6b01fb04258345abea7a845bd25689edb723d5ad4068ddd3036ac");
    BinaryData a160   = READHEX(  "0c1b83d01d0ffb2bccae606963376cca3863a7ce");
    BinaryData unique = READHEX("000c1b83d01d0ffb2bccae606963376cca3863a7ce");
-   TXOUT_SCRIPT_TYPE scrType = BtcUtils::getTxOutScriptType(script);
+   TXOUT_SCRIPT_TYPE scrType = PtsUtils::getTxOutScriptType(script);
    EXPECT_EQ(scrType, TXOUT_SCRIPT_STDPUBKEY33 );
-   EXPECT_EQ(BtcUtils::getTxOutRecipientAddr(script), a160 );
-   EXPECT_EQ(BtcUtils::getTxOutRecipientAddr(script, scrType), a160 );
-   EXPECT_EQ(BtcUtils::getTxOutScrAddr(script), unique );
-   EXPECT_EQ(BtcUtils::getTxOutScrAddr(script, scrType), unique );
+   EXPECT_EQ(PtsUtils::getTxOutRecipientAddr(script), a160 );
+   EXPECT_EQ(PtsUtils::getTxOutRecipientAddr(script, scrType), a160 );
+   EXPECT_EQ(PtsUtils::getTxOutScrAddr(script), unique );
+   EXPECT_EQ(PtsUtils::getTxOutScrAddr(script, scrType), unique );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(BtcUtilsTest, TxOutScriptID_NonStd)
+TEST_F(PtsUtilsTest, TxOutScriptID_NonStd)
 {
    // This was from block 150951 which was erroneously produced by MagicalTux
    // This is not only non-standard, it's non-spendable
    BinaryData script = READHEX("76a90088ac");
-   BinaryData a160   = BtcUtils::BadAddress_;
-   BinaryData unique = READHEX("ff") + BtcUtils::getHash160(READHEX("76a90088ac"));
-   TXOUT_SCRIPT_TYPE scrType = BtcUtils::getTxOutScriptType(script);
+   BinaryData a160   = PtsUtils::BadAddress_;
+   BinaryData unique = READHEX("ff") + PtsUtils::getHash160(READHEX("76a90088ac"));
+   TXOUT_SCRIPT_TYPE scrType = PtsUtils::getTxOutScriptType(script);
    EXPECT_EQ(scrType, TXOUT_SCRIPT_NONSTANDARD );
-   EXPECT_EQ(BtcUtils::getTxOutRecipientAddr(script), a160 );
-   EXPECT_EQ(BtcUtils::getTxOutRecipientAddr(script, scrType), a160 );
-   EXPECT_EQ(BtcUtils::getTxOutScrAddr(script), unique );
-   EXPECT_EQ(BtcUtils::getTxOutScrAddr(script, scrType), unique );
+   EXPECT_EQ(PtsUtils::getTxOutRecipientAddr(script), a160 );
+   EXPECT_EQ(PtsUtils::getTxOutRecipientAddr(script, scrType), a160 );
+   EXPECT_EQ(PtsUtils::getTxOutScrAddr(script), unique );
+   EXPECT_EQ(PtsUtils::getTxOutScrAddr(script, scrType), unique );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(BtcUtilsTest, TxOutScriptID_P2SH)
+TEST_F(PtsUtilsTest, TxOutScriptID_P2SH)
 {
    // P2SH script from tx: 4ac04b4830d115eb9a08f320ef30159cc107dfb72b29bbc2f370093f962397b4 (TxOut: 1)
    // Spent in tx:         fd16d6bbf1a3498ca9777b9d31ceae883eb8cb6ede1fafbdd218bae107de66fe (TxIn: 1)
@@ -1756,16 +1756,16 @@ TEST_F(BtcUtilsTest, TxOutScriptID_P2SH)
    BinaryData script = READHEX("a914d0c15a7d41500976056b3345f542d8c944077c8a87"); // send to P2SH
    BinaryData a160 =   READHEX(  "d0c15a7d41500976056b3345f542d8c944077c8a");
    BinaryData unique = READHEX("05d0c15a7d41500976056b3345f542d8c944077c8a");
-   TXOUT_SCRIPT_TYPE scrType = BtcUtils::getTxOutScriptType(script);
+   TXOUT_SCRIPT_TYPE scrType = PtsUtils::getTxOutScriptType(script);
    EXPECT_EQ(scrType, TXOUT_SCRIPT_P2SH);
-   EXPECT_EQ(BtcUtils::getTxOutRecipientAddr(script), a160 );
-   EXPECT_EQ(BtcUtils::getTxOutRecipientAddr(script, scrType), a160 );
-   EXPECT_EQ(BtcUtils::getTxOutScrAddr(script), unique );
-   EXPECT_EQ(BtcUtils::getTxOutScrAddr(script, scrType), unique );
+   EXPECT_EQ(PtsUtils::getTxOutRecipientAddr(script), a160 );
+   EXPECT_EQ(PtsUtils::getTxOutRecipientAddr(script, scrType), a160 );
+   EXPECT_EQ(PtsUtils::getTxOutScrAddr(script), unique );
+   EXPECT_EQ(PtsUtils::getTxOutScrAddr(script, scrType), unique );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(BtcUtilsTest, TxOutScriptID_Multisig)
+TEST_F(PtsUtilsTest, TxOutScriptID_Multisig)
 {
    BinaryData script = READHEX(
       "5221034758cefcb75e16e4dfafb32383b709fa632086ea5ca982712de6add93"
@@ -1775,22 +1775,22 @@ TEST_F(BtcUtilsTest, TxOutScriptID_Multisig)
    BinaryData pub2   = READHEX("03fe96237629128a0ae8c3825af8a4be8fe3109b16f62af19cec0b1eb93b8717e2");
    BinaryData addr1  = READHEX("785652a6b8e721e80ffa353e5dfd84f0658284a9");
    BinaryData addr2  = READHEX("b3348abf9dd2d1491359f937e2af64b1bb6d525a");
-   BinaryData a160   = BtcUtils::BadAddress_;
+   BinaryData a160   = PtsUtils::BadAddress_;
    BinaryData unique = READHEX(
       "fe0202785652a6b8e721e80ffa353e5dfd84f0658284a9b3348abf9dd2d14913"
       "59f937e2af64b1bb6d525a");
 
-   TXOUT_SCRIPT_TYPE scrType = BtcUtils::getTxOutScriptType(script);
+   TXOUT_SCRIPT_TYPE scrType = PtsUtils::getTxOutScriptType(script);
    EXPECT_EQ(scrType, TXOUT_SCRIPT_MULTISIG);
-   EXPECT_EQ(BtcUtils::getTxOutRecipientAddr(script), a160 );
-   EXPECT_EQ(BtcUtils::getTxOutRecipientAddr(script, scrType), a160 );
-   EXPECT_EQ(BtcUtils::getTxOutScrAddr(script), unique );
-   EXPECT_EQ(BtcUtils::getTxOutScrAddr(script, scrType), unique );
+   EXPECT_EQ(PtsUtils::getTxOutRecipientAddr(script), a160 );
+   EXPECT_EQ(PtsUtils::getTxOutRecipientAddr(script, scrType), a160 );
+   EXPECT_EQ(PtsUtils::getTxOutScrAddr(script), unique );
+   EXPECT_EQ(PtsUtils::getTxOutScrAddr(script, scrType), unique );
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(BtcUtilsTest, TxOutScriptID_MultiList)
+TEST_F(PtsUtilsTest, TxOutScriptID_MultiList)
 {
    BinaryData script = READHEX(
       "5221034758cefcb75e16e4dfafb32383b709fa632086ea5ca982712de6add930"
@@ -1798,7 +1798,7 @@ TEST_F(BtcUtilsTest, TxOutScriptID_MultiList)
       "b93b8717e252ae");
    BinaryData addr0  = READHEX("785652a6b8e721e80ffa353e5dfd84f0658284a9");
    BinaryData addr1  = READHEX("b3348abf9dd2d1491359f937e2af64b1bb6d525a");
-   BinaryData a160   = BtcUtils::BadAddress_;
+   BinaryData a160   = PtsUtils::BadAddress_;
    BinaryData unique = READHEX(
       "fe0202785652a6b8e721e80ffa353e5dfd84f0658284a9b3348abf9dd2d14913"
       "59f937e2af64b1bb6d525a");
@@ -1806,7 +1806,7 @@ TEST_F(BtcUtilsTest, TxOutScriptID_MultiList)
    vector<BinaryData> a160List;
    uint32_t M;
 
-   M = BtcUtils::getMultisigAddrList(script, a160List);
+   M = PtsUtils::getMultisigAddrList(script, a160List);
    EXPECT_EQ(M, 2);              
    EXPECT_EQ(a160List.size(), 2); // N
    
@@ -1815,7 +1815,7 @@ TEST_F(BtcUtilsTest, TxOutScriptID_MultiList)
 }
 
 
-//TEST_F(BtcUtilsTest, TxInScriptID)
+//TEST_F(PtsUtilsTest, TxInScriptID)
 //{
    //TXIN_SCRIPT_STDUNCOMPR,
    //TXIN_SCRIPT_STDCOMPR,
@@ -1827,7 +1827,7 @@ TEST_F(BtcUtilsTest, TxOutScriptID_MultiList)
 //}
  
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(BtcUtilsTest, TxInScriptID_StdUncompr)
+TEST_F(PtsUtilsTest, TxInScriptID_StdUncompr)
 {
    BinaryData script = READHEX(
       "493046022100b9daf2733055be73ae00ee0c5d78ca639d554fe779f163396c1a"
@@ -1838,15 +1838,15 @@ TEST_F(BtcUtilsTest, TxInScriptID_StdUncompr)
    BinaryData a160 = READHEX("c42a8290196b2c5bcb35471b45aa0dc096baed5e");
    BinaryData prevHash = prevHashReg_;
 
-   TXIN_SCRIPT_TYPE scrType = BtcUtils::getTxInScriptType( script, prevHash);
+   TXIN_SCRIPT_TYPE scrType = PtsUtils::getTxInScriptType( script, prevHash);
    EXPECT_EQ(scrType,  TXIN_SCRIPT_STDUNCOMPR);
-   EXPECT_EQ(BtcUtils::getTxInAddr(script, prevHash), a160);
-   EXPECT_EQ(BtcUtils::getTxInAddr(script, prevHash, scrType), a160);
-   EXPECT_EQ(BtcUtils::getTxInAddrFromType(script,  scrType), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddr(script, prevHash), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddr(script, prevHash, scrType), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddrFromType(script,  scrType), a160);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(BtcUtilsTest, TxInScriptID_StdCompr)
+TEST_F(PtsUtilsTest, TxInScriptID_StdCompr)
 {
    BinaryData script = READHEX(
       "47304402205299224886e5e3402b0e9fa3527bcfe1d73c4e2040f18de8dd17f1"
@@ -1856,51 +1856,51 @@ TEST_F(BtcUtilsTest, TxInScriptID_StdCompr)
    BinaryData a160 = READHEX("03214fc1433a287e964d6c4242093c34e4ed0001");
    BinaryData prevHash = prevHashReg_;
 
-   TXIN_SCRIPT_TYPE scrType = BtcUtils::getTxInScriptType(script, prevHash);
+   TXIN_SCRIPT_TYPE scrType = PtsUtils::getTxInScriptType(script, prevHash);
    EXPECT_EQ(scrType,  TXIN_SCRIPT_STDCOMPR);
-   EXPECT_EQ(BtcUtils::getTxInAddr(script, prevHash), a160);
-   EXPECT_EQ(BtcUtils::getTxInAddr(script, prevHash, scrType), a160);
-   EXPECT_EQ(BtcUtils::getTxInAddrFromType(script,  scrType), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddr(script, prevHash), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddr(script, prevHash, scrType), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddrFromType(script,  scrType), a160);
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(BtcUtilsTest, TxInScriptID_Coinbase)
+TEST_F(PtsUtilsTest, TxInScriptID_Coinbase)
 {
    BinaryData script = READHEX(
       "0310920304000071c3124d696e656420627920425443204775696c640800b75f950e000000");
-   BinaryData a160 =  BtcUtils::BadAddress_;
+   BinaryData a160 =  PtsUtils::BadAddress_;
    BinaryData prevHash = prevHashCB_;
 
-   TXIN_SCRIPT_TYPE scrType = BtcUtils::getTxInScriptType(script, prevHash);
+   TXIN_SCRIPT_TYPE scrType = PtsUtils::getTxInScriptType(script, prevHash);
    EXPECT_EQ(scrType, TXIN_SCRIPT_COINBASE);
-   EXPECT_EQ(BtcUtils::getTxInAddr(script, prevHash), a160);
-   EXPECT_EQ(BtcUtils::getTxInAddr(script, prevHash, scrType), a160);
-   EXPECT_EQ(BtcUtils::getTxInAddrFromType(script,  scrType), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddr(script, prevHash), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddr(script, prevHash, scrType), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddrFromType(script,  scrType), a160);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(BtcUtilsTest, TxInScriptID_SpendPubKey)
+TEST_F(PtsUtilsTest, TxInScriptID_SpendPubKey)
 {
    BinaryData script = READHEX(
       "47304402201ffc44394e5a3dd9c8b55bdc12147e18574ac945d15dac026793bf"
       "3b8ff732af022035fd832549b5176126f735d87089c8c1c1319447a458a09818"
       "e173eaf0c2eef101");
-   BinaryData a160 =  BtcUtils::BadAddress_;
+   BinaryData a160 =  PtsUtils::BadAddress_;
    BinaryData prevHash = prevHashReg_;
 
-   TXIN_SCRIPT_TYPE scrType = BtcUtils::getTxInScriptType(script, prevHash);
+   TXIN_SCRIPT_TYPE scrType = PtsUtils::getTxInScriptType(script, prevHash);
    EXPECT_EQ(scrType, TXIN_SCRIPT_SPENDPUBKEY);
-   EXPECT_EQ(BtcUtils::getTxInAddr(script, prevHash), a160);
-   EXPECT_EQ(BtcUtils::getTxInAddr(script, prevHash, scrType), a160);
-   EXPECT_EQ(BtcUtils::getTxInAddrFromType(script,  scrType), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddr(script, prevHash), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddr(script, prevHash, scrType), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddrFromType(script,  scrType), a160);
    //txInHash160s.push_back( READHEX("957efec6af757ccbbcf9a436f0083c5ddaa3bf1d")); // this one can't be determined
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(BtcUtilsTest, TxInScriptID_SpendMultisig)
+TEST_F(PtsUtilsTest, TxInScriptID_SpendMultisig)
 {
 
    BinaryData script = READHEX(
@@ -1909,16 +1909,16 @@ TEST_F(BtcUtilsTest, TxInScriptID_SpendMultisig)
       "520db45494ec095ce80148304502206ee62f539d5cd94f990b7abfda77750f58"
       "ff91043c3f002501e5448ef6dba2520221009d29229cdfedda1dd02a1a90bb71"
       "b30b77e9c3fc28d1353f054c86371f6c2a8101");
-   BinaryData a160 =  BtcUtils::BadAddress_;
+   BinaryData a160 =  PtsUtils::BadAddress_;
    BinaryData prevHash = prevHashReg_;
-   TXIN_SCRIPT_TYPE scrType = BtcUtils::getTxInScriptType(script, prevHash);
+   TXIN_SCRIPT_TYPE scrType = PtsUtils::getTxInScriptType(script, prevHash);
    EXPECT_EQ(scrType, TXIN_SCRIPT_SPENDMULTI);
-   EXPECT_EQ(BtcUtils::getTxInAddr(script, prevHash), a160);
-   EXPECT_EQ(BtcUtils::getTxInAddr(script, prevHash, scrType), a160);
-   EXPECT_EQ(BtcUtils::getTxInAddrFromType(script,  scrType), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddr(script, prevHash), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddr(script, prevHash, scrType), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddrFromType(script,  scrType), a160);
 
 
-   vector<BinaryDataRef> scrParts = BtcUtils::splitPushOnlyScriptRefs(script);
+   vector<BinaryDataRef> scrParts = PtsUtils::splitPushOnlyScriptRefs(script);
    BinaryData zero = READHEX("00");
    BinaryData sig1 = READHEX(
       "30450221009254113fa46918f299b1d18ec918613e56cffbeba0960db05f66b5"
@@ -1942,7 +1942,7 @@ TEST_F(BtcUtilsTest, TxInScriptID_SpendMultisig)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(BtcUtilsTest, TxInScriptID_SpendP2SH)
+TEST_F(PtsUtilsTest, TxInScriptID_SpendP2SH)
 {
 
    // Spending P2SH output as above:  fd16d6bbf1a3498ca9777b9d31ceae883eb8cb6ede1fafbdd218bae107de66fe (TxIn: 1, 219 B)
@@ -1957,22 +1957,22 @@ TEST_F(BtcUtilsTest, TxInScriptID_SpendP2SH)
       "0ae8c3825af8a4be8fe3109b16f62af19cec0b1eb93b8717e252ae");
    BinaryData a160 =  READHEX("d0c15a7d41500976056b3345f542d8c944077c8a");
    BinaryData prevHash = prevHashReg_;
-   TXIN_SCRIPT_TYPE scrType = BtcUtils::getTxInScriptType(script, prevHash);
+   TXIN_SCRIPT_TYPE scrType = PtsUtils::getTxInScriptType(script, prevHash);
    EXPECT_EQ(scrType, TXIN_SCRIPT_SPENDP2SH);
-   EXPECT_EQ(BtcUtils::getTxInAddr(script, prevHash), a160);
-   EXPECT_EQ(BtcUtils::getTxInAddr(script, prevHash, scrType), a160);
-   EXPECT_EQ(BtcUtils::getTxInAddrFromType(script,  scrType), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddr(script, prevHash), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddr(script, prevHash, scrType), a160);
+   EXPECT_EQ(PtsUtils::getTxInAddrFromType(script,  scrType), a160);
 }
 
 
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(BtcUtilsTest, BitsToDifficulty)
+TEST_F(PtsUtilsTest, BitsToDifficulty)
 {
 
-   double a = BtcUtils::convertDiffBitsToDouble(READHEX("ffff001d"));
-   double b = BtcUtils::convertDiffBitsToDouble(READHEX("be2f021a"));
-   double c = BtcUtils::convertDiffBitsToDouble(READHEX("3daa011a"));
+   double a = PtsUtils::convertDiffBitsToDouble(READHEX("ffff001d"));
+   double b = PtsUtils::convertDiffBitsToDouble(READHEX("be2f021a"));
+   double c = PtsUtils::convertDiffBitsToDouble(READHEX("3daa011a"));
    
    EXPECT_DOUBLE_EQ(a, 1.0);
    EXPECT_DOUBLE_EQ(b, 7672999.920164138);
@@ -1981,7 +1981,7 @@ TEST_F(BtcUtilsTest, BitsToDifficulty)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-TEST_F(BtcUtilsTest, ScriptToOpCodes)
+TEST_F(PtsUtilsTest, ScriptToOpCodes)
 {
    BinaryData complexScript = READHEX(
       "526b006b7dac7ca9143cd1def404e12a85ead2b4d3f5f9f817fb0d46ef879a6c"
@@ -2031,7 +2031,7 @@ TEST_F(BtcUtilsTest, ScriptToOpCodes)
    opstr.push_back(string("OP_FROMALTSTACK"));
    opstr.push_back(string("OP_GREATERTHANOREQUAL"));
 
-   vector<string> output = BtcUtils::convertScriptToOpStrings(complexScript);
+   vector<string> output = PtsUtils::convertScriptToOpStrings(complexScript);
    ASSERT_EQ(output.size(), opstr.size());
    for(uint32_t i=0; i<opstr.size(); i++)
       EXPECT_EQ(output[i], opstr[i]);
@@ -2300,7 +2300,7 @@ TEST_F(BlockObjTest, TxInUnserialize)
 {
    BinaryRefReader brr(rawTxIn_);
    uint32_t len = rawTxIn_.getSize();
-   BinaryData srcAddr = BtcUtils::getHash160( READHEX("04"
+   BinaryData srcAddr = PtsUtils::getHash160( READHEX("04"
       "5d74feae58c4c36d7c35beac05eddddc78b3ce4b02491a2eea72043978056a8b"
       "c439b99ddaad327207b09ef16a8910828e805b0cc8c11fba5caea2ee939346d7"));
    BinaryData rawOP = READHEX(
@@ -2789,7 +2789,7 @@ TEST_F(StoredBlockObjTest, LengthUnfrag)
    StoredTx tx;
    vector<uint32_t> offin, offout;
 
-   uint32_t lenUnfrag  = BtcUtils::StoredTxCalcLength( rawTxUnfrag_.getPtr(), 
+   uint32_t lenUnfrag  = PtsUtils::StoredTxCalcLength( rawTxUnfrag_.getPtr(), 
                                                        false, 
                                                        &offin, 
                                                        &offout);
@@ -2813,7 +2813,7 @@ TEST_F(StoredBlockObjTest, LengthFragged)
 {
    vector<uint32_t> offin, offout;
 
-   uint32_t lenFragged = BtcUtils::StoredTxCalcLength( rawTxFragged_.getPtr(), 
+   uint32_t lenFragged = PtsUtils::StoredTxCalcLength( rawTxFragged_.getPtr(), 
                                                        true, 
                                                        &offin, 
                                                        &offout);
@@ -5100,7 +5100,7 @@ TEST_F(LevelDBTest, PutGetBareHeader)
       "0000000105d3571220ef5f87c6ac0bc8bf5b33c02a9e6edf83c84d840109592c"
       "0000000027523728e15f5fe1ac507bff92499eada4af8a0c485d5178e3f96568"
       "c18f84994e0e4efc1c0175d646a91ad4");
-   BinaryData header1 = BtcUtils::getHash256(newHeader);
+   BinaryData header1 = PtsUtils::getHash256(newHeader);
 
    StoredHeader sbh2;
    sbh2.unserialize(newHeader);
@@ -5116,7 +5116,7 @@ TEST_F(LevelDBTest, PutGetBareHeader)
       "010000001d8f4ec0443e1f19f305e488c1085c95de7cc3fd25e0d2c5bb5d0000"
       "000000009762547903d36881a86751f3f5049e23050113f779735ef82734ebf0"
       "b4450081d8c8c84db3936a1a334b035b");
-   BinaryData header2 = BtcUtils::getHash256(anotherHead);
+   BinaryData header2 = PtsUtils::getHash256(anotherHead);
 
    sbh3.unserialize(anotherHead);
    sbh3.setKeyData(123000, UINT8_MAX);
@@ -5645,7 +5645,7 @@ protected:
       txList_[6] = READHEX("66666666666666666666666666666666"
                            "666666666666666666666666abcd6666");
    
-      vector<BinaryData> merkleTree_ = BtcUtils::calculateMerkleTree(txList_); 
+      vector<BinaryData> merkleTree_ = PtsUtils::calculateMerkleTree(txList_); 
 
       /*
       cout << "Merkle Tree looks like the following (7 tx): " << endl;
@@ -5849,8 +5849,8 @@ protected:
       mkdir(homedir_);
 
       // Put the first 5 blocks into the blkdir
-      blk0dat_ = BtcUtils::getBlkFilename(blkdir_, 0);
-      BtcUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
+      blk0dat_ = PtsUtils::getBlkFilename(blkdir_, 0);
+      PtsUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
 
       TheBDM.SelectNetwork("Main");
       TheBDM.SetBlkFileLocation(blkdir_);
@@ -5957,7 +5957,7 @@ TEST_F(BlockUtilsBare, BuildNoRegisterWlt)
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(BlockUtilsBare, Load5Blocks)
 {
-   BtcWallet wlt;
+   PtsWallet wlt;
    wlt.addScrAddress(scrAddrA_);
    wlt.addScrAddress(scrAddrB_);
    wlt.addScrAddress(scrAddrC_);
@@ -5983,7 +5983,7 @@ TEST_F(BlockUtilsBare, Load5Blocks)
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(BlockUtilsBare, Load4Blocks_Plus1)
 {
-   BtcWallet wlt;
+   PtsWallet wlt;
    wlt.addScrAddress(scrAddrA_);
    wlt.addScrAddress(scrAddrB_);
    wlt.addScrAddress(scrAddrC_);
@@ -5992,14 +5992,14 @@ TEST_F(BlockUtilsBare, Load4Blocks_Plus1)
    
    // Copy only the first four blocks.  Will copy the full file next to test
    // readBlkFileUpdate method on non-reorg blocks.
-   BtcUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_, 1596);
+   PtsUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_, 1596);
    TheBDM.doInitialSyncOnLoad(); 
    TheBDM.scanBlockchainForTx(wlt);
    EXPECT_EQ(iface_->getTopBlockHeight(HEADERS), 3);
    EXPECT_EQ(iface_->getTopBlockHash(HEADERS), blkHash3);
    EXPECT_TRUE(TheBDM.getHeaderByHash(blkHash3)->isMainBranch());
    
-   BtcUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
+   PtsUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
    TheBDM.readBlkFileUpdate(); 
    TheBDM.scanBlockchainForTx(wlt);
    EXPECT_EQ(iface_->getTopBlockHeight(HEADERS), 4);
@@ -6020,25 +6020,25 @@ TEST_F(BlockUtilsBare, Load4Blocks_Plus1)
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(BlockUtilsBare, Load5Blocks_FullReorg)
 {
-   BtcWallet wlt;
+   PtsWallet wlt;
    wlt.addScrAddress(scrAddrA_);
    wlt.addScrAddress(scrAddrB_);
    wlt.addScrAddress(scrAddrC_);
    TheBDM.registerWallet(&wlt);
    TheBDM.registerNewScrAddr(scrAddrD_);
 
-   BtcWallet wlt2;
+   PtsWallet wlt2;
    wlt2.addScrAddress(scrAddrD_);
    
    TheBDM.doInitialSyncOnLoad(); 
    TheBDM.scanBlockchainForTx(wlt);
    TheBDM.scanBlockchainForTx(wlt2);
 
-   BtcUtils::copyFile("../reorgTest/blk_3A.dat", blk0dat_);
+   PtsUtils::copyFile("../reorgTest/blk_3A.dat", blk0dat_);
    TheBDM.readBlkFileUpdate();
-   BtcUtils::copyFile("../reorgTest/blk_4A.dat", blk0dat_);
+   PtsUtils::copyFile("../reorgTest/blk_4A.dat", blk0dat_);
    TheBDM.readBlkFileUpdate();
-   BtcUtils::copyFile("../reorgTest/blk_5A.dat", blk0dat_);
+   PtsUtils::copyFile("../reorgTest/blk_5A.dat", blk0dat_);
    TheBDM.readBlkFileUpdate();
 
    TheBDM.scanBlockchainForTx(wlt);
@@ -6062,7 +6062,7 @@ TEST_F(BlockUtilsBare, Load5Blocks_FullReorg)
 TEST_F(BlockUtilsBare, Load5Blocks_RescanOps)
 {
    ScrAddrObj * scrobj;
-   BtcWallet wlt;
+   PtsWallet wlt;
    wlt.addScrAddress(scrAddrA_);
    wlt.addScrAddress(scrAddrB_);
    wlt.addScrAddress(scrAddrC_);
@@ -6123,7 +6123,7 @@ TEST_F(BlockUtilsBare, Load5Blocks_RescanOps)
 TEST_F(BlockUtilsBare, Load5Blocks_RescanEmptyDB)
 {
    ScrAddrObj * scrobj;
-   BtcWallet wlt;
+   PtsWallet wlt;
    wlt.addScrAddress(scrAddrA_);
    wlt.addScrAddress(scrAddrB_);
    wlt.addScrAddress(scrAddrC_);
@@ -6144,7 +6144,7 @@ TEST_F(BlockUtilsBare, Load5Blocks_RescanEmptyDB)
 TEST_F(BlockUtilsBare, Load5Blocks_RebuildEmptyDB)
 {
    ScrAddrObj * scrobj;
-   BtcWallet wlt;
+   PtsWallet wlt;
    wlt.addScrAddress(scrAddrA_);
    wlt.addScrAddress(scrAddrB_);
    wlt.addScrAddress(scrAddrC_);
@@ -6168,7 +6168,7 @@ TEST_F(BlockUtilsBare, Load5Blocks_RebuildEmptyDB)
 TEST_F(BlockUtilsBare, Load5Blocks_ForceFullRewhatever)
 {
    ScrAddrObj * scrobj;
-   BtcWallet wlt;
+   PtsWallet wlt;
    wlt.addScrAddress(scrAddrA_);
    wlt.addScrAddress(scrAddrB_);
    wlt.addScrAddress(scrAddrC_);
@@ -6224,7 +6224,7 @@ TEST_F(BlockUtilsBare, Load5Blocks_ForceFullRewhatever)
 TEST_F(BlockUtilsBare, Load5Blocks_ScanWhatIsNeeded)
 {
    ScrAddrObj * scrobj;
-   BtcWallet wlt;
+   PtsWallet wlt;
    wlt.addScrAddress(scrAddrA_);
    wlt.addScrAddress(scrAddrB_);
    wlt.addScrAddress(scrAddrC_);
@@ -6288,7 +6288,7 @@ protected:
       DBUtils.setArmoryDbType(ARMORY_DB_BARE);
       DBUtils.setDbPruneType(DB_PRUNE_NONE);
 
-      blkdir_  = string("/home/alan/.bitcoin/testnet3/blocks");
+      blkdir_  = string("/home/alan/.protoshares/testnet3/blocks");
       homedir_ = string("/home/alan/.armory/testnet3");
       ldbdir_  = string("/home/alan/.armory/testnet3/databases");
 
@@ -6339,7 +6339,7 @@ TEST_F(LoadTestnetBareTest, DISABLED_StepThroughDebug_usually_disabled)
    BinaryData scrAddrB_ = READHEX("00ee26c56fc1d942be8d7a24b2a1001dd894693980");
    BinaryData scrAddrC_ = READHEX("00cb2abde8bccacc32e893df3a054b9ef7f227a4ce");
     
-   BtcWallet wlt;
+   PtsWallet wlt;
    wlt.addScrAddress(scrAddrA_);
    wlt.addScrAddress(scrAddrB_);
    wlt.addScrAddress(scrAddrC_);
@@ -6379,8 +6379,8 @@ protected:
       mkdir(homedir_);
 
       // Put the first 5 blocks into the blkdir
-      blk0dat_ = BtcUtils::getBlkFilename(blkdir_, 0);
-      BtcUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
+      blk0dat_ = PtsUtils::getBlkFilename(blkdir_, 0);
+      PtsUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
 
       TheBDM.SetDatabaseModes(ARMORY_DB_SUPER, DB_PRUNE_NONE);
       TheBDM.SelectNetwork("Main");
@@ -6511,14 +6511,14 @@ TEST_F(BlockUtilsSuper, HeadersOnly_Reorg)
    EXPECT_EQ(iface_->getTopBlockHeight(HEADERS), 4);
    EXPECT_EQ(iface_->getTopBlockHash(HEADERS), blkHash4);
 
-   BtcUtils::copyFile("../reorgTest/blk_3A.dat", BtcUtils::getBlkFilename(blkdir_, 1));
+   PtsUtils::copyFile("../reorgTest/blk_3A.dat", PtsUtils::getBlkFilename(blkdir_, 1));
    TheBDM.processNewHeadersInBlkFiles(1);
    EXPECT_EQ(iface_->getTopBlockHeight(HEADERS), 4);
    EXPECT_EQ(iface_->getTopBlockHash(HEADERS), blkHash4);
    EXPECT_FALSE(TheBDM.getHeaderByHash(blkHash3A)->isMainBranch());
    EXPECT_TRUE( TheBDM.getHeaderByHash(blkHash3 )->isMainBranch());
 
-   BtcUtils::copyFile("../reorgTest/blk_4A.dat", BtcUtils::getBlkFilename(blkdir_, 2));
+   PtsUtils::copyFile("../reorgTest/blk_4A.dat", PtsUtils::getBlkFilename(blkdir_, 2));
    TheBDM.processNewHeadersInBlkFiles(2);
    EXPECT_EQ(iface_->getTopBlockHeight(HEADERS), 4);
    EXPECT_EQ(iface_->getTopBlockHash(HEADERS), blkHash4);
@@ -6527,7 +6527,7 @@ TEST_F(BlockUtilsSuper, HeadersOnly_Reorg)
    EXPECT_FALSE(TheBDM.getHeaderByHash(blkHash4A)->isMainBranch());
    EXPECT_TRUE( TheBDM.getHeaderByHash(blkHash4 )->isMainBranch());
 
-   BtcUtils::copyFile("../reorgTest/blk_5A.dat", BtcUtils::getBlkFilename(blkdir_, 3));
+   PtsUtils::copyFile("../reorgTest/blk_5A.dat", PtsUtils::getBlkFilename(blkdir_, 3));
    TheBDM.processNewHeadersInBlkFiles(3);
    EXPECT_EQ(iface_->getTopBlockHeight(HEADERS), 5);
    EXPECT_EQ(iface_->getTopBlockHeight(HEADERS), 5);
@@ -6575,13 +6575,13 @@ TEST_F(BlockUtilsSuper, Load4BlocksPlus1)
 {
    // Copy only the first four blocks.  Will copy the full file next to test
    // readBlkFileUpdate method on non-reorg blocks.
-   BtcUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_, 1596);
+   PtsUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_, 1596);
    TheBDM.doInitialSyncOnLoad(); 
    EXPECT_EQ(iface_->getTopBlockHeight(HEADERS), 3);
    EXPECT_EQ(iface_->getTopBlockHash(HEADERS), blkHash3);
    EXPECT_TRUE(TheBDM.getHeaderByHash(blkHash3)->isMainBranch());
    
-   BtcUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
+   PtsUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
    TheBDM.readBlkFileUpdate(); 
    EXPECT_EQ(iface_->getTopBlockHeight(HEADERS), 4);
    EXPECT_EQ(iface_->getTopBlockHash(HEADERS), blkHash4);
@@ -6596,17 +6596,17 @@ TEST_F(BlockUtilsSuper, Load5Blocks_Plus2NoReorg)
    TheBDM.doInitialSyncOnLoad(); 
 
 
-   BtcUtils::copyFile("../reorgTest/blk_3A.dat", blk0dat_);
+   PtsUtils::copyFile("../reorgTest/blk_3A.dat", blk0dat_);
    TheBDM.readBlkFileUpdate();
    EXPECT_EQ(TheBDM.getTopBlockHash(),   blkHash4);
    EXPECT_EQ(TheBDM.getTopBlockHeight(), 4);
 
-   BtcUtils::copyFile("../reorgTest/blk_4A.dat", blk0dat_);
+   PtsUtils::copyFile("../reorgTest/blk_4A.dat", blk0dat_);
    TheBDM.readBlkFileUpdate();
    EXPECT_EQ(TheBDM.getTopBlockHash(),   blkHash4);
    EXPECT_EQ(TheBDM.getTopBlockHeight(), 4);
 
-   //BtcUtils::copyFile("../reorgTest/blk_5A.dat", blk0dat_);
+   //PtsUtils::copyFile("../reorgTest/blk_5A.dat", blk0dat_);
    //iface_->pprintBlkDataDB(BLKDATA);
 }
 
@@ -6617,11 +6617,11 @@ TEST_F(BlockUtilsSuper, Load5Blocks_FullReorg)
    DBUtils.setDbPruneType(DB_PRUNE_NONE);
    TheBDM.doInitialSyncOnLoad(); 
 
-   BtcUtils::copyFile("../reorgTest/blk_3A.dat", blk0dat_);
+   PtsUtils::copyFile("../reorgTest/blk_3A.dat", blk0dat_);
    TheBDM.readBlkFileUpdate();
-   BtcUtils::copyFile("../reorgTest/blk_4A.dat", blk0dat_);
+   PtsUtils::copyFile("../reorgTest/blk_4A.dat", blk0dat_);
    TheBDM.readBlkFileUpdate();
-   BtcUtils::copyFile("../reorgTest/blk_5A.dat", blk0dat_);
+   PtsUtils::copyFile("../reorgTest/blk_5A.dat", blk0dat_);
    TheBDM.readBlkFileUpdate();
 
    //iface_->pprintBlkDataDB(BLKDATA);
@@ -6654,7 +6654,7 @@ TEST_F(BlockUtilsSuper, DISABLED_RestartDBAfterBuild)
 {
    // Copy only the first four blocks.  Will copy the full file next to test
    // readBlkFileUpdate method on non-reorg blocks.
-   BtcUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_, 926);
+   PtsUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_, 926);
    TheBDM.doInitialSyncOnLoad(); 
    EXPECT_EQ(iface_->getTopBlockHeight(HEADERS), 2);
    EXPECT_EQ(iface_->getTopBlockHash(HEADERS), blkHash2);
@@ -6662,7 +6662,7 @@ TEST_F(BlockUtilsSuper, DISABLED_RestartDBAfterBuild)
    TheBDM.DestroyInstance();
    
    // Add two more blocks
-   BtcUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
+   PtsUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
 
    // Now reinitialize the DB and hopefully detect the new blocks and update
    TheBDM.SelectNetwork("Main");
@@ -6708,7 +6708,7 @@ TEST_F(BlockUtilsSuper, DISABLED_RestartDBAfterBuild_withReplay)
 {
    // Copy only the first four blocks.  Will copy the full file next to test
    // readBlkFileUpdate method on non-reorg blocks.
-   BtcUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_, 926);
+   PtsUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_, 926);
    TheBDM.doInitialSyncOnLoad(); 
    EXPECT_EQ(iface_->getTopBlockHeight(HEADERS), 2);
    EXPECT_EQ(iface_->getTopBlockHash(HEADERS), blkHash2);
@@ -6716,7 +6716,7 @@ TEST_F(BlockUtilsSuper, DISABLED_RestartDBAfterBuild_withReplay)
    TheBDM.DestroyInstance();
    
    // Add two more blocks
-   BtcUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
+   PtsUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
 
    // Now reinitialize the DB and hopefully detect the new blocks and update
    TheBDM.SelectNetwork("Main");
@@ -6779,10 +6779,10 @@ TEST_F(BlockUtilsSuper, DISABLED_TimeAndSpaceTest_usuallydisabled)
    DBUtils.setDbPruneType(DB_PRUNE_NONE);
 
    string oldblkdir = blkdir_;
-   //blkdir_  = string("/home/alan/.bitcoin/blks3");
-   //blkdir_  = string("/home/alan/.bitcoin/blocks");
+   //blkdir_  = string("/home/alan/.protoshares/blks3");
+   //blkdir_  = string("/home/alan/.protoshares/blocks");
    //TheBDM.SelectNetwork("Main");
-   blkdir_  = string("/home/alan/.bitcoin/testnet3/blocks");
+   blkdir_  = string("/home/alan/.protoshares/testnet3/blocks");
    TheBDM.SelectNetwork("Test");
    TheBDM.SetBlkFileLocation(blkdir_);
    TheBDM.SetHomeDirLocation(homedir_);
@@ -6833,8 +6833,8 @@ protected:
       mkdir(homedir_);
 
       // Put the first 5 blocks into the blkdir
-      blk0dat_ = BtcUtils::getBlkFilename(blkdir_, 0);
-      BtcUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
+      blk0dat_ = PtsUtils::getBlkFilename(blkdir_, 0);
+      PtsUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
 
       TheBDM.SetDatabaseModes(ARMORY_DB_SUPER, DB_PRUNE_NONE);
       TheBDM.SelectNetwork("Main");
@@ -6938,14 +6938,14 @@ protected:
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(BlockUtilsWithWalletTest, PreRegisterScrAddrs)
 {
-   BtcWallet wlt;
+   PtsWallet wlt;
    wlt.addScrAddress(scrAddrA_);
    wlt.addScrAddress(scrAddrB_);
    wlt.addScrAddress(scrAddrC_);
    TheBDM.registerWallet(&wlt);
    TheBDM.registerNewScrAddr(scrAddrD_);
 
-   BtcUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
+   PtsUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
    TheBDM.doInitialSyncOnLoad();
 
    TheBDM.fetchAllRegisteredScrAddrData();
@@ -6978,11 +6978,11 @@ TEST_F(BlockUtilsWithWalletTest, PreRegisterScrAddrs)
 ////////////////////////////////////////////////////////////////////////////////
 TEST_F(BlockUtilsWithWalletTest, PostRegisterScrAddr)
 {
-   BtcUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
+   PtsUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_);
    TheBDM.doInitialSyncOnLoad();
 
    // We do all the database stuff first, THEN load the addresses
-   BtcWallet wlt;
+   PtsWallet wlt;
    wlt.addScrAddress(scrAddrA_);
    wlt.addScrAddress(scrAddrB_);
    wlt.addScrAddress(scrAddrC_);
@@ -7031,7 +7031,7 @@ protected:
       DBUtils.setArmoryDbType(ARMORY_DB_FULL);
       DBUtils.setDbPruneType(DB_PRUNE_NONE);
 
-      blkdir_  = string("/home/alan/.bitcoin");
+      blkdir_  = string("/home/alan/.protoshares");
       homedir_ = string("./fakehomedir");
       ldbdir_  = string("/home/alan/ARMORY_DB_257k_BLKS");
 
@@ -7123,7 +7123,7 @@ TEST_F(BlockUtilsWithWalletTest, TestBalanceMainnet_usuallydisabled)
    TheBDM.doInitialSyncOnLoad();
 
    // We do all the database stuff first, THEN load the addresses
-   BtcWallet wlt;
+   PtsWallet wlt;
    wlt.addScrAddress(scrAddrA_);
    wlt.addScrAddress(scrAddrB_);
    TheBDM.registerWallet(&wlt);
@@ -7161,11 +7161,11 @@ TEST_F(BlockUtilsWithWalletTest, TestBalanceMainnet_usuallydisabled)
 TEST_F(BlockUtilsWithWalletTest, ZeroConfUpdate)
 {
    // Copy only the first four blocks
-   BtcUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_, 1596);
+   PtsUtils::copyFile("../reorgTest/blk_0_to_4.dat", blk0dat_, 1596);
    TheBDM.doInitialSyncOnLoad();
 
    // We do all the database stuff first, THEN load the addresses
-   BtcWallet wlt;
+   PtsWallet wlt;
    wlt.addScrAddress(scrAddrA_);
    wlt.addScrAddress(scrAddrB_);
    wlt.addScrAddress(scrAddrC_);

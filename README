@@ -11,7 +11,7 @@
 * Project:    Armory
 * Author:     Alan Reiner
 * Orig Date:  13 July, 2011
-* Descr:      Armory is a full-featured Bitcoin client, offering a dozen 
+* Descr:      Armory is a full-featured Protoshares client, offering a dozen 
 *             innovative features not found in any other client software!
 *             Manage multiple wallets (deterministic and watching-only), 
 *             print paper backups that work forever, import or sweep private 
@@ -30,12 +30,12 @@
 *             it has turned out to be an inconvenience worth having. 
 *             Reimplementing all the networking code would be fraught with bugs,
 *             security holes, and possible blockchain forking.  The reliance
-*             on Bitcoin-Qt right now is actually making Armory more secure!
+*             on Protoshares-Qt right now is actually making Armory more secure!
 *           
 *
 ********************************************************************************
 *
-* Please take a moment to donate 1.0 BTC!   1ArmoryXcfq7TnCSuZa9fQjRYwJ4bkRKfv 
+* Please take a moment to donate 1.0 PTS!   1ArmoryXcfq7TnCSuZa9fQjRYwJ4bkRKfv 
 *
 ********************************************************************************
 *

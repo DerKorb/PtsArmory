@@ -16,7 +16,7 @@
 #define SWIG_PYTHON_EXTRA_NATIVE_CONTAINERS
 #include "BlockObj.h"
 #include "BlockUtils.h"
-#include "BtcUtils.h"
+#include "PtsUtils.h"
 #include "EncryptionUtils.h"
 %}
 
@@ -46,7 +46,7 @@ namespace std
    %template(vector_Tx) std::vector<Tx>;
    %template(vector_BlockHeaderPtr) std::vector<BlockHeader>;
    %template(vector_UnspentTxOut) std::vector<UnspentTxOut>;
-   %template(vector_BtcWallet) std::vector<BtcWallet*>;
+   %template(vector_PtsWallet) std::vector<PtsWallet*>;
    %template(vector_AddressBookEntry) std::vector<AddressBookEntry>;
    %template(vector_RegisteredTx) std::vector<RegisteredTx>;
 }
@@ -100,7 +100,7 @@ namespace std
 /* With our typemaps, we can finally include our other objects */
 %include "BlockObj.h"
 %include "BlockUtils.h"
-%include "BtcUtils.h"
+%include "PtsUtils.h"
 %include "EncryptionUtils.h"
 
 

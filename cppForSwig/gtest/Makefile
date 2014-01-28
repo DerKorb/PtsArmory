@@ -33,7 +33,7 @@ CPPFLAGS += -I$(GTEST_DIR) \
 				#-O2 \
 
 HEADERS += 	$(USER_DIR)/BinaryData.h \
-		 		$(USER_DIR)/BtcUtils.h \
+		 		$(USER_DIR)/PtsUtils.h \
 		 		$(USER_DIR)/BlockObj.h \
 		 		$(USER_DIR)/StoredBlockObj.h \
 		 		$(USER_DIR)/leveldb_wrapper.h \
@@ -41,7 +41,7 @@ HEADERS += 	$(USER_DIR)/BinaryData.h \
 		 		$(USER_DIR)/PartialMerkle.h
 
 OBJECTS += 	BinaryData.o \
-		 		BtcUtils.o \
+		 		PtsUtils.o \
 		 		BlockObj.o \
 		 		StoredBlockObj.o \
 		 		leveldb_wrapper.o \
@@ -115,25 +115,25 @@ libleveldb.a: Makefile
 UniversalTimer.o: $(USER_DIR)/UniversalTimer.h $(USER_DIR)/UniversalTimer.cpp
 	$(CXX) $(CPPFLAGS) -c $(USER_DIR)/UniversalTimer.cpp
 
-BinaryData.o: $(USER_DIR)/BinaryData.h $(USER_DIR)/BinaryData.cpp $(USER_DIR)/BtcUtils.h $(USER_DIR)/log.h
+BinaryData.o: $(USER_DIR)/BinaryData.h $(USER_DIR)/BinaryData.cpp $(USER_DIR)/PtsUtils.h $(USER_DIR)/log.h
 	$(CXX) $(CPPFLAGS) -c $(USER_DIR)/BinaryData.cpp
 
-BtcUtils.o: $(USER_DIR)/BtcUtils.h $(USER_DIR)/BtcUtils.cpp $(USER_DIR)/log.h
-	$(CXX) $(CPPFLAGS) -c $(USER_DIR)/BtcUtils.cpp
+PtsUtils.o: $(USER_DIR)/PtsUtils.h $(USER_DIR)/PtsUtils.cpp $(USER_DIR)/log.h
+	$(CXX) $(CPPFLAGS) -c $(USER_DIR)/PtsUtils.cpp
 
-BlockObj.o: $(USER_DIR)/log.h $(USER_DIR)/BinaryData.h $(USER_DIR)/BtcUtils.h $(USER_DIR)/BlockObj.h $(USER_DIR)/BlockObj.cpp
+BlockObj.o: $(USER_DIR)/log.h $(USER_DIR)/BinaryData.h $(USER_DIR)/PtsUtils.h $(USER_DIR)/BlockObj.h $(USER_DIR)/BlockObj.cpp
 	$(CXX) $(CPPFLAGS) -c $(USER_DIR)/BlockObj.cpp
 
-StoredBlockObj.o: $(USER_DIR)/log.h $(USER_DIR)/BtcUtils.h $(USER_DIR)/BinaryData.h $(USER_DIR)/StoredBlockObj.h $(USER_DIR)/StoredBlockObj.cpp
+StoredBlockObj.o: $(USER_DIR)/log.h $(USER_DIR)/PtsUtils.h $(USER_DIR)/BinaryData.h $(USER_DIR)/StoredBlockObj.h $(USER_DIR)/StoredBlockObj.cpp
 	$(CXX) $(CPPFLAGS) -c $(USER_DIR)/StoredBlockObj.cpp
 
-leveldb_wrapper.o: $(USER_DIR)/log.h $(USER_DIR)/BtcUtils.h $(USER_DIR)/BinaryData.h $(USER_DIR)/leveldb_wrapper.h $(USER_DIR)/leveldb_wrapper.cpp
+leveldb_wrapper.o: $(USER_DIR)/log.h $(USER_DIR)/PtsUtils.h $(USER_DIR)/BinaryData.h $(USER_DIR)/leveldb_wrapper.h $(USER_DIR)/leveldb_wrapper.cpp
 	$(CXX) $(CPPFLAGS) -c $(USER_DIR)/leveldb_wrapper.cpp
 
 BlockUtils.o: $(USER_DIR)/log.h $(USER_DIR)/BlockUtils.h $(USER_DIR)/BinaryData.h $(USER_DIR)/UniversalTimer.h $(USER_DIR)/PartialMerkle.h $(USER_DIR)/BlockUtils.cpp
 	$(CXX) $(CPPFLAGS) -c $(USER_DIR)/BlockUtils.cpp
 
-EncryptionUtils.o: $(USER_DIR)/log.h $(USER_DIR)/BtcUtils.h $(USER_DIR)/BinaryData.h $(USER_DIR)/EncryptionUtils.h $(USER_DIR)/EncryptionUtils.cpp
+EncryptionUtils.o: $(USER_DIR)/log.h $(USER_DIR)/PtsUtils.h $(USER_DIR)/BinaryData.h $(USER_DIR)/EncryptionUtils.h $(USER_DIR)/EncryptionUtils.cpp
 	$(CXX) $(CPPFLAGS) -c $(USER_DIR)/EncryptionUtils.cpp
 
 

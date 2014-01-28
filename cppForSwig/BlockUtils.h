@@ -29,7 +29,7 @@
 #include <limits>
 
 #include "BinaryData.h"
-#include "BtcUtils.h"
+#include "PtsUtils.h"
 #include "BlockObj.h"
 #include "StoredBlockObj.h"
 #include "leveldb_wrapper.h"
@@ -78,14 +78,14 @@ typedef enum
 //
 // LedgerEntry  
 //
-// LedgerEntry class is used for bother ScrAddresses and BtcWallets.  Members
+// LedgerEntry class is used for bother ScrAddresses and PtsWallets.  Members
 // have slightly different meanings (or irrelevant) depending which one it's
 // used with.
 //
 //  Address -- Each entry corresponds to ONE TxIn OR ONE TxOut
 //
 //    scrAddr_    -  useless - just repeating this address
-//    value_     -  net debit/credit on addr balance, in Satoshis (1e-8 BTC)
+//    value_     -  net debit/credit on addr balance, in Satoshis (1e-8 PTS)
 //    blockNum_  -  block height of the tx in which this txin/out was included
 //    txHash_    -  hash of the tx in which this txin/txout was included
 //    index_     -  index of the txin/txout in this tx
@@ -96,10 +96,10 @@ typedef enum
 //                    this unless I do a prescan to determine if all txOuts
 //                    are ours, or just some of them
 //
-//  BtcWallet -- Each entry corresponds to ONE WHOLE TRANSACTION
+//  PtsWallet -- Each entry corresponds to ONE WHOLE TRANSACTION
 //
 //    scrAddr_    -  useless - originally had a purpose, but lost it
-//    value_     -  total debit/credit on WALLET balance, in Satoshis (1e-8 BTC)
+//    value_     -  total debit/credit on WALLET balance, in Satoshis (1e-8 PTS)
 //    blockNum_  -  block height of the block in which this tx was included
 //    txHash_    -  hash of this tx 
 //    index_     -  index of the tx in the block
@@ -116,7 +116,7 @@ public:
       scrAddr_(0),
       value_(0),
       blockNum_(UINT32_MAX),
-      txHash_(BtcUtils::EmptyHash_),
+      txHash_(PtsUtils::EmptyHash_),
       index_(UINT32_MAX),
       txTime_(0),
       isValid_(false),
@@ -193,7 +193,7 @@ class AddressBookEntry
 public:
 
    /////
-   AddressBookEntry(void) : scrAddr_(BtcUtils::EmptyHash_) { txList_.clear(); }
+   AddressBookEntry(void) : scrAddr_(PtsUtils::EmptyHash_) { txList_.clear(); }
    explicit AddressBookEntry(BinaryData scraddr) : scrAddr_(scraddr) { txList_.clear(); }
    void addTx(Tx & tx) { txList_.push_back( RegisteredTx(tx) ); }
    BinaryData getScrAddr(void) { return scrAddr_; }
@@ -221,7 +221,7 @@ private:
 };
 
 
-class BtcWallet;
+class PtsWallet;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -236,7 +236,7 @@ class BtcWallet;
 // represent any kind of TxOut script.  Multisig, P2SH, or any non-standard,
 // unusual, escrow, whatever "address."  While it might be more technically
 // correct to just call this class "Script" or "TxOutScript", I felt like 
-// "address" is a term that will always exist in the Bitcoin ecosystem, and 
+// "address" is a term that will always exist in the Protoshares ecosystem, and 
 // frequently used even when not preferred.
 //
 // Similarly, we refer to the member variable scraddr_ as a "scradder".  It
@@ -247,7 +247,7 @@ class BtcWallet;
 ////////////////////////////////////////////////////////////////////////////////
 class ScrAddrObj
 {
-   friend class BtcWallet;
+   friend class PtsWallet;
 public:
 
    ScrAddrObj(void) : 
@@ -328,15 +328,15 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// BtcWallet
+// PtsWallet
 //
 ////////////////////////////////////////////////////////////////////////////////
-class BtcWallet
+class PtsWallet
 {
 public:
-   BtcWallet(void) : bdmPtr_(NULL) {}
-   explicit BtcWallet(BlockDataManager_LevelDB* bdm) : bdmPtr_(bdm) {}
-   ~BtcWallet(void);
+   PtsWallet(void) : bdmPtr_(NULL) {}
+   explicit PtsWallet(BlockDataManager_LevelDB* bdm) : bdmPtr_(bdm) {}
+   ~PtsWallet(void);
 
    /////////////////////////////////////////////////////////////////////////////
    // addScrAddr when blockchain rescan req'd, addNewScrAddr for just-created
@@ -604,7 +604,7 @@ private:
    // comment being written), then we don't have anything to track -- the DB
    // will automatically update for all addresses, period.  And we'd best not 
    // track those in RAM (maybe on a huge server...?)
-   set<BtcWallet*>                    registeredWallets_;
+   set<PtsWallet*>                    registeredWallets_;
    map<BinaryData, RegisteredScrAddr> registeredScrAddrMap_;
    list<RegisteredTx>                 registeredTxList_;
    set<HashString>                    registeredTxSet_;
@@ -637,7 +637,7 @@ public:
    void SetHomeDirLocation(string homeDir);
    bool SetBlkFileLocation(string blkdir);
    void SetLevelDBLocation(string ldbdir);
-   void SetBtcNetworkParams( BinaryData const & GenHash,
+   void SetPtsNetworkParams( BinaryData const & GenHash,
                              BinaryData const & GenTxHash,
                              BinaryData const & MagicBytes);
 
@@ -713,8 +713,8 @@ public:
    // blockchain in RAM, each scan will take 30-120 seconds.  Registering makes 
    // sure that the intial blockchain scan picks up wallet-relevant stuff as 
    // it goes, and does a full [re-]scan of the blockchain only if necessary.
-   bool     registerWallet(BtcWallet* wallet, bool wltIsNew=false);
-   void     unregisterWallet(BtcWallet* wlt) {registeredWallets_.erase(wlt);}
+   bool     registerWallet(PtsWallet* wallet, bool wltIsNew=false);
+   void     unregisterWallet(PtsWallet* wlt) {registeredWallets_.erase(wlt);}
 
    bool     registerScrAddr(BinaryData scraddr, bool isNew, uint32_t blk0);
    bool     registerNewScrAddr(BinaryData scraddr);
@@ -724,10 +724,10 @@ public:
    uint32_t evalLowestBlockNextScan(void);
    uint32_t evalLowestScrAddrCreationBlock(void);
    bool     evalRescanIsRequired(void);
-   uint32_t numBlocksToRescan(BtcWallet & wlt, uint32_t topBlk=UINT32_MAX);
+   uint32_t numBlocksToRescan(PtsWallet & wlt, uint32_t topBlk=UINT32_MAX);
    void     updateRegisteredScrAddrs(uint32_t newTopBlk);
 
-   bool     walletIsRegistered(BtcWallet & wlt);
+   bool     walletIsRegistered(PtsWallet & wlt);
    bool     scrAddrIsRegistered(HashString scrAddr);
    void     insertRegisteredTxIfNew(HashString txHash);
    void     insertRegisteredTxIfNew(RegisteredTx & regTx);
@@ -750,7 +750,7 @@ public:
    void     pprintRegisteredWallets(void);
 
 
-   BtcWallet* createNewWallet(void);
+   PtsWallet* createNewWallet(void);
 
    // Parsing requires the data TO ALREADY BE IN ITS PERMANENT MEMORY LOCATION
    // Pass in a wallet if you want to update the initialScanTxHashes_/OutPoints_
@@ -828,7 +828,7 @@ public:
    void shutdownSaveScrAddrHistories(void);
 
    void fetchAllRegisteredScrAddrData(void);
-   void fetchAllRegisteredScrAddrData(BtcWallet & myWlt);
+   void fetchAllRegisteredScrAddrData(PtsWallet & myWlt);
    void fetchAllRegisteredScrAddrData(
                               map<BinaryData, RegisteredScrAddr> & addrMap);
    void fetchAllRegisteredScrAddrData(BinaryData const & scrAddr);
@@ -854,7 +854,7 @@ public:
    // Traverse the blockchain and update the wallet[s] with the relevant Tx data
    // See comments above the scanBlockchainForTx in the .cpp, for more info
    // NOTE: THIS ASSUMES THAT registeredTxSet_/List_ is already populated!
-   void scanBlockchainForTx(BtcWallet & myWallet,
+   void scanBlockchainForTx(PtsWallet & myWallet,
                             uint32_t startBlknum=0,
                             uint32_t endBlknum=UINT32_MAX,
                             bool fetchFirst=true);
@@ -865,7 +865,7 @@ public:
 
    // This will only be used by the above method, probably wouldn't be called
    // directly from any other code
-   void scanRegisteredTxForWallet( BtcWallet & wlt,
+   void scanRegisteredTxForWallet( PtsWallet & wlt,
                                    uint32_t blkStart=0,
                                    uint32_t blkEnd=UINT32_MAX);
 
@@ -889,7 +889,7 @@ public:
    void purgeZeroConfPool(void);
    void pprintZeroConfPool(void);
    void rewriteZeroConfFile(void);
-   void rescanWalletZeroConf(BtcWallet & wlt);
+   void rescanWalletZeroConf(PtsWallet & wlt);
    bool isTxFinal(Tx & tx);
 
 
@@ -902,13 +902,13 @@ public:
    bool             isLastBlockReorg(void)     {return lastBlockWasReorg_;}
    set<HashString>  getTxJustInvalidated(void) {return txJustInvalidated_;}
    set<HashString>  getTxJustAffected(void)    {return txJustAffected_;}
-   void             updateWalletAfterReorg(BtcWallet & wlt);
-   void             updateWalletsAfterReorg(vector<BtcWallet*> wltvect);
-   void             updateWalletsAfterReorg(set<BtcWallet*> wltset);
+   void             updateWalletAfterReorg(PtsWallet & wlt);
+   void             updateWalletsAfterReorg(vector<PtsWallet*> wltvect);
+   void             updateWalletsAfterReorg(set<PtsWallet*> wltset);
 
    // Use these two methods to get ALL information about your unused TxOuts
-   //vector<UnspentTxOut> getUnspentTxOutsForWallet(BtcWallet & wlt, int sortType=-1);
-   //vector<UnspentTxOut> getNonStdUnspentTxOutsForWallet(BtcWallet & wlt);
+   //vector<UnspentTxOut> getUnspentTxOutsForWallet(PtsWallet & wlt, int sortType=-1);
+   //vector<UnspentTxOut> getNonStdUnspentTxOutsForWallet(PtsWallet & wlt);
 
    ////////////////////////////////////////////////////////////////////////////////
    // We're going to need the BDM's help to get the sender for a TxIn since it

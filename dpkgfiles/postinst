@@ -26,8 +26,8 @@ def createDesktopFile(name, idstr, arglist, toDir=''):
    if name:
       deskfile.write(' (' + name + ')')
    deskfile.write('\n')
-   deskfile.write('GenericName=Bitcoin Client\n')
-   deskfile.write('Comment=Full-featured Bitcoin wallet management application\n')
+   deskfile.write('GenericName=Protoshares Client\n')
+   deskfile.write('Comment=Full-featured Protoshares wallet management application\n')
    deskfile.write('Categories=Qt;Network;\n')
    deskfile.write('Exec=python /usr/lib/armory/ArmoryQt.py')
    for a in arglist:
@@ -38,7 +38,7 @@ def createDesktopFile(name, idstr, arglist, toDir=''):
    deskfile.write('Icon=armory%sicon\n' % idstr)
    deskfile.write('StartupNotify=false\n')
    deskfile.write('Terminal=false\n')
-   deskfile.write('MimeType=x-scheme-handler/bitcoin\n')
+   deskfile.write('MimeType=x-scheme-handler/protoshares\n')
    deskfile.close()
 
 

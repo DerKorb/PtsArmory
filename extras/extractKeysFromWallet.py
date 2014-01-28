@@ -13,7 +13,7 @@
 #
 #  NOTE:       This was created before wallets ever used encryption.  It's 
 #              probably fairly useless... but any unencrypted wallets created
-#              before Bitcoin-Qt 0.6.0 would still be recoverable, even if 
+#              before Protoshares-Qt 0.6.0 would still be recoverable, even if 
 #              corrupted
 #
 #
@@ -61,7 +61,7 @@ for i in range(len(walletBytes)):
          if CryptoECDSA().VerifyPublicKeyValid(potentialPubKey):
             fileloc = int_to_hex(i, widthBytes=4, endOut=BIGENDIAN)
             print '\nFound PUBLIC key in file (0x%08s) / ' % (fileloc,),
-            hash160   = potentialPubKey.getHash160()
+            hash160   = CryptoECDSA().CompressPoint(potentialPubKey).getHash160()
             addrStr   = hash160_to_addrStr(hash160)
             pubkeyHex = potentialPubKey.toHexStr()
             print ' Addr: %-34s' % (addrStr,), '   PrivKey:',
@@ -75,7 +75,7 @@ for i in range(len(walletBytes)):
                endIdx = startIdx+32
                potentialPrivKey = SecureBinaryData(walletBytes[startIdx:endIdx])
                computedPub = CryptoECDSA().ComputePublicKey(potentialPrivKey)
-               if( hash160 == computedPub.getHash160()):
+               if( hash160 == CryptoECDSA().CompressPoint(computedPub).getHash160()):
                   havePrivKey = True
                   privkeyHex =  potentialPrivKey.toHexStr()
                   break

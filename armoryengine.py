@@ -7,8 +7,8 @@
 ################################################################################
 
 # Version Numbers 
-BTCARMORY_VERSION    = (0, 90,  0, 0)  # (Major, Minor, Bugfix, AutoIncrement) 
-PYBTCWALLET_VERSION  = (1, 35,  0, 0)  # (Major, Minor, Bugfix, AutoIncrement)
+PTSARMORY_VERSION    = (0, 90,  0, 0)  # (Major, Minor, Bugfix, AutoIncrement) 
+PYPTSWALLET_VERSION  = (1, 35,  0, 0)  # (Major, Minor, Bugfix, AutoIncrement)
 
 ARMORY_DONATION_ADDR = '1ArmoryXcfq7TnCSuZa9fQjRYwJ4bkRKfv'
 ARMORY_DONATION_PUBKEY = ( '04' 
@@ -57,8 +57,8 @@ import optparse
 parser = optparse.OptionParser(usage="%prog [options]\n")
 parser.add_option("--settings",        dest="settingsPath",default='DEFAULT', type="str",          help="load Armory with a specific settings file")
 parser.add_option("--datadir",         dest="datadir",     default='DEFAULT', type="str",          help="Change the directory that Armory calls home")
-parser.add_option("--satoshi-datadir", dest="satoshiHome", default='DEFAULT', type='str',          help="The Bitcoin-Qt/bitcoind home directory")
-parser.add_option("--satoshi-port",    dest="satoshiPort", default='DEFAULT', type="str",          help="For Bitcoin-Qt instances operating on a non-standard port")
+parser.add_option("--satoshi-datadir", dest="satoshiHome", default='DEFAULT', type='str',          help="The Protoshares-Qt/protosharesd home directory")
+parser.add_option("--satoshi-port",    dest="satoshiPort", default='DEFAULT', type="str",          help="For Protoshares-Qt instances operating on a non-standard port")
 parser.add_option("--dbdir",           dest="leveldbDir",  default='DEFAULT', type='str',          help="Location to store blocks database (defaults to --datadir)")
 parser.add_option("--rpcport",         dest="rpcport",     default='DEFAULT', type="str",          help="RPC port for running armoryd.py")
 parser.add_option("--testnet",         dest="testnet",     default=False,     action="store_true", help="Use the testnet protocol")
@@ -186,7 +186,7 @@ OS_MACOSX  = 'darwin' in opsys.lower() or 'osx'     in opsys.lower()
 OS_NAME          = ''
 OS_VARIANT       = ''
 USER_HOME_DIR    = ''
-BTC_HOME_DIR     = ''
+PTS_HOME_DIR     = ''
 ARMORY_HOME_DIR  = ''
 LEVELDB_DIR      = ''
 SUBDIR = 'testnet3' if USE_TESTNET else ''
@@ -194,30 +194,30 @@ if OS_WINDOWS:
    OS_NAME         = 'Windows'
    OS_VARIANT      = platform.win32_ver()
    USER_HOME_DIR   = os.getenv('APPDATA')
-   BTC_HOME_DIR    = os.path.join(USER_HOME_DIR, 'Bitcoin', SUBDIR)
-   ARMORY_HOME_DIR = os.path.join(USER_HOME_DIR, 'Armory', SUBDIR)
-   BLKFILE_DIR     = os.path.join(BTC_HOME_DIR, 'blocks')
+   PTS_HOME_DIR    = os.path.join(USER_HOME_DIR, 'Protoshares', SUBDIR)
+   ARMORY_HOME_DIR = os.path.join(USER_HOME_DIR, 'PTSArmory', SUBDIR)
+   BLKFILE_DIR     = os.path.join(PTS_HOME_DIR, 'blocks')
 elif OS_LINUX:
    OS_NAME         = 'Linux'
    OS_VARIANT      = platform.linux_distribution()
    USER_HOME_DIR   = os.getenv('HOME')
-   BTC_HOME_DIR    = os.path.join(USER_HOME_DIR, '.bitcoin', SUBDIR)
-   ARMORY_HOME_DIR = os.path.join(USER_HOME_DIR, '.armory', SUBDIR)
-   BLKFILE_DIR     = os.path.join(BTC_HOME_DIR, 'blocks')
+   PTS_HOME_DIR    = os.path.join(USER_HOME_DIR, '.protoshares', SUBDIR)
+   ARMORY_HOME_DIR = os.path.join(USER_HOME_DIR, '.ptsarmory', SUBDIR)
+   BLKFILE_DIR     = os.path.join(PTS_HOME_DIR, 'blocks')
 elif OS_MACOSX:
    platform.mac_ver()
    OS_NAME         = 'MacOSX'
    OS_VARIANT      = platform.mac_ver()
    USER_HOME_DIR   = os.path.expanduser('~/Library/Application Support')
-   BTC_HOME_DIR    = os.path.join(USER_HOME_DIR, 'Bitcoin', SUBDIR)
-   ARMORY_HOME_DIR = os.path.join(USER_HOME_DIR, 'Armory', SUBDIR)
-   BLKFILE_DIR     = os.path.join(BTC_HOME_DIR, 'blocks')
+   PTS_HOME_DIR    = os.path.join(USER_HOME_DIR, 'Protoshares', SUBDIR)
+   ARMORY_HOME_DIR = os.path.join(USER_HOME_DIR, 'PTSArmory', SUBDIR)
+   BLKFILE_DIR     = os.path.join(PTS_HOME_DIR, 'blocks')
 else:
    print '***Unknown operating system!'
    print '***Cannot determine default directory locations'
 
 
-# Allow user to override default bitcoin-qt/bitcoind home directory
+# Allow user to override default protoshares-qt/protosharesd home directory
 if not CLI_OPTIONS.satoshiHome.lower()=='default':
    success = True
    if USE_TESTNET:
@@ -229,7 +229,7 @@ if not CLI_OPTIONS.satoshiHome.lower()=='default':
       print 'Directory "%s" does not exist!  Using default!' % \
                                                 CLI_OPTIONS.satoshiHome
    else:
-      BTC_HOME_DIR = CLI_OPTIONS.satoshiHome
+      PTS_HOME_DIR = CLI_OPTIONS.satoshiHome
 
 
 
@@ -254,9 +254,9 @@ if not CLI_OPTIONS.leveldbDir.lower()=='default':
 
 
 # Change the settings file to use
-#BITCOIND_PATH = None
-#if not CLI_OPTIONS.bitcoindPath.lower()=='default':
-   #BITCOIND_PATH = CLI_OPTIONS.bitcoindPath
+#PROTOSHARESD_PATH = None
+#if not CLI_OPTIONS.protosharesdPath.lower()=='default':
+   #PROTOSHARESD_PATH = CLI_OPTIONS.protosharesdPath
 
 # Change the settings file to use
 if CLI_OPTIONS.settingsPath.lower()=='default':
@@ -287,12 +287,12 @@ if not os.path.exists(LEVELDB_DIR):
 if sys.argv[0]=='ArmoryQt.py':
    print '********************************************************************************'
    print 'Loading Armory Engine:'
-   print '   Armory Version:      ', getVersionString(BTCARMORY_VERSION)
-   print '   PyBtcWallet  Version:', getVersionString(PYBTCWALLET_VERSION)
+   print '   Armory Version:      ', getVersionString(PTSARMORY_VERSION)
+   print '   PyPtsWallet  Version:', getVersionString(PYPTSWALLET_VERSION)
    print 'Detected Operating system:', OS_NAME
    print '   OS Variant            :', OS_VARIANT
    print '   User home-directory   :', USER_HOME_DIR
-   print '   Satoshi BTC directory :', BTC_HOME_DIR
+   print '   Satoshi PTS directory :', PTS_HOME_DIR
    print '   Armory home dir       :', ARMORY_HOME_DIR
    print '   LevelDB directory     :', LEVELDB_DIR
    print '   Armory settings file  :', SETTINGS_PATH
@@ -326,7 +326,7 @@ class CompressedKeyError(Exception): pass
 class TooMuchPrecisionError(Exception): pass
 class NegativeValueError(Exception): pass
 class FiniteFieldError(Exception): pass
-class BitcoindError(Exception): pass
+class ProtosharesdError(Exception): pass
 class ShouldNotGetHereError(Exception): pass
 class BadInputError(Exception): pass
 
@@ -336,21 +336,21 @@ class BadInputError(Exception): pass
 ##### MAIN NETWORK IS DEFAULT #####
 if not USE_TESTNET:
    # TODO:  The testnet genesis tx hash can't be the same...?
-   BITCOIN_PORT = 8333
-   BITCOIN_RPC_PORT = 8332
-   ARMORY_RPC_PORT = 8225
-   MAGIC_BYTES = '\xf9\xbe\xb4\xd9'
-   GENESIS_BLOCK_HASH_HEX  = '6fe28c0ab6f1b372c1a6a246ae63f74f931e8365e15a089c68d6190000000000'
-   GENESIS_BLOCK_HASH      = 'o\xe2\x8c\n\xb6\xf1\xb3r\xc1\xa6\xa2F\xaec\xf7O\x93\x1e\x83e\xe1Z\x08\x9ch\xd6\x19\x00\x00\x00\x00\x00'
-   GENESIS_TX_HASH_HEX     = '3ba3edfd7a7b12b27ac72c3e67768f617fc81bc3888a51323a9fb8aa4b1e5e4a'
-   GENESIS_TX_HASH         = ';\xa3\xed\xfdz{\x12\xb2z\xc7,>gv\x8fa\x7f\xc8\x1b\xc3\x88\x8aQ2:\x9f\xb8\xaaK\x1e^J'
-   ADDRBYTE = '\x00'
+   PROTOSHARES_PORT = 3888
+   PROTOSHARES_RPC_PORT = 3838
+   ARMORY_RPC_PORT = 8226
+   MAGIC_BYTES = '\xf9\xbd\xb5\xd9'
+   GENESIS_BLOCK_HASH_HEX  = 'c0b8d737b4d1fd4fc69eb11ae02422eb905c33f3d5de2a6aa4757e7bd4dc0f00'
+   GENESIS_BLOCK_HASH      = '\xc0\xb8\xd7\x37\xb4\xd1\xfd\x4f\xc6\x9e\xb1\x1a\xe0\x24\x22\xeb\x90\x5c\x33\xf3\xd5\xde\x2a\x6a\xa4\x75\x7e\x7b\xd4\xdc\x0f\x00'
+   GENESIS_TX_HASH_HEX     = '6febf272d7d805900e38483d20c9cc0bd391000f9ade73a66e1d340616bea96f'
+   GENESIS_TX_HASH         = '\x6f\xeb\xf2\x72\xd7\xd8\x05\x90\x0e\x38\x48\x3d\x20\xc9\xcc\x0b\xd3\x91\x00\x0f\x9a\xde\x73\xa6\x6e\x1d\x34\x06\x16\xbe\xa9\x6f'
+   ADDRBYTE = '\x38'
    P2SHBYTE = '\x05'
-   PRIVKEYBYTE = '\x80'
+   PRIVKEYBYTE = '\xB8'
 else:
-   BITCOIN_PORT = 18333
-   BITCOIN_RPC_PORT = 18332
-   ARMORY_RPC_PORT     = 18225
+   PROTOSHARES_PORT = 13888
+   PROTOSHARES_RPC_PORT = 13838
+   ARMORY_RPC_PORT     = 18226
    MAGIC_BYTES  = '\x0b\x11\x09\x07'
    GENESIS_BLOCK_HASH_HEX  = '43497fd7f826957108f4a30fd9cec3aeba79972084e90ead01ea330900000000'
    GENESIS_BLOCK_HASH      = 'CI\x7f\xd7\xf8&\x95q\x08\xf4\xa3\x0f\xd9\xce\xc3\xae\xbay\x97 \x84\xe9\x0e\xad\x01\xea3\t\x00\x00\x00\x00'
@@ -362,9 +362,9 @@ else:
 
 if not CLI_OPTIONS.satoshiPort == 'DEFAULT':
    try:
-      BITCOIN_PORT = int(CLI_OPTIONS.satoshiPort)
+      PROTOSHARES_PORT = int(CLI_OPTIONS.satoshiPort)
    except:
-      raise TypeError, 'Invalid port for Bitcoin-Qt, using ' + str(BITCOIN_PORT)
+      raise TypeError, 'Invalid port for Protoshares-Qt, using ' + str(PROTOSHARES_PORT)
 
 
 if not CLI_OPTIONS.rpcport == 'DEFAULT':
@@ -380,7 +380,8 @@ BLOCKCHAINS['\xfa\xbf\xb5\xda'] = "Old Test Network"
 BLOCKCHAINS['\x0b\x11\x09\x07'] = "Test Network (testnet3)"
 
 NETWORKS = {}
-NETWORKS['\x00'] = "Main Network"
+NETWORKS['\x38'] = "PTS Network"
+NETWORKS['\x00'] = "Bitcoin Network"
 NETWORKS['\x6f'] = "Test Network"
 NETWORKS['\x34'] = "Namecoin Network"
 
@@ -810,12 +811,12 @@ LOGINFO('************************************************************')
 LOGINFO('Invoked: ' + ' '.join(argv))
 LOGINFO('************************************************************')
 LOGINFO('Loading Armory Engine:')
-LOGINFO('   Armory Version        : ' + getVersionString(BTCARMORY_VERSION))
-LOGINFO('   PyBtcWallet  Version  : ' + getVersionString(PYBTCWALLET_VERSION))
+LOGINFO('   Armory Version        : ' + getVersionString(PTSARMORY_VERSION))
+LOGINFO('   PyPtsWallet  Version  : ' + getVersionString(PYPTSWALLET_VERSION))
 LOGINFO('Detected Operating system: ' + OS_NAME)
 LOGINFO('   OS Variant            : ' + (str(OS_VARIANT) if OS_MACOSX else '-'.join(OS_VARIANT)))
 LOGINFO('   User home-directory   : ' + USER_HOME_DIR)
-LOGINFO('   Satoshi BTC directory : ' + BTC_HOME_DIR)
+LOGINFO('   Satoshi PTS directory : ' + PTS_HOME_DIR)
 LOGINFO('   Armory home dir       : ' + ARMORY_HOME_DIR)
 LOGINFO('Detected System Specs    : ')
 LOGINFO('   Total Available RAM   : %0.2f GB', SystemSpecs.Memory)
@@ -825,7 +826,7 @@ LOGINFO('   System is 64-bit      : ' + str(SystemSpecs.IsX64))
 LOGINFO('   Preferred Encoding    : ' + locale.getpreferredencoding())
 LOGINFO('')
 LOGINFO('Network Name: ' + NETWORKS[ADDRBYTE])
-LOGINFO('Satoshi Port: %d', BITCOIN_PORT)
+LOGINFO('Satoshi Port: %d', PROTOSHARES_PORT)
 LOGINFO('Named options/arguments to armoryengine.py:')
 for key,val in ast.literal_eval(str(CLI_OPTIONS)).iteritems():
    LOGINFO('    %-16s: %s', key,val)
@@ -850,7 +851,7 @@ def GetExecDir():
 
 def coin2str(nSatoshi, ndec=8, rJust=True, maxZeros=8):
    """
-   Converts a raw value (1e-8 BTC) into a formatted string for display
+   Converts a raw value (1e-8 PTS) into a formatted string for display
    
    ndec, guarantees that we get get a least N decimal places in our result
 
@@ -859,8 +860,8 @@ def coin2str(nSatoshi, ndec=8, rJust=True, maxZeros=8):
 
    """
 
-   nBtc = float(nSatoshi) / float(ONE_BTC)
-   s = ('%%0.%df' % ndec) % nBtc
+   nPts = float(nSatoshi) / float(ONE_PTS)
+   s = ('%%0.%df' % ndec) % nPts
    s = s.rjust(18, ' ')
 
    if maxZeros < ndec:
@@ -869,7 +870,7 @@ def coin2str(nSatoshi, ndec=8, rJust=True, maxZeros=8):
       if nChop>0:
          s  = s[:-nChop] + nChop*' '
 
-   if nSatoshi < 10000*ONE_BTC:
+   if nSatoshi < 10000*ONE_PTS:
       s.lstrip()
 
    if not rJust:
@@ -911,7 +912,7 @@ def str2coin(theStr, negAllowed=True, maxDec=8, roundHighPrec=True):
    if not '.' in coinStrPos:
       if not negAllowed and isNeg:
          raise NegativeValueError
-      return (int(coinStrPos)*ONE_BTC)*(-1 if isNeg else 1)
+      return (int(coinStrPos)*ONE_PTS)*(-1 if isNeg else 1)
    else:
       lhs,rhs = coinStrPos.strip().split('.')
       if len(lhs.strip('-'))==0:
@@ -938,12 +939,12 @@ BASE16CHARS  = '0123 4567 89ab cdef'.replace(' ','')
 LITTLEENDIAN  = '<';
 BIGENDIAN     = '>';
 NETWORKENDIAN = '!';
-ONE_BTC       = long(100000000)
+ONE_PTS       = long(100000000)
 CENT          = long(1000000)
 UNINITIALIZED = None
 UNKNOWN       = -2
-MIN_TX_FEE    = 10000
-MIN_RELAY_TX_FEE = 10000
+MIN_TX_FEE    = 100000
+MIN_RELAY_TX_FEE = 100000
 MT_WAIT_TIMEOUT_SEC = 20;
 
 UINT8_MAX  = 2**8-1
@@ -993,7 +994,7 @@ FORMAT_SYMBOLS = [ \
 # be valid entities for tracking in a wallet.  Until then, all of our python
 # utilities all use just hash160 values, and we manually add the prefix 
 # before talking to the BDM.
-HASH160PREFIX  = '\x00'
+HASH160PREFIX  = '\x38'
 P2SHPREFIX     = '\x05'
 MSIGPREFIX     = '\xfe'
 NONSTDPREFIX   = '\xff'
@@ -1093,7 +1094,7 @@ def getCurrTimeAndBlock():
 # Define all the hashing functions we're going to need.  We don't actually
 # use any of the first three directly (sha1, sha256, ripemd160), we only
 # use hash256 and hash160 which use the first three to create the ONLY hash
-# operations we ever do in the bitcoin network
+# operations we ever do in the protoshares network
 # UPDATE:  mini-private-key format requires vanilla sha256... 
 def sha1(bits):
    return hashlib.new('sha1', bits).digest()
@@ -1104,13 +1105,13 @@ def sha512(bits):
 def ripemd160(bits):
    # It turns out that not all python has ripemd160...?
    #return hashlib.new('ripemd160', bits).digest()
-   return Cpp.BtcUtils().ripemd160_SWIG(bits)
+   return Cpp.PtsUtils().ripemd160_SWIG(bits)
 def hash256(s):
    """ Double-SHA256 """
    return sha256(sha256(s))
 def hash160(s):
    """ RIPEMD160( SHA256( binaryStr ) ) """
-   return Cpp.BtcUtils().getHash160_SWIG(s)
+   return Cpp.PtsUtils().getHash160_SWIG(s)
 
 
 def HMAC(key, msg, hashfunc=sha512, hashsz=None):
@@ -1290,7 +1291,7 @@ EmptyHash = hex_to_binary('00'*32)
 # BINARY/BASE58 CONVERSIONS
 def binary_to_base58(binstr):
    """
-   This method applies the Bitcoin-specific conversion from binary to Base58
+   This method applies the Protoshares-specific conversion from binary to Base58
    which may includes some extra "zero" bytes, such as is the case with the
    main-network addresses.
 
@@ -1320,7 +1321,7 @@ def binary_to_base58(binstr):
 ################################################################################
 def base58_to_binary(addr):
    """
-   This method applies the Bitcoin-specific conversion from Base58 to binary
+   This method applies the Protoshares-specific conversion from Base58 to binary
    which may includes some extra "zero" bytes, such as is the case with the
    main-network addresses.
 
@@ -1357,7 +1358,7 @@ def base58_to_binary(addr):
 ################################################################################
 def hash160_to_addrStr(binStr, isP2SH=False):
    """
-   Converts the 20-byte pubKeyHash to 25-byte binary Bitcoin address
+   Converts the 20-byte pubKeyHash to 25-byte binary Protoshares address
    which includes the network byte (prefix) and 4-byte checksum (suffix)
    """
    addr21 = (P2SHBYTE if isP2SH else ADDRBYTE) + binStr
@@ -1428,14 +1429,14 @@ def readSixteenEasyBytes(et18):
    else:
       return (b16new,None)
 
-##### FLOAT/BTC #####
-# https://en.bitcoin.it/wiki/Proper_Money_Handling_(JSON-RPC)
-def ubtc_to_floatStr(n):
-   return '%d.%08d' % divmod (n, ONE_BTC)
-def floatStr_to_ubtc(s):
-   return long(round(float(s) * ONE_BTC))
-def float_to_btc (f):
-   return long (round(f * ONE_BTC))
+##### FLOAT/PTS #####
+# https://en.protoshares.it/wiki/Proper_Money_Handling_(JSON-RPC)
+def upts_to_floatStr(n):
+   return '%d.%08d' % divmod (n, ONE_PTS)
+def floatStr_to_upts(s):
+   return long(round(float(s) * ONE_PTS))
+def float_to_pts (f):
+   return long (round(f * ONE_PTS))
 
 
 
@@ -1541,8 +1542,8 @@ def verifyChecksum(binaryStr, chksum, hashFunc=hash256, fixIfNecessary=True, \
       -- 2+ bytes error:  return ''
 
    This method will check the CHECKSUM ITSELF for errors, but not correct them.
-   However, for PyBtcWallet serialization, if I determine that it is a chksum
-   error and simply return the original string, then PyBtcWallet will correct
+   However, for PyPtsWallet serialization, if I determine that it is a chksum
+   error and simply return the original string, then PyPtsWallet will correct
    the checksum in the file, next time it reserializes the data. 
    """
    bin1 = str(binaryStr)
@@ -1584,7 +1585,7 @@ def verifyChecksum(binaryStr, chksum, hashFunc=hash256, fixIfNecessary=True, \
    return ''
 
 
-# Taken directly from rpc.cpp in reference bitcoin client, 0.3.24
+# Taken directly from rpc.cpp in reference protoshares client, 0.3.24
 def binaryBits_to_difficulty(b):
    """ Converts the 4-byte binary difficulty string to a float """
    i = binary_to_int(b)
@@ -1815,7 +1816,7 @@ class BinaryPacker(object):
 
 ################################################################################
 
-# The following params are for the Bitcoin elliptic curves (secp256k1)
+# The following params are for the Protoshares elliptic curves (secp256k1)
 SECP256K1_MOD   = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2FL
 SECP256K1_ORDER = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141L
 SECP256K1_B     = 0x0000000000000000000000000000000000000000000000000000000000000007L
@@ -2141,16 +2142,16 @@ def checkAddrType(addrBin):
    else:
       return -1
 
-# Check validity of a BTC address in its binary form, as would
+# Check validity of a PTS address in its binary form, as would
 # be found inside a pkScript.  Usually about 24 bytes
 def checkAddrBinValid(addrBin, netbyte=ADDRBYTE):
    """
    Checks whether this address is valid for the given network
-   (set at the top of pybtcengine.py)
+   (set at the top of pyptsengine.py)
    """
    return checkAddrType(addrBin) == netbyte
 
-# Check validity of a BTC address in Base58 form
+# Check validity of a PTS address in Base58 form
 def checkAddrStrValid(addrStr):
    """ Check that a Base58 address-string is valid on this network """
    return checkAddrBinValid(base58_to_binary(addrStr))
@@ -2170,7 +2171,7 @@ def convertKeyDataToAddress(privKey=None, pubKey=None):
 
    if isinstance(pubKey,str):
       pubKey = SecureBinaryData(pubKey)
-   return pubKey.getHash160()
+   return CryptoECDSA().CompressPoint(pubKey).getHash160()
 
 
 
@@ -2264,7 +2265,7 @@ def encodePrivKeyBase58(privKeyBin, leadByte=PRIVKEYBYTE):
 URI_VERSION_STR = '1.0'
 
 ################################################################################
-def parseBitcoinURI(theStr):
+def parseProtosharesURI(theStr):
    """ Takes a URI string, returns the pieces of it, in a dictionary """
 
    # Start by splitting it into pieces on any separator
@@ -2274,7 +2275,7 @@ def parseBitcoinURI(theStr):
    parts = theStr.split()
 
    # Now start walking through the parts and get the info out of it
-   if not parts[0] == 'bitcoin':
+   if not parts[0] == 'protoshares':
       return {}
 
    uriData = {}
@@ -2329,8 +2330,8 @@ def uriPercentToReserved(theStr):
    
 
 ################################################################################
-def createBitcoinURI(addr, amt=None, msg=None):
-   uriStr = 'bitcoin:%s' % addr 
+def createProtosharesURI(addr, amt=None, msg=None):
+   uriStr = 'protoshares:%s' % addr 
    if amt or msg:
       uriStr += '?'
    
@@ -2364,9 +2365,9 @@ def createSigScript(rBin, sBin):
    return sigScript
 
 ################################################################################
-class PyBtcAddress(object):
+class PyPtsAddress(object):
    """
-   PyBtcAddress --
+   PyPtsAddress --
 
    This class encapsulated EVERY kind of address object:
       -- Plaintext private-key-bearing addresses
@@ -2476,7 +2477,7 @@ class PyBtcAddress(object):
    #############################################################################
    def getAddr160(self):
       if len(self.addrStr20)!=20:
-         raise KeyDataError, 'PyBtcAddress does not have an address string!'
+         raise KeyDataError, 'PyPtsAddress does not have an address string!'
       return self.addrStr20
 
 
@@ -2522,7 +2523,7 @@ class PyBtcAddress(object):
 
    #############################################################################
    def copy(self):
-      newAddr = PyBtcAddress().unserialize(self.serialize())
+      newAddr = PyPtsAddress().unserialize(self.serialize())
       newAddr.binPrivKey32_Plain = self.binPrivKey32_Plain.copy()
       newAddr.binPrivKey32_Encr  = self.binPrivKey32_Encr.copy()
       newAddr.binPublicKey65     = self.binPublicKey65.copy()
@@ -2593,7 +2594,7 @@ class PyBtcAddress(object):
             verified = (self.binPublicKey65==computedPubKey)
          else:
             self.binPublicKey65 = computedPubKey
-            verified = (computedPubKey.getHash160()==self.addrStr20)
+            verified = (CryptoECDSA().CompressPoint(computedPubKey).getHash160()==self.addrStr20)
 
       decryptedKey.destroy()
       return verified
@@ -2668,7 +2669,7 @@ class PyBtcAddress(object):
          raise ChecksumError, "Checksum doesn't match encrypted priv key data!"
       if pubKey:
          self.binPublicKey65 = SecureBinaryData(pubKey)
-         if not self.binPublicKey65.getHash160()==self.addrStr20:
+         if not CryptoECDSA().CompressPoint(self.binPublicKey65).getHash160()==self.addrStr20:
             raise KeyDataError, "Public key does not match supplied address"
 
       return self
@@ -2700,7 +2701,7 @@ class PyBtcAddress(object):
          raise ChecksumError, "Checksum doesn't match plaintext priv key!"
       if publicKey65:
          self.binPublicKey65 = SecureBinaryData(publicKey65)
-         if not self.binPublicKey65.getHash160()==self.addrStr20:
+         if not CryptoECDSA().CompressPoint(self.binPublicKey65).getHash160()==self.addrStr20:
             raise KeyDataError, "Public key does not match supplied address"
          if not skipCheck:
             if not CryptoECDSA().CheckPubPrivKeyMatch(self.binPrivKey32_Plain,\
@@ -2715,9 +2716,9 @@ class PyBtcAddress(object):
    #############################################################################
    def createFromPublicKeyData(self, publicKey65, chksum=None):
 
-      assert(publicKey65.getSize()==65)
+      assert(publicKey65.getSize()==65 or publicKey65.getSize()==33)
       self.__init__()
-      self.addrStr20 = publicKey65.getHash160()
+      self.addrStr20 = CryptoECDSA().CompressPoint(publicKey65).getHash160()
       self.binPublicKey65 = publicKey65
       self.isInitialized = True
       self.isLocked = False
@@ -3007,7 +3008,7 @@ class PyBtcAddress(object):
       if not self.chaincode.getSize() == 32:
          raise KeyDataError, 'No chaincode has been defined to extend chain'
 
-      newAddr = PyBtcAddress()
+      newAddr = PyPtsAddress()
       privKeyAvailButNotDecryptable = (self.hasPrivKey() and \
                                        self.isLocked     and \
                                        not secureKdfOutput  )
@@ -3033,11 +3034,11 @@ class PyBtcAddress(object):
                                     self.binPrivKey32_Plain, \
                                     self.chaincode)
          newPub  = CryptoECDSA().ComputePublicKey(newPriv)
-         newAddr160 = newPub.getHash160()
+         newAddr160 = CryptoECDSA().CompressPoint(newPub).getHash160()
          newAddr.createFromPlainKeyData(newPriv, newAddr160, \
                                        IV16=newIV, publicKey65=newPub)
 
-         newAddr.addrStr20 = newPub.getHash160()
+         newAddr.addrStr20 = CryptoECDSA().CompressPoint(newPub).getHash160()
          newAddr.useEncryption = self.useEncryption
          newAddr.isInitialized = True
          newAddr.chaincode     = self.chaincode
@@ -3057,7 +3058,7 @@ class PyBtcAddress(object):
             raise KeyDataError, 'No public key available to extend chain'
          newAddr.binPublicKey65 = CryptoECDSA().ComputeChainedPublicKey( \
                                     self.binPublicKey65, self.chaincode)
-         newAddr.addrStr20 = newAddr.binPublicKey65.getHash160()
+         newAddr.addrStr20 = CryptoECDSA().CompressPoint(newAddr.binPublicKey65).getHash160()
          newAddr.useEncryption = self.useEncryption
          newAddr.isInitialized = True
          newAddr.chaincode  = self.chaincode
@@ -3115,7 +3116,7 @@ class PyBtcAddress(object):
          PrivKey     (32 bytes) :  Private key data (may be encrypted)
          PrivKeyChk  ( 4 bytes) :  Checksum for private key data
 
-         PublicKey   (65 bytes) :  Public key for this address
+         PublicKey   (33 bytes) :  Public key for this address
          PubKeyChk   ( 4 bytes) :  Checksum for private key data
 
 
@@ -3168,7 +3169,7 @@ class PyBtcAddress(object):
       binOut = BinaryPacker()
       binOut.put(BINARY_CHUNK,   self.addrStr20,                    width=20)
       binOut.put(BINARY_CHUNK,   chk(self.addrStr20),               width= 4)
-      binOut.put(UINT32,         getVersionInt(PYBTCWALLET_VERSION))
+      binOut.put(UINT32,         getVersionInt(PYPTSWALLET_VERSION))
       binOut.put(UINT64,         bitset_to_int(flags))
 
       # Write out address-chaining parameters (for deterministic wallets)
@@ -3196,7 +3197,7 @@ class PyBtcAddress(object):
          binOut.put(BINARY_CHUNK,   raw(self.binPrivKey32_Plain),   width=32)
          binOut.put(BINARY_CHUNK,   chk(self.binPrivKey32_Plain),   width= 4)
 
-      binOut.put(BINARY_CHUNK, raw(self.binPublicKey65),            width=65)
+      binOut.put(BINARY_CHUNK, raw(CryptoECDSA().CompressPoint(self.binPublicKey65)), width=33)
       binOut.put(BINARY_CHUNK, chk(self.binPublicKey65),            width= 4)
 
       binOut.put(UINT64, self.timeRange[0])
@@ -3222,7 +3223,7 @@ class PyBtcAddress(object):
       register the address and rescan asynchronously, skipping this method
       entirely:
 
-         cppWlt = Cpp.BtcWallet()
+         cppWlt = Cpp.PtsWallet()
          cppWlt.addScrAddress_1_(Hash160ToScrAddr(self.getAddr160()))
          TheBDM.registerScrAddr(Hash160ToScrAddr(self.getAddr160()))
          TheBDM.rescanBlockchain(wait=False)
@@ -3239,11 +3240,11 @@ class PyBtcAddress(object):
       """
       if TheBDM.getBDMState()=='BlockchainReady' or \
                             (TheBDM.isScanning() and not abortIfBDMBusy):
-         LOGDEBUG('Scanning blockchain for address')
+         LOGINFO('Scanning blockchain for address')
 
          # We are expecting this method to return balance
          # and UTXO data, so we must make sure we're blocking.
-         cppWlt = Cpp.BtcWallet()
+         cppWlt = Cpp.PtsWallet()
          cppWlt.addScrAddress_1_(Hash160ToScrAddr(self.getAddr160()))
          TheBDM.registerWallet(cppWlt, wait=True)
          TheBDM.scanBlockchainForTx(cppWlt, wait=True)
@@ -3346,12 +3347,12 @@ class PyBtcAddress(object):
             self.binInitVect16      = iv.copy()
             self.binPrivKey32_Plain = privKey.copy()
 
-      pubKey = chkzero(serializedData.get(BINARY_CHUNK, 65))
+      pubKey = chkzero(serializedData.get(BINARY_CHUNK, 33))
       chkPub =         serializedData.get(BINARY_CHUNK, 4)
       pubKey = SecureBinaryData(verifyChecksum(pubKey, chkPub))
 
       if containsPubKey:
-         if not pubKey.getSize()==65:
+         if not pubKey.getSize()==33:
             if self.binPrivKey32_Plain.getSize()==32:
                pubKey = CryptoAES().ComputePublicKey(self.binPrivKey32_Plain)
             else:
@@ -3399,7 +3400,7 @@ class PyBtcAddress(object):
                                              self.binPrivKey32_Plain, \
                                              self.binPublicKey65))
 
-      self.addrStr20 = self.binPublicKey65.getHash160()
+      self.addrStr20 = CryptoECDSA().CompressPoint(self.binPublicKey65).getHash160()
 
       self.isInitialized = True
       return self
@@ -3419,10 +3420,14 @@ class PyBtcAddress(object):
          # We are given public-key (x,y) pair
          binXBE = int_to_binary(pubkey[0], widthBytes=32, endOut=BIGENDIAN)
          binYBE = int_to_binary(pubkey[1], widthBytes=32, endOut=BIGENDIAN)
-         self.binPublicKey65 = SecureBinaryData('\x04' + binXBE + binYBE)
+         self.binPublicKey65 = CryptoECDSA().CompressPoint(SecureBinaryData('\x04' + binXBE + binYBE))
          if not CryptoECDSA().VerifyPublicKeyValid(self.binPublicKey65):
             raise KeyDataError, 'Supplied public key is not on secp256k1 curve'
       elif isinstance(pubkey, str) and len(pubkey)==65:
+         self.binPublicKey65 = CryptoECDSA().CompressPoint(SecureBinaryData(pubkey))
+         if not CryptoECDSA().VerifyPublicKeyValid(self.binPublicKey65):
+            raise KeyDataError, 'Supplied public key is not on secp256k1 curve'
+      elif isinstance(pubkey, str) and len(pubkey)==33:
          self.binPublicKey65 = SecureBinaryData(pubkey)
          if not CryptoECDSA().VerifyPublicKeyValid(self.binPublicKey65):
             raise KeyDataError, 'Supplied public key is not on secp256k1 curve'
@@ -3475,7 +3480,7 @@ class PyBtcAddress(object):
       """
       if not self.hasPubKey():
          raise KeyDataError, 'Cannot compute address without PublicKey'
-      keyHash = self.binPublicKey65.getHash160()
+      keyHash = CryptoECDSA().CompressPoint(self.binPublicKey65).getHash160()
       chksum  = hash256(netbyte + keyHash)[:4]
       return  binary_to_base58(netbyte + keyHash + chksum)
 
@@ -3491,7 +3496,7 @@ class PyBtcAddress(object):
             return '--'*32
          else:
             return x.toHexStr()[:nchar]
-      print indent + 'BTC Address      :', self.getAddrStr()
+      print indent + 'PTS Address      :', self.getAddrStr()
       print indent + 'Hash160[BE]      :', binary_to_hex(self.getAddr160())
       print indent + 'Wallet Location  :', self.walletByteLoc
       print indent + 'Chained Address  :', self.chainIndex >= -1
@@ -3502,10 +3507,8 @@ class PyBtcAddress(object):
       print indent + 'First/Last Block : (%s,%s)' % \
                      (str(self.blkRange[0]), str(self.blkRange[1]))
       if self.hasPubKey():
-         print indent + 'PubKeyX(BE)      :', \
-                        binary_to_hex(self.binPublicKey65.toBinStr()[1:33 ])
-         print indent + 'PubKeyY(BE)      :', \
-                        binary_to_hex(self.binPublicKey65.toBinStr()[  33:])
+         print indent + 'PubKey           :', \
+                        binary_to_hex(self.binPublicKey65.toBinStr())
       print indent + 'Encryption parameters:'
       print indent + '   UseEncryption :', self.useEncryption
       print indent + '   IsLocked      :', self.isLocked
@@ -3526,7 +3529,7 @@ class PyBtcAddress(object):
 #############################################################################
 def calcWalletIDFromRoot(root, chain):
    """ Helper method for computing a wallet ID """
-   root  = PyBtcAddress().createFromPlainKeyData(SecureBinaryData(root))
+   root  = PyPtsAddress().createFromPlainKeyData(SecureBinaryData(root))
    root.chaincode = SecureBinaryData(chain)
    first = root.extendAddressChain()
    return binary_to_base58((ADDRBYTE + first.getAddr160()[:5])[::-1])
@@ -3833,6 +3836,7 @@ TXIN_SCRIPT_COINBASE = 1
 TXIN_SCRIPT_SPENDCB  = 2
 TXIN_SCRIPT_UNSIGNED = 3
 TXIN_SCRIPT_UNKNOWN  = 4
+TXIN_SCRIPT_STDCOMPR = 5
 
 TXOUT_SCRIPT_STANDARD = 0
 TXOUT_SCRIPT_COINBASE = 1
@@ -3857,7 +3861,8 @@ TXIN_TYPE_NAMES = {  TXIN_SCRIPT_STANDARD:  'Standard', \
                      TXIN_SCRIPT_COINBASE:  'Coinbase', \
                      TXIN_SCRIPT_SPENDCB:   'Spend-CB', \
                      TXIN_SCRIPT_UNSIGNED:  'Unsigned', \
-                     TXIN_SCRIPT_UNKNOWN:   '<Unrecognized>'}
+                     TXIN_SCRIPT_UNKNOWN:   '<Unrecognized>', \
+                     TXIN_SCRIPT_STDCOMPR:  'Standard' }
 
 ################################################################################
 def getTxOutMultiSigInfo(binScript):
@@ -3905,6 +3910,10 @@ def getTxOutMultiSigInfo(binScript):
          addr160List.append(convertKeyDataToAddress(pubKey=binChunk))
          pub65List.append(binChunk)
          opcodes.append('<PubKey65>')
+      elif len(binChunk) == 33:
+         addr160List.append(convertKeyDataToAddress(pubKey=binChunk))
+         pub65List.append(binChunk)
+         opcodes.append('<PubKey65>')
 
 
    mstype = MULTISIG_UNKNOWN
@@ -3945,6 +3954,11 @@ def getTxOutMultiSigInfo(binScript):
 def getTxOutScriptType(binScript):
    if binScript[:2] == hex_to_binary('4104'):
       is65B = len(binScript) == 67
+      lastByteMatch = binScript[-1] == getOpCode('OP_CHECKSIG')
+      if (is65B and lastByteMatch):
+         return TXOUT_SCRIPT_COINBASE
+   elif binScript[:2] == hex_to_binary('2103') or binScript[:2] == hex_to_binary('2102'):
+      is65B = len(binScript) == 35
       lastByteMatch = binScript[-1] == getOpCode('OP_CHECKSIG')
       if (is65B and lastByteMatch):
          return TXOUT_SCRIPT_COINBASE
@@ -4006,6 +4020,8 @@ def getTxInScriptType(txinObj):
       return TXIN_SCRIPT_SPENDCB
    elif len(binScript)==(SigSize + PubkeySize + 1):
       return TXIN_SCRIPT_STANDARD
+   elif len(binScript)==(SigSize + 34 + 1): # 33byte pubkey
+      return TXIN_SCRIPT_STDCOMPR
 
    return TXIN_SCRIPT_UNKNOWN
 
@@ -4015,7 +4031,11 @@ def TxInScriptExtractKeyAddr(txinObj):
    scrType = getTxInScriptType(txinObj)
    if scrType == TXIN_SCRIPT_STANDARD:
       pubKeyBin = txinObj.binScript[-65:]
-      newAddr = PyBtcAddress().createFromPublicKey(pubKeyBin)
+      newAddr = PyPtsAddress().createFromPublicKey(pubKeyBin)
+      return (newAddr.calculateAddrStr(), newAddr.binPublicKey65.toBinStr()) # LITTLE_ENDIAN
+   elif scrType == TXIN_SCRIPT_STDCOMPR:
+      pubKeyBin = txinObj.binScript[-33:]
+      newAddr = PyPtsAddress().createFromPublicKey(pubKeyBin)
       return (newAddr.calculateAddrStr(), newAddr.binPublicKey65.toBinStr()) # LITTLE_ENDIAN
    elif scrType == TXIN_SCRIPT_COINBASE:
       return ('[COINBASE-NO-ADDR: %s]'%binary_to_hex(txinObj.binScript), '[COINBASE-NO-PUBKEY]')
@@ -4029,7 +4049,10 @@ def TxInScriptExtractKeyAddr(txinObj):
 ################################################################################
 def TxInScriptExtractAddr160IfAvail(txinObj):
    if getTxInScriptType(txinObj) == TXIN_SCRIPT_STANDARD:
-      pubKeyBin = txinObj.binScript[-65:]
+      pubKeyBin = CryptoECDSA().CompressPoint(txinObj.binScript[-65:])
+      return hash160(pubKeyBin)
+   elif getTxInScriptType(txinObj) == TXIN_SCRIPT_STDCOMPR:
+      pubKeyBin = txinObj.binScript[-33:]
       return hash160(pubKeyBin)
    else:
       return ''
@@ -4065,7 +4088,7 @@ class PyOutPoint(object):
 
    def serialize(self):
       binOut = BinaryPacker()
-      binOut.put(BINARY_CHUNK, self.txHash)
+      binOut.put(BINARY_CHUNK, self.txHash) # hash can be empty -> error on unserialize
       binOut.put(UINT32, self.txOutIndex)
       return binOut.getBinaryString()
 
@@ -4118,6 +4141,7 @@ class PyTxIn(object):
 
    def serialize(self):
       binOut = BinaryPacker()
+      if self.outpoint == UNINITIALIZED: raise Ini2tError     
       binOut.put(BINARY_CHUNK, self.outpoint.serialize() )
       binOut.put(VAR_INT, len(self.binScript))
       binOut.put(BINARY_CHUNK, self.binScript)
@@ -4215,7 +4239,7 @@ class PyTxOut(object):
    def pprint(self, nIndent=0, endian=BIGENDIAN):
       indstr = indent*nIndent
       print indstr + 'TxOut:'
-      print indstr + indent + 'Value:   ', self.value, '(', float(self.value) / ONE_BTC, ')'
+      print indstr + indent + 'Value:   ', self.value, '(', float(self.value) / ONE_PTS, ')'
       txoutType = getTxOutScriptType(self.binScript)
       if txoutType == TXOUT_SCRIPT_COINBASE:
          print indstr + indent + 'Script:   PubKey(%s) OP_CHECKSIG' % \
@@ -4401,6 +4425,8 @@ class PyBlockHeader(object):
       self.timestamp    = UNINITIALIZED
       self.diffBits     = UNINITIALIZED
       self.nonce        = UNINITIALIZED
+      self.birthdayA    = UNINITIALIZED
+      self.birthdayB    = UNINITIALIZED
       # Use these fields for storage of block information, but are not otherwise
       # part of the serialized data structure
       self.theHash      = ''
@@ -4423,6 +4449,8 @@ class PyBlockHeader(object):
       binOut.put(UINT32, self.timestamp)
       binOut.put(BINARY_CHUNK, self.diffBits)
       binOut.put(UINT32, self.nonce)
+      binOut.put(UINT32, self.birthdayA)
+      binOut.put(UINT32, self.birthdayB)
       return binOut.getBinaryString()
 
 
@@ -4438,6 +4466,8 @@ class PyBlockHeader(object):
       self.timestamp   = blkData.get(UINT32)
       self.diffBits    = blkData.get(BINARY_CHUNK, 4)
       self.nonce       = blkData.get(UINT32)
+      self.birthdayA   = blkData.get(UINT32)
+      self.birthdayB   = blkData.get(UINT32)
       self.theHash     = hash256(self.serialize())
       return self
 
@@ -4842,7 +4872,7 @@ class PyScriptProcessor(object):
       # Execute TxIn script first
       self.stack = []
       exitCode1 = self.executeScript(self.script1, self.stack)
-
+      
       if not exitCode1 == SCRIPT_NO_ERROR:
          raise VerifyScriptError, ('First script failed!  Exit Code: ' + str(exitCode1))
 
@@ -4895,7 +4925,7 @@ class PyScriptProcessor(object):
 
    def checkSig(self,binSig, binPubKey, txOutScript, txInTx, txInIndex, lastOpCodeSep=None):
       """
-      Generic method for checking Bitcoin tx signatures.  This needs to be used for both
+      Generic method for checking Protoshares tx signatures.  This needs to be used for both
       OP_CHECKSIG and OP_CHECKMULTISIG.  Step 1 is to pop signature and public key off
       the stack, which must be done outside this method and passed in through the argument
       list.  The remaining steps do not require access to the stack.
@@ -4933,7 +4963,7 @@ class PyScriptProcessor(object):
       txCopy.inputs[txInIndex].binScript = subscript
 
       # 9. Prepare the signature and public key
-      senderAddr = PyBtcAddress().createFromPublicKey(binPubKey)
+      senderAddr = PyPtsAddress().createFromPublicKey(binPubKey)
       binHashCode = int_to_binary(hashtype, widthBytes=4)
       toHash = txCopy.serialize() + binHashCode
 
@@ -5275,7 +5305,7 @@ class PyScriptProcessor(object):
 
       elif opcode == OP_CHECKMULTISIG or opcode == OP_CHECKMULTISIGVERIFY:
          # OP_CHECKMULTISIG procedure ported directly from Satoshi client code
-         # Location:  bitcoin-0.4.0-linux/src/src/script.cpp:775
+         # Location:  protoshares-0.4.0-linux/src/src/script.cpp:775
          i=1
          if len(stack) < i:
             return TX_INVALID
@@ -5370,7 +5400,7 @@ def getUnspentTxOutsForAddr160List(addr160List, utxoType='Sweep', startBlk=-1, \
       to register the address and rescan asynchronously, skipping this method
       entirely:
 
-         cppWlt = Cpp.BtcWallet()
+         cppWlt = Cpp.PtsWallet()
          cppWlt.addScrAddress_1_(Hash160ToScrAddr(self.getAddr160()))
          TheBDM.registerScrAddr(Hash160ToScrAddr(self.getAddr160()))
          TheBDM.rescanBlockchain(wait=False)
@@ -5389,9 +5419,9 @@ def getUnspentTxOutsForAddr160List(addr160List, utxoType='Sweep', startBlk=-1, \
       if not isinstance(addr160List, (list,tuple)):
          addr160List = [addr160List]
    
-      cppWlt = Cpp.BtcWallet()
+      cppWlt = Cpp.PtsWallet()
       for addr in addr160List:
-         if isinstance(addr, PyBtcAddress):
+         if isinstance(addr, PyPtsAddress):
             cppWlt.addScrAddress_1_(Hash160ToScrAddr(addr.getAddr160()))
          else:
             cppWlt.addScrAddress_1_(Hash160ToScrAddr(addr))
@@ -5415,23 +5445,23 @@ def getUnspentTxOutsForAddr160List(addr160List, utxoType='Sweep', startBlk=-1, \
 ################################################################################
 # NOTE:  This method was actually used to create the Blockchain-reorg unit-
 #        test, and hence why coinbase transactions are supported.  However,
-#        for normal transactions supported by PyBtcEngine, this support is
+#        for normal transactions supported by PyPtsEngine, this support is
 #        unnecessary.
 #
 #        Additionally, this method both creates and signs the tx:  however
-#        PyBtcEngine employs TxDistProposals which require the construction
+#        PyPtsEngine employs TxDistProposals which require the construction
 #        and signing to be two separate steps.  This method is not suited
 #        for most of the armoryengine CONOPS.
 #
 #        On the other hand, this method DOES work, and there is no reason
-#        not to use it if you already have PyBtcAddress-w-PrivKeys avail
+#        not to use it if you already have PyPtsAddress-w-PrivKeys avail
 #        and have a list of inputs and outputs as described below.
 #
 # This method will take an already-selected set of TxOuts, along with
-# PyBtcAddress objects containing necessary the private keys
+# PyPtsAddress objects containing necessary the private keys
 #
-#    Src TxOut ~ {PyBtcAddr, PrevTx, PrevTxOutIdx}  --OR--  COINBASE = -1
-#    Dst TxOut ~ {PyBtcAddr, value}
+#    Src TxOut ~ {PyPtsAddr, PrevTx, PrevTxOutIdx}  --OR--  COINBASE = -1
+#    Dst TxOut ~ {PyPtsAddr, value}
 #
 # Of course, we usually don't have the private keys of the dst addrs...
 #
@@ -5458,8 +5488,12 @@ def PyCreateAndSignTx(srcTxOuts, dstAddrsVals):
       txout.value = dstAddrsVals[i][1]
       dstAddr     = dstAddrsVals[i][0]
       if(coinbaseTx):
-         txout.binScript = ''.join([  '\x41',                      \
-                                      dstAddr.binPublicKey65.toBinStr(),  \
+         pubKeyBin = dstAddr.binPublicKey65.toBinStr();
+         if pubKeyBin[0] == 0x04:
+         	pubKeyBin = CryptoECDSA().CompressPoint(dstAddr.binPublicKey65).toBinStr();
+         
+         txout.binScript = ''.join([  '\x21',                      \
+                                      pubKeyBin,  \
                                       getOpCode('OP_CHECKSIG'   )])
       else:
          txout.binScript = ''.join([  getOpCode('OP_DUP'        ), \
@@ -5526,7 +5560,7 @@ def PyCreateAndSignTx(srcTxOuts, dstAddrsVals):
             sigLenInBinary = int_to_binary(len(signature) + 1)
             newTx.inputs[i].binScript = sigLenInBinary + signature + hashCode1
          else:
-            pubkey = srcAddr.binPublicKey65.toBinStr()
+            pubkey = CryptoECDSA().CompressPoint(srcAddr.binPublicKey65).toBinStr()
             sigLenInBinary    = int_to_binary(len(signature) + 1)
             pubkeyLenInBinary = int_to_binary(len(pubkey)   )
             newTx.inputs[i].binScript = sigLenInBinary    + signature + hashCode1 + \
@@ -5559,7 +5593,7 @@ def PyCreateAndSignTx(srcTxOuts, dstAddrsVals):
 #     - Priority:          Low-priority transactions might require higher
 #                          fees and/or take longer to make it into the
 #                          blockchain.  Priority is the sum of TxOut
-#                          priorities:  (NumConfirm * NumBTC / SizeKB)
+#                          priorities:  (NumConfirm * NumPTS / SizeKB)
 #                          We especially want to avoid 0-confirmation txs
 #
 #     - Output values:     In almost every transaction, we must return
@@ -5605,7 +5639,7 @@ class PyUnspentTxOut(object):
    def __init__(self, scrAddr='', val=-1, numConf=-1):
       pass
       #self.scrAddr = scrAddr
-      #self.val  = long(val*ONE_BTC)
+      #self.val  = long(val*ONE_PTS)
       #self.conf = numConf
    def createFromCppUtxo(self, cppUtxo):
       self.scrAddr = cppUtxo.getRecipientScrAddr()
@@ -5648,7 +5682,7 @@ def sumTxOutList(txoutList):
 # This is really just for viewing a TxOut list -- usually for debugging
 def pprintUnspentTxOutList(utxoList, headerLine='Coin Selection: '):
    totalSum = sum([u.getValue() for u in utxoList])
-   print headerLine, '(Total = %s BTC)' % coin2str(totalSum)
+   print headerLine, '(Total = %s PTS)' % coin2str(totalSum)
    print '   ','Owner Address'.ljust(34),
    print '   ','TxOutValue'.rjust(18),
    print '   ','NumConf'.rjust(8),
@@ -5656,9 +5690,9 @@ def pprintUnspentTxOutList(utxoList, headerLine='Coin Selection: '):
    for utxo in utxoList:
       a160 = CheckHash160(utxo.getRecipientScrAddr())
       print '   ',hash160_to_addrStr(a160).ljust(34),
-      print '   ',(coin2str(utxo.getValue()) + ' BTC').rjust(18),
+      print '   ',(coin2str(utxo.getValue()) + ' PTS').rjust(18),
       print '   ',str(utxo.getNumConfirm()).rjust(8),
-      print '   ', ('%0.2f' % (utxo.getValue()*utxo.getNumConfirm()/(ONE_BTC*144.))).rjust(16)
+      print '   ', ('%0.2f' % (utxo.getValue()*utxo.getNumConfirm()/(ONE_PTS*144.))).rjust(16)
 
 
 ################################################################################
@@ -5931,9 +5965,9 @@ def getSelectCoinsScores(utxoSelectList, targetOutVal, minFee):
    # If the diff is negative, the wrong answer starts to look like the
    # correct one (about which output is recipient and which is change)
    # We should give "extra credit" for those cases
-   def countTrailingZeros(btcVal):
+   def countTrailingZeros(ptsVal):
       for i in range(1,20):
-         if btcVal % 10**i != 0:
+         if ptsVal % 10**i != 0:
             return i-1
       return 0  # not sure how we'd get here, but let's be safe
    tgtTrailingZeros =  countTrailingZeros(targetOutVal)
@@ -5989,7 +6023,7 @@ def getSelectCoinsScores(utxoSelectList, targetOutVal, minFee):
 
 
    ##################
-   # Priority:  If our priority is above the 1-btc-after-1-day threshold
+   # Priority:  If our priority is above the 1-pts-after-1-day threshold
    #            then we might be allowed a free tx.  But, if its priority
    #            isn't much above this thresh, it might take a couple blocks
    #            to be included
@@ -6002,7 +6036,7 @@ def getSelectCoinsScores(utxoSelectList, targetOutVal, minFee):
          dPriority += utxo.getValue() * utxo.getNumConfirm()
 
    dPriority = dPriority / numBytes
-   priorityThresh = ONE_BTC * 144 / 250
+   priorityThresh = ONE_PTS * 144 / 250
    if dPriority < priorityThresh:
       priorityFactor = 0
    elif dPriority < 10.0*priorityThresh:
@@ -6197,7 +6231,7 @@ def PySelectCoins(unspentTxOutInfo, targetOutVal, minFee=0, numRand=10, margin=C
             continue
 
          # Don't consider any inputs that are high priority already
-         if getPriority(other) > ONE_BTC*144:
+         if getPriority(other) > ONE_PTS*144:
             continue
 
          finalSelection.append(other) 
@@ -6250,7 +6284,7 @@ def calcMinSuggestedFees(selectCoinsResult, targetOutVal, preSelectedFee):
    haveDustOutputs = (0<change<CENT or targetOutVal<CENT)
 
    if((not haveDustOutputs) and \
-      prioritySum >= ONE_BTC * 144 / 250. and \
+      prioritySum >= ONE_PTS * 144 / 250. and \
       numBytes < 10000):
       return [0,0]
 
@@ -6281,7 +6315,7 @@ class PyTxDistProposal(object):
    an unsigned transaction, that may require the signatures of
    multiple parties before being accepted by the network.
 
-   This technique (https://en.bitcoin.it/wiki/BIP_0010) is that 
+   This technique (https://en.protoshares.it/wiki/BIP_0010) is that 
    once TxDP is created, the system signing it only needs the 
    ECDSA private keys and nothing else.   This enables the device
    providing the signatures to be extremely lightweight, since it
@@ -6457,7 +6491,7 @@ class PyTxDistProposal(object):
          txout.value = long(value)
 
          # Assume recipObj is either a PBA or a string
-         if isinstance(recipObj, PyBtcAddress):
+         if isinstance(recipObj, PyPtsAddress):
             recipObj = recipObj.getAddr160()
 
          # Now recipObj is def a string
@@ -6552,10 +6586,9 @@ class PyTxDistProposal(object):
    
             # Now check all public keys in the multi-sig TxOut script
             for i,pubkey in enumerate(self.inPubKeyLists):
-               tempAddr = PyBtcAddress().createFromPublicKeyData(pubkey)
+               tempAddr = PyPtsAddress().createFromPublicKeyData(pubkey)
                if tempAddr.verifyDERSignature(preHashMsg, sigStr):
-                  return txInIdx, i, hash160(pubkey)
-         
+                  return txInIdx, i, hash160(CryptoECDSA().CompressPoint(pubkey))
 
       if checkAllInputs:
          for i in range(len(self.pytxObj.inputs)):
@@ -6643,6 +6676,7 @@ class PyTxDistProposal(object):
                   sortedSigs[pos] = sig
             finalTx.inputs[i].binScript = getOpCode('OP_0') + ''.join(sortedSigs)
 
+         print "Verifying tyOutscript[" + str(i) + "] = " + binary_to_hex(self.txOutScripts[i]);
          psp.setTxObjects(self.txOutScripts[i], finalTx, i)
          totalScriptValid = psp.verifyTransactionValid()
          if not totalScriptValid:
@@ -6806,7 +6840,7 @@ class PyTxDistProposal(object):
             print indent*2 + 'Sig%d = "%s"'%(ns, binary_to_hex(sig))
       print indent+'Num Outputs           : ', len(tx.outputs)
       for i,txout in enumerate(tx.outputs):
-         print '   Recipient: %s BTC' % coin2str(txout.value),
+         print '   Recipient: %s PTS' % coin2str(txout.value),
          scrType = getTxOutScriptType(txout.binScript)
          if scrType in (TXOUT_SCRIPT_STANDARD, TXOUT_SCRIPT_COINBASE):
             print hash160_to_addrStr(TxOutScriptExtractAddr160(txout.binScript))
@@ -6918,7 +6952,7 @@ def HardcodedKeyMaskParams():
 
 ################################################################################
 ################################################################################
-class PyBtcWallet(object):
+class PyPtsWallet(object):
    """
    This class encapsulates all the concepts and variables in a "wallet",
    and maintains the passphrase protection, key stretching, encryption,
@@ -6942,11 +6976,11 @@ class PyBtcWallet(object):
    (2) Watching-only wallets - have the private keys, just not on this computer
    (3) May be watching *other* people's addrs.  There's a variety of reasons
        we might want to watch other peoples' addresses, but most them are not
-       relevant to a "basic" BTC user.  Nonetheless it should be supported to
+       relevant to a "basic" PTS user.  Nonetheless it should be supported to
        watch money without considering it part of our own assets
 
    This class is included in the combined-python-cpp module, because we really
-   need to maintain a persistent Cpp.BtcWallet if this class is to be useful
+   need to maintain a persistent Cpp.PtsWallet if this class is to be useful
    (we don't want to have to rescan the entire blockchain every time we do any
    wallet operations).
 
@@ -6965,8 +6999,8 @@ class PyBtcWallet(object):
    Version 1.0:
    ---
    fileID      -- (8)  '\xbaWALLET\x00' for wallet files
-   version     -- (4)   getVersionInt(PYBTCWALLET_VERSION)
-   magic bytes -- (4)   defines the blockchain for this wallet (BTC, NMC)
+   version     -- (4)   getVersionInt(PYPTSWALLET_VERSION)
+   magic bytes -- (4)   defines the blockchain for this wallet (PTS, NMC)
    wlt flags   -- (8)   64 bits/flags representing info about wallet
    binUniqueID -- (6)   first 5 bytes of first address in wallet
                         (rootAddr25Bytes[:5][::-1]), reversed
@@ -6987,7 +7021,7 @@ class PyBtcWallet(object):
                         Includes salt. (the breakdown of this field will
                         be described separately)
    KeyGenerator-- (237) The base address for a determinstic wallet.
-                        Just a serialized PyBtcAddress object.
+                        Just a serialized PyPtsAddress object.
    ---
    UNUSED     -- (1024) unused space for future expansion of wallet file
    ---
@@ -6997,12 +7031,12 @@ class PyBtcWallet(object):
    the subsequent data .  So far, I have three types of entries that can
    be included:
 
-      \x01 -- Address/Key data (as of PyBtcAddress version 1.0, 237 bytes)
+      \x01 -- Address/Key data (as of PyPtsAddress version 1.0, 237 bytes)
       \x02 -- Address comments (variable-width field)
       \x03 -- Address comments (variable-width field)
       \x04 -- OP_EVAL subscript (when this is enabled, in the future)
 
-   Please see PyBtcAddress for information on how key data is serialized.
+   Please see PyPtsAddress for information on how key data is serialized.
    Comments (\x02) are var-width, and if a comment is changed to
    something longer than the existing one, we'll just blank out the old
    one and append a new one to the end of the file.  It looks like
@@ -7038,15 +7072,15 @@ class PyBtcWallet(object):
    def __init__(self):
       self.fileTypeStr    = '\xbaWALLET\x00'
       self.magicBytes     = MAGIC_BYTES
-      self.version        = PYBTCWALLET_VERSION  # (Major, Minor, Minor++, even-more-minor)
+      self.version        = PYPTSWALLET_VERSION  # (Major, Minor, Minor++, even-more-minor)
       self.eofByte        = 0
-      self.cppWallet      = None   # Mirror of PyBtcWallet in C++ object
+      self.cppWallet      = None   # Mirror of PyPtsWallet in C++ object
       self.cppInfo        = {}     # Extra info about each address to help sync
       self.watchingOnly   = False
       self.wltCreateDate  = 0
 
       # Three dictionaries hold all data
-      self.addrMap     = {}  # maps 20-byte addresses to PyBtcAddress objects
+      self.addrMap     = {}  # maps 20-byte addresses to PyPtsAddress objects
       self.commentsMap = {}  # maps 20-byte addresses to user-created comments
       self.commentLocs = {}  # map comment keys to wallet file locations
       self.opevalMap   = {}  # maps 20-byte addresses to OP_EVAL data (future)
@@ -7084,14 +7118,14 @@ class PyBtcWallet(object):
       self.lastComputedChainIndex = 0
       self.highestUsedChainIndex  = 0 
 
-      # All PyBtcAddress serializations are exact same size, figure it out now
-      self.pybtcaddrSize = len(PyBtcAddress().serialize())
+      # All PyPtsAddress serializations are exact same size, figure it out now
+      self.pyptsaddrSize = len(PyPtsAddress().serialize())
 
 
       # All BDM calls by default go on the multi-thread-queue.  But if the BDM
-      # is the one calling the PyBtcWallet methods, it will deadlock if it uses
+      # is the one calling the PyPtsWallet methods, it will deadlock if it uses
       # the queue.  Therefore, the BDM will set this flag before making any 
-      # calls, which will tell PyBtcWallet to use __direct methods.
+      # calls, which will tell PyPtsWallet to use __direct methods.
       self.calledFromBDM = False
 
       # Finally, a bunch of offsets that tell us where data is stored in the
@@ -7403,7 +7437,7 @@ class PyBtcWallet(object):
             return self.addrMap.has_key(addrStr_to_hash160(addrData))
          else:
             return False
-      elif isinstance(addrData, PyBtcAddress):
+      elif isinstance(addrData, PyPtsAddress):
          return self.addrMap.has_key(addrData.getAddr160())
       else:
          return False
@@ -7439,7 +7473,7 @@ class PyBtcWallet(object):
       """
       This is used to set (in memory only) the default time to keep the encrypt
       key in memory after the encryption passphrase has been entered.  This is
-      NOT enforced by PyBtcWallet, but the unlock method will use it to calc a
+      NOT enforced by PyPtsWallet, but the unlock method will use it to calc a
       unix timestamp when the wallet SHOULD be locked, and the external program
       can use that to decide when to call the lock method.
       """
@@ -7455,7 +7489,7 @@ class PyBtcWallet(object):
       newKey = HDWalletCrypto().ChildKeyDeriv(ekey, i)
       newKey.setIndex(i)
       return newKey
-      #newAddr = PyBtcAddress().createFromExtendedPublicKey(newKey)
+      #newAddr = PyPtsAddress().createFromExtendedPublicKey(newKey)
 
    #############################################################################
    #def createFromExtendedPublicKey(self, ekey):
@@ -7468,7 +7502,7 @@ class PyBtcWallet(object):
    #############################################################################
    #def deriveChildPublicKey(self, i):
       #newKey = HDWalletCrypto().ChildKeyDeriv(self.getExtendedPublicKey(), i)
-      #newAddr = PyBtcAddress().createFromExtendedPublicKey(newKey)
+      #newAddr = PyPtsAddress().createFromExtendedPublicKey(newKey)
       
 
    #############################################################################
@@ -7484,12 +7518,12 @@ class PyBtcWallet(object):
       chain = SecureBinaryData(hex_to_binary(masterHex[c0:c0+64]))
       
       # Create the root address object
-      rootAddr = PyBtcAddress().createFromPublicKeyData( pubkey )
+      rootAddr = PyPtsAddress().createFromPublicKeyData( pubkey )
       rootAddr.markAsRootAddr(chain)
       self.addrMap['ROOT'] = rootAddr
 
       ekey = self.getChildExtPubFromRoot(0)
-      firstAddr = PyBtcAddress().createFromPublicKeyData(ekey.getPub())
+      firstAddr = PyPtsAddress().createFromPublicKeyData(ekey.getPub())
       firstAddr.chaincode = ekey.getChain()
       firstAddr.chainIndex = 0
       first160  = firstAddr.getAddr160()
@@ -7543,7 +7577,7 @@ class PyBtcWallet(object):
       time0,blk0 = getCurrTimeAndBlock() if isActuallyNew else (0,0)
 
       # Don't forget to sync the C++ wallet object
-      self.cppWallet = Cpp.BtcWallet()
+      self.cppWallet = Cpp.PtsWallet()
       self.cppWallet.addAddress_5_(rootAddr.getAddr160(), time0,blk0,time0,blk0)
       self.cppWallet.addAddress_5_(first160,              time0,blk0,time0,blk0)
 
@@ -7648,7 +7682,7 @@ class PyBtcWallet(object):
                              
 
       # Create the root address object
-      rootAddr = PyBtcAddress().createFromPlainKeyData( \
+      rootAddr = PyPtsAddress().createFromPlainKeyData( \
                                              plainRootKey, \
                                              IV16=IV, \
                                              willBeEncr=withEncrypt, \
@@ -7710,7 +7744,7 @@ class PyBtcWallet(object):
       time0,blk0 = getCurrTimeAndBlock() if isActuallyNew else (0,0)
 
       # Don't forget to sync the C++ wallet object
-      self.cppWallet = Cpp.BtcWallet()
+      self.cppWallet = Cpp.PtsWallet()
       self.cppWallet.addScrAddress_5_(Hash160ToScrAddr(rootAddr.getAddr160()), \
                                                       time0,blk0,time0,blk0)
       self.cppWallet.addScrAddress_5_(Hash160ToScrAddr(first160), \
@@ -8003,7 +8037,7 @@ class PyBtcWallet(object):
          else:
             self.unlock(securePassphrase=SecureBinaryData(securePassphrase))
 
-      newWlt = PyBtcWallet().readWalletFile(newPath)
+      newWlt = PyPtsWallet().readWalletFile(newPath)
       newWlt.unlock(self.kdfKey)
       newWlt.changeWalletEncryption(None)
 
@@ -8059,7 +8093,7 @@ class PyBtcWallet(object):
          LOGWARN('This wallet is already void of any private key data!')
          LOGWARN('Aborting wallet fork operation.')
 
-      onlineWallet = PyBtcWallet()
+      onlineWallet = PyPtsWallet()
       onlineWallet.fileTypeStr = self.fileTypeStr
       onlineWallet.version = self.version
       onlineWallet.magicBytes = self.magicBytes
@@ -8659,7 +8693,7 @@ class PyBtcWallet(object):
    def unpackHeader(self, binUnpacker):
       """
       Unpacking the header information from a wallet file.  See the help text
-      on the base class, PyBtcWallet, for more information on the wallet
+      on the base class, PyPtsWallet, for more information on the wallet
       serialization.
       """
       self.fileTypeStr = binUnpacker.get(BINARY_CHUNK, 8)
@@ -8714,8 +8748,8 @@ class PyBtcWallet(object):
       self.offsetRootAddr  = binUnpacker.getPosition()
       
 
-      rawAddrData = binUnpacker.get(BINARY_CHUNK, self.pybtcaddrSize)
-      self.addrMap['ROOT'] = PyBtcAddress().unserialize(rawAddrData)
+      rawAddrData = binUnpacker.get(BINARY_CHUNK, self.pyptsaddrSize)
+      self.addrMap['ROOT'] = PyPtsAddress().unserialize(rawAddrData)
       fixedAddrData = self.addrMap['ROOT'].serialize()
       if not rawAddrData==fixedAddrData:
          self.walletFileSafeUpdate([ \
@@ -8742,7 +8776,7 @@ class PyBtcWallet(object):
       binData = ''
       if dtype==WLT_DATATYPE_KEYDATA:
          hashVal = binUnpacker.get(BINARY_CHUNK, 20)
-         binData = binUnpacker.get(BINARY_CHUNK, self.pybtcaddrSize)
+         binData = binUnpacker.get(BINARY_CHUNK, self.pyptsaddrSize)
       elif dtype==WLT_DATATYPE_ADDRCOMMENT:
          hashVal = binUnpacker.get(BINARY_CHUNK, 20)
          commentLen = binUnpacker.get(UINT16)
@@ -8783,7 +8817,7 @@ class PyBtcWallet(object):
       wltdata = BinaryUnpacker(wltfile.read())
       wltfile.close()
 
-      self.cppWallet = Cpp.BtcWallet()
+      self.cppWallet = Cpp.PtsWallet()
       self.unpackHeader(wltdata)
 
       self.lastComputedChainIndex = -UINT32_MAX
@@ -8792,7 +8826,7 @@ class PyBtcWallet(object):
          byteLocation = wltdata.getPosition()
          dtype, hashVal, rawData = self.unpackNextEntry(wltdata)
          if dtype==WLT_DATATYPE_KEYDATA:
-            newAddr = PyBtcAddress()
+            newAddr = PyPtsAddress()
             newAddr.unserialize(rawData)
             newAddr.walletByteLoc = byteLocation + 21
             # Fix byte errors in the address data
@@ -8833,7 +8867,7 @@ class PyBtcWallet(object):
 
 
       ### Update the wallet version if necessary ###
-      if getVersionInt(self.version) < getVersionInt(PYBTCWALLET_VERSION):
+      if getVersionInt(self.version) < getVersionInt(PYPTSWALLET_VERSION):
          LOGERROR('Wallets older than version 1.35 no loger supported!')
          return
 
@@ -8849,8 +8883,8 @@ class PyBtcWallet(object):
       """
       The input "toAddDataList" should be a list of triplets, such as:
       [
-        [WLT_DATA_ADD,    WLT_DATATYPE_KEYDATA, addr160_1,  PyBtcAddrObj1]
-        [WLT_DATA_ADD,    WLT_DATATYPE_KEYDATA, addr160_2,  PyBtcAddrObj2]
+        [WLT_DATA_ADD,    WLT_DATATYPE_KEYDATA, addr160_1,  PyPtsAddrObj1]
+        [WLT_DATA_ADD,    WLT_DATATYPE_KEYDATA, addr160_2,  PyPtsAddrObj2]
         [WLT_DATA_MODIFY, modifyStartByte1,  binDataForOverwrite1  ]
         [WLT_DATA_ADD,    WLT_DATATYPE_ADDRCOMMENT, addr160_3,  'Long-term savings']
         [WLT_DATA_MODIFY, modifyStartByte2,  binDataForOverwrite2 ]
@@ -8861,7 +8895,7 @@ class PyBtcWallet(object):
       wallet file.  For MODIFY fields, this just returns the modifyStartByte
       field that was provided as input.  For adding data, it specifies the
       starting byte of the new field (the DATATYPE byte).  We keep this data
-      in PyBtcAddress objects so that we know where to apply modifications in
+      in PyPtsAddress objects so that we know where to apply modifications in
       case we need to change something, like converting from unencrypted to
       encrypted private keys.
 
@@ -8928,7 +8962,7 @@ class PyBtcWallet(object):
                dtype = updateInfo[0]
                updateLocations.append(toAppend.getSize()+oldWalletSize)
                if dtype==WLT_DATATYPE_KEYDATA:
-                  if len(updateInfo[1])!=20 or not isinstance(updateInfo[2], PyBtcAddress):
+                  if len(updateInfo[1])!=20 or not isinstance(updateInfo[2], PyPtsAddress):
                      raise Exception, 'Data type does not match update type'
                   toAppend.put(UINT8, WLT_DATATYPE_KEYDATA)
                   toAppend.put(BINARY_CHUNK, updateInfo[1])
@@ -9032,7 +9066,7 @@ class PyBtcWallet(object):
       same, we want to do a check that the data is consistent.  We do this
       by simply reading in the key-data from the wallet, unserializing it
       and reserializing it to see if it matches -- this works due to the
-      way the PyBtcAddress::unserialize() method works:  it verifies the
+      way the PyPtsAddress::unserialize() method works:  it verifies the
       checksums in the address data, and corrects errors automatically!
       And it's part of the unit-tests that serialize/unserialize round-trip
       is guaranteed to match for all address types if there's no byte errors.
@@ -9105,7 +9139,7 @@ class PyBtcWallet(object):
          raise WalletAddressError, 'You can only delete imported addresses!'
 
       overwriteLoc = self.addrMap[addr160].walletByteLoc - 21
-      overwriteLen = 20 + self.pybtcaddrSize - 2
+      overwriteLen = 20 + self.pyptsaddrSize - 2
 
       overwriteBin = ''
       overwriteBin += int_to_binary(WLT_DATATYPE_DELETED, widthBytes=1)
@@ -9215,7 +9249,7 @@ class PyBtcWallet(object):
 
       if privKey:
          # For priv key, lots of extra encryption and verification options
-         newAddr = PyBtcAddress().createFromPlainKeyData( addr160=addr20, \
+         newAddr = PyPtsAddress().createFromPlainKeyData( addr160=addr20, \
                                   plainPrivKey=privKey, publicKey65=computedPubkey,  \
                                   willBeEncr=self.useEncryption, \
                                   generateIVIfNecessary=self.useEncryption, \
@@ -9225,9 +9259,9 @@ class PyBtcWallet(object):
             newAddr.unlock(self.kdfKey)
       elif pubKey:
          securePubKey = SecureBinaryData(pubKey)
-         newAddr = PyBtcAddress().createFromPublicKeyData(securePubKey)
+         newAddr = PyPtsAddress().createFromPublicKeyData(securePubKey)
       else:
-         newAddr = PyBtcAddress().createFromPublicKeyHash160(addr20)
+         newAddr = PyPtsAddress().createFromPublicKeyHash160(addr20)
 
 
       newAddr.chaincode  = SecureBinaryData('\xff'*32)
@@ -9424,7 +9458,7 @@ class PyBtcWallet(object):
                   
 
       # WltAddr now contains a list of every input we can sign for, and the
-      # PyBtcAddress object that can be used to sign it.  Let's do it.
+      # PyPtsAddress object that can be used to sign it.  Let's do it.
       numMyAddr = len(wltAddr)
       LOGDEBUG('Total number of inputs in transaction:  %d', numInputs)
       LOGDEBUG('Number of inputs that you can sign for: %d', numMyAddr)
@@ -9464,11 +9498,15 @@ class PyBtcWallet(object):
             txdp.signatures[idx][0] = sigLenInBinary + signature
          elif txdp.scriptTypes[idx]==TXOUT_SCRIPT_STANDARD:
             # Gotta include the public key, too, for standard TxOuts
-            pubkey = addrObj.binPublicKey65.toBinStr()
+            if addrObj.binPublicKey65.toBinStr()[0] == 0x04:
+                pubkey = CryptoECDSA().CompressPoint(addrObj.binPublicKey65).toBinStr()
+            else:
+                pubkey = addrObj.binPublicKey65.toBinStr()
             sigLenInBinary    = int_to_binary(len(signature))
             pubkeyLenInBinary = int_to_binary(len(pubkey)   )
             txdp.signatures[idx][0] = sigLenInBinary    + signature + \
                                       pubkeyLenInBinary + pubkey
+            print "her?"
          elif txdp.scriptTypes[idx]==TXOUT_SCRIPT_MULTISIG:
             # We attach just the sig for multi-sig transactions
             sigLenInBinary = int_to_binary(len(signature))
@@ -9538,18 +9576,18 @@ class PyBtcWallet(object):
       """
       We assume that we have already set all encryption parameters (such as
       IVs for each key) and thus all we need to do is call the "lock" method
-      on each PyBtcAddress object.
+      on each PyPtsAddress object.
 
       If wallet is unlocked, try to re-lock addresses, regardless of whether
       we have a kdfKey or not.  In some circumstances (such as when the addrs
       have never been locked before) we will need the key to encrypt them.
       However, in most cases, the encrypted versions are already available
-      and the PyBtcAddress objects can destroy the plaintext keys without
+      and the PyPtsAddress objects can destroy the plaintext keys without
       ever needing access to the encryption keys.
 
       ANY METHOD THAT CALLS THIS MUST CATCH WALLETLOCKERRORS UNLESS YOU ARE
       POSITIVE THAT THE KEYS HAVE ALREADY BEEN ENCRYPTED BEFORE, OR ARE
-      ALREADY SITTING IN THE ENCRYPTED WALLET FILE.  PyBtcAddress objects
+      ALREADY SITTING IN THE ENCRYPTED WALLET FILE.  PyPtsAddress objects
       were designed to do this, but in case of a bug, you don't want the
       program crashing with money-bearing private keys sitting in memory only.
 
@@ -9563,7 +9601,7 @@ class PyBtcWallet(object):
       # WalletLockError, and the caller can get the passphrase from the user,
       # unlock the wallet, then try locking again.
       # NOTE: If we don't have kdfKey, it is set to None, which is the default
-      #       input for PyBtcAddress::lock for "I don't have it".  In most 
+      #       input for PyPtsAddress::lock for "I don't have it".  In most 
       #       cases, it is actually possible to lock the wallet without the 
       #       kdfKey because we saved the encrypted versions before unlocking
       LOGDEBUG('Attempting to lock wallet: %s', self.uniqueIDB58)
@@ -9596,7 +9634,7 @@ class PyBtcWallet(object):
 
    #############################################################################
    def getAddrList(self):
-      """ Returns list of PyBtcAddress objects """
+      """ Returns list of PyPtsAddress objects """
       addrList = []
       for addr160,addrObj in self.addrMap.iteritems():
          if addr160=='ROOT':
@@ -9664,7 +9702,7 @@ class PyBtcWallet(object):
 
    #############################################################################
    def pprint(self, indent='', allAddrInfo=True):
-      print indent + 'PyBtcWallet  :', self.uniqueIDB58
+      print indent + 'PyPtsWallet  :', self.uniqueIDB58
       print indent + '   useEncrypt:', self.useEncryption
       print indent + '   watchOnly :', self.watchingOnly
       print indent + '   isLocked  :', self.isLocked
@@ -9761,7 +9799,7 @@ class PyLedgerEntry(object):
       
 
    //    addr20_    -  useless - originally had a purpose, but lost it
-   //    value_     -  total debit/credit on WALLET balance, in Satoshis (1e-8 BTC)
+   //    value_     -  total debit/credit on WALLET balance, in Satoshis (1e-8 PTS)
    //    blockNum_  -  block height of the block in which this tx was included
    //    txHash_    -  hash of this tx 
    //    index_     -  index of the tx in the block
@@ -9868,7 +9906,7 @@ class PyMessage(object):
    def pprint(self, nIndent=0):
       indstr = indent*nIndent
       print ''
-      print indstr + 'Bitcoin-Network-Message -- ' + self.cmd.upper()
+      print indstr + 'Protoshares-Network-Message -- ' + self.cmd.upper()
       print indstr + indent + 'Magic:   ' + binary_to_hex(self.magic)
       print indstr + indent + 'Command: ' + self.cmd
       print indstr + indent + 'Payload: ' + str(len(self.payload.serialize())) + ' bytes'
@@ -10460,14 +10498,14 @@ def createBlockLocatorNumList(topblk):
 #    Armory to operate, using python-twisted.  There are "better"
 #    ways to do this with "reusable" code structures (i.e. using huge
 #    deferred callback chains), but this is not the central "creative" 
-#    part of the Bitcoin protocol.  I need just enough to broadcast tx
+#    part of the Protoshares protocol.  I need just enough to broadcast tx
 #    and receive new tx that aren't in the blockchain yet.  Beyond that,
 #    I'll just be ignoring everything else.
 #
 ################################################################################
 class ArmoryClient(Protocol):
    """
-   This is where all the Bitcoin-specific networking stuff goes.
+   This is where all the Protoshares-specific networking stuff goes.
    In the Twisted way, you need to inject your own chains of 
    callbacks through the factory in order to get this class to do
    the right thing on the various events.
@@ -10502,7 +10540,7 @@ class ArmoryClient(Protocol):
       msgVersion.addrRecv = PyNetAddress(0, services, addrTo,   portTo  )
       msgVersion.addrFrom = PyNetAddress(0, services, addrFrom, portFrom)
       msgVersion.nonce    = random.randint(2**60, 2**64-1)
-      msgVersion.subver   = 'Armory:%s' % getVersionString(BTCARMORY_VERSION)
+      msgVersion.subver   = 'Armory:%s' % getVersionString(PTSARMORY_VERSION)
       msgVersion.height0  = -1
       self.sendMessage( msgVersion )
       self.factory.func_madeConnect()
@@ -10829,7 +10867,7 @@ class FakeClientFactory(ReconnectingClientFactory):
 
 #############################################################################
 import socket
-def satoshiIsAvailable(host='127.0.0.1', port=BITCOIN_PORT, timeout=0.01):
+def satoshiIsAvailable(host='127.0.0.1', port=PROTOSHARES_PORT, timeout=0.01):
 
    if not isinstance(port, (list,tuple)):
       port = [port]
@@ -10912,16 +10950,16 @@ def parseLinkList(theData):
    
 
 ################################################################################
-# jgarzik'sjj jsonrpc-bitcoin code -- stupid-easy to talk to bitcoind
+# jgarzik'sjj jsonrpc-protoshares code -- stupid-easy to talk to protosharesd
 from jsonrpc import ServiceProxy, authproxy
 class SatoshiDaemonManager(object):
    """
-   Use an existing implementation of bitcoind 
+   Use an existing implementation of protosharesd 
    """
 
-   class BitcoindError(Exception): pass
-   class BitcoindNotAvailableError(Exception): pass
-   class BitcoinDotConfError(Exception): pass
+   class ProtosharesdError(Exception): pass
+   class ProtosharesdNotAvailableError(Exception): pass
+   class ProtosharesDotConfError(Exception): pass
    class SatoshiHomeDirDNE(Exception): pass
    class ConfigFileUserDNE(Exception): pass
    class ConfigFilePwdDNE(Exception): pass
@@ -10933,7 +10971,7 @@ class SatoshiDaemonManager(object):
       self.satoshiHome = None
       self.bitconf = {}
       self.proxy = None
-      self.bitcoind = None  
+      self.protosharesd = None  
       self.isMidQuery = False
       self.last20queries = []
       self.disabled = False
@@ -10942,8 +10980,8 @@ class SatoshiDaemonManager(object):
       self.foundExe = []
       self.circBufferState = []
       self.circBufferTime = []
-      self.btcOut = None
-      self.btcErr = None
+      self.ptsOut = None
+      self.ptsErr = None
       self.lastTopBlockInfo = { \
                                  'numblks':    -1,
                                  'tophash':    '',
@@ -10954,29 +10992,29 @@ class SatoshiDaemonManager(object):
 
 
    #############################################################################
-   def setupSDM(self, pathToBitcoindExe=None, satoshiHome=BTC_HOME_DIR, \
+   def setupSDM(self, pathToProtosharesdExe=None, satoshiHome=PTS_HOME_DIR, \
                       extraExeSearch=[], createHomeIfDNE=True):
       LOGDEBUG('Exec setupSDM')
       self.failedFindExe = False
       self.failedFindHome = False
       # If we are supplied a path, then ignore the extra exe search paths
-      if pathToBitcoindExe==None:
-         pathToBitcoindExe = self.findBitcoind(extraExeSearch)
-         if len(pathToBitcoindExe)==0:
-            LOGDEBUG('Failed to find bitcoind')
+      if pathToProtosharesdExe==None:
+         pathToProtosharesdExe = self.findProtosharesd(extraExeSearch)
+         if len(pathToProtosharesdExe)==0:
+            LOGDEBUG('Failed to find protosharesd')
             self.failedFindExe = True
          else:
-            LOGINFO('Found bitcoind in the following places:')
-            for p in pathToBitcoindExe:
+            LOGINFO('Found protosharesd in the following places:')
+            for p in pathToProtosharesdExe:
                LOGINFO('   %s', p)
-            pathToBitcoindExe = pathToBitcoindExe[0]
-            LOGINFO('Using: %s', pathToBitcoindExe)
+            pathToProtosharesdExe = pathToProtosharesdExe[0]
+            LOGINFO('Using: %s', pathToProtosharesdExe)
 
-            if not os.path.exists(pathToBitcoindExe):
+            if not os.path.exists(pathToProtosharesdExe):
                LOGINFO('Somehow failed to find exe even after finding it...?')
                self.failedFindExe = True
 
-      self.executable = pathToBitcoindExe
+      self.executable = pathToProtosharesdExe
 
       if not os.path.exists(satoshiHome):
          if createHomeIfDNE:
@@ -10986,17 +11024,17 @@ class SatoshiDaemonManager(object):
             LOGINFO('No home dir, makedir not requested')
             self.failedFindHome = True
 
-      if self.failedFindExe:  raise self.BitcoindError, 'bitcoind not found'
-      if self.failedFindHome: raise self.BitcoindError, 'homedir not found'
+      if self.failedFindExe:  raise self.ProtosharesdError, 'protosharesd not found'
+      if self.failedFindHome: raise self.ProtosharesdError, 'homedir not found'
 
       self.satoshiHome = satoshiHome
       self.disabled = False
       self.proxy = None
-      self.bitcoind = None  # this will be a Popen object
+      self.protosharesd = None  # this will be a Popen object
       self.isMidQuery = False
       self.last20queries = []
 
-      self.readBitcoinConf(makeIfDNE=True)
+      self.readProtosharesConf(makeIfDNE=True)
 
 
    
@@ -11007,8 +11045,8 @@ class SatoshiDaemonManager(object):
       s = self.getSDMState()
 
       if newBool==True:
-         if s in ('BitcoindInitializing', 'BitcoindSynchronizing', 'BitcoindReady'):
-            self.stopBitcoind()
+         if s in ('ProtosharesdInitializing', 'ProtosharesdSynchronizing', 'ProtosharesdReady'):
+            self.stopProtosharesd()
 
       self.disabled = newBool
             
@@ -11019,7 +11057,7 @@ class SatoshiDaemonManager(object):
       
       
    #############################################################################
-   def findBitcoind(self, extraSearchPaths=[]):
+   def findProtosharesd(self, extraSearchPaths=[]):
       self.foundExe = []
 
       searchPaths = list(extraSearchPaths)  # create a copy
@@ -11033,12 +11071,12 @@ class SatoshiDaemonManager(object):
          if os.path.exists(desktop):
             dtopfiles = os.listdir(desktop)
             for path in [os.path.join(desktop, fn) for fn in dtopfiles]:
-               if 'bitcoin' in path.lower() and path.lower().endswith('.lnk'):
+               if 'protoshares' in path.lower() and path.lower().endswith('.lnk'):
                   import win32com.client
                   shell = win32com.client.Dispatch('WScript.Shell')
                   targ = shell.CreateShortCut(path).Targetpath
                   targDir = os.path.dirname(targ)
-                  LOGINFO('Found Bitcoin-Qt link on desktop: %s', targDir)
+                  LOGINFO('Found Protoshares-Qt link on desktop: %s', targDir)
                   possBaseDir.append( targDir )
          
          # Also look in default place in ProgramFiles dirs
@@ -11049,12 +11087,12 @@ class SatoshiDaemonManager(object):
 
          # Now look at a few subdirs of the 
          searchPaths.extend(possBaseDir)
-         searchPaths.extend([os.path.join(p, 'Bitcoin', 'daemon') for p in possBaseDir])
+         searchPaths.extend([os.path.join(p, 'Protoshares', 'daemon') for p in possBaseDir])
          searchPaths.extend([os.path.join(p, 'daemon') for p in possBaseDir])
-         searchPaths.extend([os.path.join(p, 'Bitcoin') for p in possBaseDir])
+         searchPaths.extend([os.path.join(p, 'Protoshares') for p in possBaseDir])
 
          for p in searchPaths:
-            testPath = os.path.join(p, 'bitcoind.exe')
+            testPath = os.path.join(p, 'protosharesd.exe')
             if os.path.exists(testPath):
                self.foundExe.append(testPath)
 
@@ -11065,17 +11103,17 @@ class SatoshiDaemonManager(object):
          else:
             searchPaths.extend([os.path.join(p, 'bin/32') for p in extraSearchPaths])
 
-         searchPaths.extend(['/usr/bin/', '/usr/lib/bitcoin/'])
+         searchPaths.extend(['/usr/bin/', '/usr/lib/protoshares/'])
 
          for p in searchPaths:
-            testPath = os.path.join(p, 'bitcoind')
+            testPath = os.path.join(p, 'protosharesd')
             if os.path.exists(testPath):
                self.foundExe.append(testPath)
 
          try:
-            locs = subprocess_check_output(['whereis','bitcoind']).split()
+            locs = subprocess_check_output(['whereis','protosharesd']).split()
             if len(locs)>1:
-               locs = filter(lambda x: os.path.basename(x)=='bitcoind', locs)
+               locs = filter(lambda x: os.path.basename(x)=='protosharesd', locs)
                LOGINFO('"whereis" returned: %s', str(locs))
                self.foundExe.extend(locs)
          except:
@@ -11092,10 +11130,10 @@ class SatoshiDaemonManager(object):
                foundIt=True
 
          if not foundIt:
-            LOGERROR('Bitcoind could not be found in the specified installation:')
+            LOGERROR('Protosharesd could not be found in the specified installation:')
             for p in extraSearchPaths:
                LOGERROR('   %s', p)
-            LOGERROR('Bitcoind is being started from:')
+            LOGERROR('Protosharesd is being started from:')
             LOGERROR('   %s', self.foundExe[0])
 
       return self.foundExe
@@ -11121,17 +11159,17 @@ class SatoshiDaemonManager(object):
                          
    
    #############################################################################
-   def readBitcoinConf(self, makeIfDNE=False):
-      LOGINFO('Reading bitcoin.conf file')
-      bitconf = os.path.join( self.satoshiHome, 'bitcoin.conf' )
+   def readProtosharesConf(self, makeIfDNE=False):
+      LOGINFO('Reading protoshares.conf file')
+      bitconf = os.path.join( self.satoshiHome, 'protoshares.conf' )
       if not os.path.exists(bitconf):
          if not makeIfDNE:
-            raise self.BitcoinDotConfError, 'Could not find bitcoin.conf'
+            raise self.ProtosharesDotConfError, 'Could not find protoshares.conf'
          else:
-            LOGINFO('No bitcoin.conf available.  Creating it...')
+            LOGINFO('No protoshares.conf available.  Creating it...')
             touchFile(bitconf)
 
-      # Guarantee that bitcoin.conf file has very strict permissions
+      # Guarantee that protoshares.conf file has very strict permissions
       if OS_WINDOWS:
          if OS_VARIANT[0].lower()=='xp':
             LOGERROR('Cannot set permissions correctly in XP!')
@@ -11141,14 +11179,14 @@ class SatoshiDaemonManager(object):
             LOGERROR('on XP systems):')
             LOGERROR('    %s', bitconf)
          else: 
-            LOGINFO('Setting permissions on bitcoin.conf')
+            LOGINFO('Setting permissions on protoshares.conf')
             import win32api
             username = win32api.GetUserName()
             cmd_icacls = ['icacls',bitconf,'/inheritance:r','/grant:r', '%s:F' % username]
             icacls_out = subprocess_check_output(cmd_icacls, shell=True)
             LOGINFO('icacls returned: %s', icacls_out)
       else:
-         LOGINFO('Setting permissions on bitcoin.conf')
+         LOGINFO('Setting permissions on protoshares.conf')
          os.chmod(bitconf, stat.S_IRUSR | stat.S_IWUSR)
                
             
@@ -11167,7 +11205,7 @@ class SatoshiDaemonManager(object):
 
 
       # Look for rpcport, use default if not there
-      self.bitconf['rpcport'] = int(self.bitconf.get('rpcport', BITCOIN_RPC_PORT))
+      self.bitconf['rpcport'] = int(self.bitconf.get('rpcport', PROTOSHARES_RPC_PORT))
 
       # We must have a username and password.  If not, append to file
       if not self.bitconf.has_key('rpcuser'):
@@ -11188,29 +11226,29 @@ class SatoshiDaemonManager(object):
 
 
       if not isASCII(self.bitconf['rpcuser']):
-         LOGERROR('Non-ASCII character in bitcoin.conf (rpcuser)!')
+         LOGERROR('Non-ASCII character in protoshares.conf (rpcuser)!')
       if not isASCII(self.bitconf['rpcpassword']):
-         LOGERROR('Non-ASCII character in bitcoin.conf (rpcpassword)!')
+         LOGERROR('Non-ASCII character in protoshares.conf (rpcpassword)!')
 
       self.bitconf['host'] = '127.0.0.1'
       
 
 
    #############################################################################
-   def startBitcoind(self):
-      self.btcOut, self.btcErr = None,None
+   def startProtosharesd(self):
+      self.ptsOut, self.ptsErr = None,None
       if self.disabled:
          LOGERROR('SDM was disabled, must be re-enabled before starting')
          return
 
-      LOGINFO('Called startBitcoind')
+      LOGINFO('Called startProtosharesd')
       import subprocess
 
-      if self.isRunningBitcoind():
-         raise self.BitcoindError, 'Looks like we have already started bitcoind'
+      if self.isRunningProtosharesd():
+         raise self.ProtosharesdError, 'Looks like we have already started protosharesd'
 
       if not os.path.exists(self.executable):
-         raise self.BitcoindError, 'Could not find bitcoind'
+         raise self.ProtosharesdError, 'Could not find protosharesd'
    
 
       pargs = [self.executable]
@@ -11240,18 +11278,18 @@ class SatoshiDaemonManager(object):
          LOGEXCEPT('Failed size check of blocks directory')
                
 
-      # Startup bitcoind and get its process ID (along with our own)
-      self.bitcoind = launchProcess(pargs)
+      # Startup protosharesd and get its process ID (along with our own)
+      self.protosharesd = launchProcess(pargs)
                                        
-      self.btcdpid  = self.bitcoind.pid
+      self.ptsdpid  = self.protosharesd.pid
       self.selfpid  = os.getpid()
 
-      LOGINFO('PID of bitcoind: %d',  self.btcdpid)
+      LOGINFO('PID of protosharesd: %d',  self.ptsdpid)
       LOGINFO('PID of armory:   %d',  self.selfpid)
 
       # Startup guardian process -- it will watch Armory's PID
       gpath = self.getGuardianPath()
-      pargs = [gpath, str(self.selfpid), str(self.btcdpid)] 
+      pargs = [gpath, str(self.selfpid), str(self.ptsdpid)] 
       if not OS_WINDOWS:
          pargs.insert(0, 'python')
       launchProcess(pargs)
@@ -11259,57 +11297,57 @@ class SatoshiDaemonManager(object):
 
 
    #############################################################################
-   def stopBitcoind(self):
-      LOGINFO('Called stopBitcoind')
-      if not self.isRunningBitcoind():
-         LOGINFO('...but bitcoind is not running, to be able to stop')
+   def stopProtosharesd(self):
+      LOGINFO('Called stopProtosharesd')
+      if not self.isRunningProtosharesd():
+         LOGINFO('...but protosharesd is not running, to be able to stop')
          return
 
-      killProcessTree(self.bitcoind.pid)
-      killProcess(self.bitcoind.pid)
+      killProcessTree(self.protosharesd.pid)
+      killProcess(self.protosharesd.pid)
 
       time.sleep(1)
-      self.bitcoind = None
+      self.protosharesd = None
       
 
    #############################################################################
-   def isRunningBitcoind(self):
+   def isRunningProtosharesd(self):
       """ 
       armoryengine satoshiIsAvailable() only tells us whether there's a 
-      running bitcoind that is actively responding on its port.  But it 
+      running protosharesd that is actively responding on its port.  But it 
       won't be responding immediately after we've started it (still doing
-      startup operations).  If bitcoind was started and still running, 
+      startup operations).  If protosharesd was started and still running, 
       then poll() will return None.  Any othe poll() return value means 
       that the process terminated
       """
-      if self.bitcoind==None:
+      if self.protosharesd==None:
          return False
       else:
-         if not self.bitcoind.poll()==None:
-            LOGDEBUG('Bitcoind is no more')
-            if self.btcOut==None:
-               self.btcOut, self.btcErr = self.bitcoind.communicate()
-               LOGWARN('bitcoind exited, bitcoind STDOUT:')
-               for line in self.btcOut.split('\n'):
+         if not self.protosharesd.poll()==None:
+            LOGDEBUG('Protosharesd is no more')
+            if self.ptsOut==None:
+               self.ptsOut, self.ptsErr = self.protosharesd.communicate()
+               LOGWARN('protosharesd exited, protosharesd STDOUT:')
+               for line in self.ptsOut.split('\n'):
                   LOGWARN(line)
-               LOGWARN('bitcoind exited, bitcoind STDERR:')
-               for line in self.btcErr.split('\n'):
+               LOGWARN('protosharesd exited, protosharesd STDERR:')
+               for line in self.ptsErr.split('\n'):
                   LOGWARN(line)
-         return self.bitcoind.poll()==None
+         return self.protosharesd.poll()==None
       
    #############################################################################
-   def wasRunningBitcoind(self):
-      return (not self.bitcoind==None)
+   def wasRunningProtosharesd(self):
+      return (not self.protosharesd==None)
 
    #############################################################################
-   def bitcoindIsResponsive(self):
+   def protosharesdIsResponsive(self):
       return satoshiIsAvailable(self.bitconf['host'], self.bitconf['rpcport'])
    
    #############################################################################
    def getSDMState(self):
       """ 
       As for why I'm doing this:  it turns out that between "initializing"
-      and "synchronizing", bitcoind temporarily stops responding entirely,
+      and "synchronizing", protosharesd temporarily stops responding entirely,
       which causes "not-available" to be the state.  I need to smooth that
       out because it wreaks havoc on the GUI which will switch to showing 
       a nasty error.
@@ -11329,10 +11367,10 @@ class SatoshiDaemonManager(object):
       # of "not available").   "NotAvail" keeps getting added to the 
       # buffer, but if it was "initializing" in the last 5 seconds, 
       # we will keep "initializing"
-      if state=='BitcoindNotAvailable':
-         if 'BitcoindInitializing' in self.circBufferState:
+      if state=='ProtosharesdNotAvailable':
+         if 'ProtosharesdInitializing' in self.circBufferState:
             LOGWARN('Overriding not-available message. This should happen 0-5 times')
-            return 'BitcoindInitializing'
+            return 'ProtosharesdInitializing'
       
       return state
 
@@ -11340,63 +11378,63 @@ class SatoshiDaemonManager(object):
    def getSDMStateLogic(self):
 
       if self.disabled:
-         return 'BitcoindMgmtDisabled'
+         return 'ProtosharesdMgmtDisabled'
 
       if self.failedFindExe:
-         return 'BitcoindExeMissing'
+         return 'ProtosharesdExeMissing'
 
       if self.failedFindHome:
-         return 'BitcoindHomeMissing'
+         return 'ProtosharesdHomeMissing'
 
       latestInfo = self.getTopBlockInfo()
 
-      if self.bitcoind==None and latestInfo['error']=='Uninitialized':
-         return 'BitcoindNeverStarted'
+      if self.protosharesd==None and latestInfo['error']=='Uninitialized':
+         return 'ProtosharesdNeverStarted'
    
-      if not self.isRunningBitcoind():
+      if not self.isRunningProtosharesd():
          # Not running at all:  either never started, or process terminated
-         if not self.btcErr==None and len(self.btcErr)>0:
-            errstr = self.btcErr.replace(',',' ').replace('.',' ').replace('!',' ')
+         if not self.ptsErr==None and len(self.ptsErr)>0:
+            errstr = self.ptsErr.replace(',',' ').replace('.',' ').replace('!',' ')
             errPcs = set([a.lower() for a in errstr.split()])
             runPcs = set(['cannot','obtain','lock','already','running'])
             dbePcs = set(['database', 'recover','backup','except','wallet','dat'])
             if len(errPcs.intersection(runPcs))>=(len(runPcs)-1):
-               return 'BitcoindAlreadyRunning'
+               return 'ProtosharesdAlreadyRunning'
             elif len(errPcs.intersection(dbePcs))>=(len(dbePcs)-1):
-               return 'BitcoindDatabaseEnvError'
+               return 'ProtosharesdDatabaseEnvError'
             else:
-               return 'BitcoindUnknownCrash'
+               return 'ProtosharesdUnknownCrash'
          else:
-            return 'BitcoindNotAvailable'
-      elif not self.bitcoindIsResponsive():
+            return 'ProtosharesdNotAvailable'
+      elif not self.protosharesdIsResponsive():
          # Running but not responsive... must still be initializing
-         return 'BitcoindInitializing'
+         return 'ProtosharesdInitializing'
       else:
          # If it's responsive, get the top block and check
          # TODO: These conditionals are based on experimental results.  May 
          #       not be accurate what the specific errors mean...
          if latestInfo['error']=='ValueError':
-            return 'BitcoindWrongPassword'
+            return 'ProtosharesdWrongPassword'
          elif latestInfo['error']=='JsonRpcException':
-            return 'BitcoindInitializing'
+            return 'ProtosharesdInitializing'
          elif latestInfo['error']=='SocketError':
-            return 'BitcoindNotAvailable'
+            return 'ProtosharesdNotAvailable'
 
-         if 'BitcoindReady' in self.circBufferState:
+         if 'ProtosharesdReady' in self.circBufferState:
             # If ready, always ready
-            return 'BitcoindReady'
+            return 'ProtosharesdReady'
 
-         # If we get here, bitcoind is gave us a response.
+         # If we get here, protosharesd is gave us a response.
          secSinceLastBlk = RightNow() - latestInfo['toptime']
          blkspersec = latestInfo['blkspersec']
          #print 'Blocks per 10 sec:', ('UNKNOWN' if blkspersec==-1 else blkspersec*10)
          if secSinceLastBlk > 4*HOUR or blkspersec==-1:
-            return 'BitcoindSynchronizing'
+            return 'ProtosharesdSynchronizing'
          else:
-            if blkspersec*20 > 2 and not 'BitcoindReady' in self.circBufferState:
-               return 'BitcoindSynchronizing'
+            if blkspersec*20 > 2 and not 'ProtosharesdReady' in self.circBufferState:
+               return 'ProtosharesdSynchronizing'
             else:
-               return 'BitcoindReady'
+               return 'ProtosharesdReady'
             
 
         
@@ -11447,11 +11485,11 @@ class SatoshiDaemonManager(object):
          LOGEXCEPT('ValueError in bkgd req top blk')
          self.lastTopBlockInfo['error'] = 'ValueError'
       except authproxy.JSONRPCException:
-         # This seems to happen when bitcoind is overwhelmed... not quite ready 
+         # This seems to happen when protosharesd is overwhelmed... not quite ready 
          LOGDEBUG('generic jsonrpc exception')
          self.lastTopBlockInfo['error'] = 'JsonRpcException'
       except socket.error:
-         # Connection isn't available... is bitcoind not running anymore?
+         # Connection isn't available... is protosharesd not running anymore?
          LOGDEBUG('generic socket error')
          self.lastTopBlockInfo['error'] = 'SocketError'
       except:
@@ -11465,7 +11503,7 @@ class SatoshiDaemonManager(object):
    #############################################################################
    def updateTopBlockInfo(self):
       """
-      We want to get the top block information, but if bitcoind is rigorously
+      We want to get the top block information, but if protosharesd is rigorously
       downloading and verifying the blockchain, it can sometimes take 10s to
       to respond to JSON-RPC calls!  We must do it in the background...
 
@@ -11473,7 +11511,7 @@ class SatoshiDaemonManager(object):
       just return the last value, which may be "stale" but we don't really 
       care for this particular use-case
       """
-      if not self.isRunningBitcoind():
+      if not self.isRunningProtosharesd():
          return   
 
       if self.isMidQuery:
@@ -11486,7 +11524,7 @@ class SatoshiDaemonManager(object):
 
    #############################################################################
    def getTopBlockInfo(self):
-      if self.isRunningBitcoind():
+      if self.isRunningProtosharesd():
          self.updateTopBlockInfo()
          self.queryThread.join(0.001)  # In most cases, result should come in 1 ms
          # We return a copy so that the data is not changing as we use it
@@ -11497,10 +11535,10 @@ class SatoshiDaemonManager(object):
    #############################################################################
    def callJSON(self, func, *args):
       state = self.getSDMState()
-      if not state in ('BitcoindReady', 'BitcoindSynchronizing'):
+      if not state in ('ProtosharesdReady', 'ProtosharesdSynchronizing'):
          LOGERROR('Called callJSON(%s, %s)', func, str(args))
          LOGERROR('Current SDM state: %s', state)
-         raise self.BitcoindError, 'callJSON while %s'%state
+         raise self.ProtosharesdError, 'callJSON while %s'%state
 
       return self.proxy.__getattr__(func)(*args)
    
@@ -11515,7 +11553,7 @@ class SatoshiDaemonManager(object):
          sdminfo['topblk_%s'%key] = val
 
       sdminfo['executable'] = self.executable
-      sdminfo['isrunning']  = self.isRunningBitcoind()
+      sdminfo['isrunning']  = self.isRunningProtosharesd()
       sdminfo['homedir']    = self.satoshiHome
       sdminfo['proxyinit']  = (not self.proxy==None)
       sdminfo['ismidquery'] = self.isMidQuery
@@ -11754,7 +11792,7 @@ class SettingsFile(object):
 #      # 0 to 252 :   1-byte-length followed by bytes (if any)
 #      # 253 to 65,535 : byte'253' 2-byte-length followed by bytes
 #      # 65,536 to 4,294,967,295 : byte '254' 4-byte-length followed by bytes
-#      # ... and the Bitcoin client is coded to understand:
+#      # ... and the Protoshares client is coded to understand:
 #      # greater than 4,294,967,295 : byte '255' 8-byte-length followed by bytes of string
 #      # ... but I don't think it actually handles any strings that big.
 #      if self.input is None:
@@ -11860,7 +11898,7 @@ class SettingsFile(object):
 #      r = True
 #
 #   if r is not None:
-#      LOGERROR("Couldn't open wallet.dat/main. Try quitting Bitcoin and running this again.")
+#      LOGERROR("Couldn't open wallet.dat/main. Try quitting Protoshares and running this again.")
 #      sys.exit(1)
 #   
 #   return db
@@ -12226,7 +12264,7 @@ class BlockDataManagerThread(threading.Thread):
 
       THEREFORE, the BDM now has a single, master wallet.  Any address you add
       to any of your wallets, should be added to the master wallet, too.  The 
-      PyBtcWallet class does this for you, but if you are using raw BtcWallets
+      PyPtsWallet class does this for you, but if you are using raw PtsWallets
       (the C++ equivalent), you need to do:
    
             cppWallet.addScrAddress_1_(Hash160ToScrAddr(newAddr))
@@ -12284,11 +12322,11 @@ class BlockDataManagerThread(threading.Thread):
       self.cppWltList   = []   # these will be python refs
 
       # The BlockDataManager is easier to use if you put all your addresses
-      # into a C++ BtcWallet object, and let it 
-      self.masterCppWallet = Cpp.BtcWallet()
+      # into a C++ PtsWallet object, and let it 
+      self.masterCppWallet = Cpp.PtsWallet()
       self.bdm.registerWallet(self.masterCppWallet)
        
-      self.btcdir = BTC_HOME_DIR
+      self.ptsdir = PTS_HOME_DIR
       self.ldbdir = LEVELDB_DIR
       self.lastPctLoad = 0
 
@@ -12497,16 +12535,16 @@ class BlockDataManagerThread(threading.Thread):
       return self.waitForOutputIfNecessary(expectOutput, rndID)
 
    #############################################################################
-   def setSatoshiDir(self, newBtcDir):
-      if not os.path.exists(newBtcDir):
-         LOGERROR('setSatoshiDir: directory does not exist: %s', newBtcDir)
+   def setSatoshiDir(self, newPtsDir):
+      if not os.path.exists(newPtsDir):
+         LOGERROR('setSatoshiDir: directory does not exist: %s', newPtsDir)
          return
 
       if not self.blkMode in (BLOCKCHAINMODE.Offline, BLOCKCHAINMODE.Uninitialized):
          LOGERROR('Cannot set blockchain/satoshi path after BDM is started')
          return
 
-      self.btcdir = newBtcDir
+      self.ptsdir = newPtsDir
 
    #############################################################################
    def setLevelDBDir(self, ldbdir):
@@ -12755,9 +12793,9 @@ class BlockDataManagerThread(threading.Thread):
       must be a blocking method.  
       """
       rndID = int(random.uniform(0,100000000)) 
-      if isinstance(wlt, PyBtcWallet):
+      if isinstance(wlt, PyPtsWallet):
          self.inputQueue.put([BDMINPUTTYPE.AddrBookRequested, rndID, True, wlt.cppWallet])
-      elif isinstance(wlt, Cpp.BtcWallet):
+      elif isinstance(wlt, Cpp.PtsWallet):
          self.inputQueue.put([BDMINPUTTYPE.AddrBookRequested, rndID, True, wlt])
 
       try:
@@ -12843,7 +12881,7 @@ class BlockDataManagerThread(threading.Thread):
       if not wait==False and (self.alwaysBlock or wait==True):
          expectOutput = True
 
-      if isinstance(wlt, PyBtcWallet):
+      if isinstance(wlt, PyPtsWallet):
          scrAddrs = [Hash160ToScrAddr(a.getAddr160()) for a in wlt.getAddrList()]
 
          if isFresh:
@@ -12856,7 +12894,7 @@ class BlockDataManagerThread(threading.Thread):
          if not wlt in self.pyWltList:
             self.pyWltList.append(wlt)
 
-      elif isinstance(wlt, Cpp.BtcWallet):
+      elif isinstance(wlt, Cpp.PtsWallet):
          naddr = wlt.getNumScrAddr()
 
          for a in range(naddr):
@@ -12881,7 +12919,7 @@ class BlockDataManagerThread(threading.Thread):
    # we know for sure that the BDM ultimately called this method.
    def registerScrAddr_bdm_direct(self, scrAddr, timeInfo):
       """ 
-      Something went awry calling __registerScrAddrNow from the PyBtcWallet
+      Something went awry calling __registerScrAddrNow from the PyPtsWallet
       code (apparently I don't understand __methods).  Use this method to 
       externally bypass the BDM thread queue and register the address 
       immediately.  
@@ -12988,11 +13026,11 @@ class BlockDataManagerThread(threading.Thread):
       if os.path.exists(bfile):
          os.remove(bfile)
 
-      # Check for the existence of the Bitcoin-Qt directory
-      if not os.path.exists(self.btcdir):
-         raise FileExistsError, ('Directory does not exist: %s' % self.btcdir)
+      # Check for the existence of the Protoshares-Qt directory
+      if not os.path.exists(self.ptsdir):
+         raise FileExistsError, ('Directory does not exist: %s' % self.ptsdir)
 
-      blkdir = os.path.join(self.btcdir, 'blocks')
+      blkdir = os.path.join(self.ptsdir, 'blocks')
       blk1st = os.path.join(blkdir, 'blk00000.dat')
 
       # ... and its blk000X.dat files
@@ -13009,7 +13047,7 @@ class BlockDataManagerThread(threading.Thread):
       self.bdm.SetHomeDirLocation(ARMORY_HOME_DIR)
       self.bdm.SetBlkFileLocation(str(blkdir))
       self.bdm.SetLevelDBLocation(self.ldbdir)
-      self.bdm.SetBtcNetworkParams( GENESIS_BLOCK_HASH, \
+      self.bdm.SetPtsNetworkParams( GENESIS_BLOCK_HASH, \
                                     GENESIS_TX_HASH,    \
                                     MAGIC_BYTES)
 
@@ -13087,16 +13125,16 @@ class BlockDataManagerThread(threading.Thread):
 
       In order to work cleanly with the threaded BDM, the search code 
       needed to be integrated directly here, instead of being called
-      from the PyBtcWallet method.  Because that method is normally called 
+      from the PyPtsWallet method.  Because that method is normally called 
       from outside the BDM thread, but this method is only called from 
       _inside_ the BDM thread.  Those calls use the BDM stack which will
       deadlock waiting for the itself before it can move on...
 
       Unfortunately, because of this, we have to break a python-class 
-      privacy rules:  we are accessing the PyBtcWallet object as if this
-      were PyBtcWallet code (accessing properties directly).  
+      privacy rules:  we are accessing the PyPtsWallet object as if this
+      were PyPtsWallet code (accessing properties directly).  
       """
-      if not isinstance(pywlt, PyBtcWallet):
+      if not isinstance(pywlt, PyPtsWallet):
          LOGERROR('Only python wallets can be passed for recovery scans')
          return
 
@@ -13111,7 +13149,7 @@ class BlockDataManagerThread(threading.Thread):
 
       #####
 
-      # Whenever calling PyBtcWallet methods from BDM, set flag
+      # Whenever calling PyPtsWallet methods from BDM, set flag
       prevCalledFromBDM = pywlt.calledFromBDM
       pywlt.calledFromBDM = True
       
@@ -13226,7 +13264,7 @@ class BlockDataManagerThread(threading.Thread):
 
       # Flags
       self.startBDM     = False
-      #self.btcdir       = BTC_HOME_DIR
+      #self.ptsdir       = PTS_HOME_DIR
 
       # Lists of wallets that should be checked after blockchain updates
       self.pyWltList    = []   # these will be python refs
@@ -13234,8 +13272,8 @@ class BlockDataManagerThread(threading.Thread):
 
 
       # The BlockDataManager is easier to use if you put all your addresses
-      # into a C++ BtcWallet object, and let it 
-      self.masterCppWallet = Cpp.BtcWallet()
+      # into a C++ PtsWallet object, and let it 
+      self.masterCppWallet = Cpp.PtsWallet()
       self.bdm.registerWallet(self.masterCppWallet)
 
 

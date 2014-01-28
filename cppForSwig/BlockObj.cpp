@@ -13,7 +13,7 @@
 #include <algorithm>
 
 #include "BinaryData.h"
-#include "BtcUtils.h"
+#include "PtsUtils.h"
 #include "BlockObj.h"
 #include "leveldb_wrapper.h"
 
@@ -24,8 +24,8 @@
 void BlockHeader::unserialize(uint8_t const * ptr)
 {
    dataCopy_.copyFrom(ptr, HEADER_SIZE);
-   BtcUtils::getHash256(dataCopy_.getPtr(), HEADER_SIZE, thisHash_);
-   difficultyDbl_ = BtcUtils::convertDiffBitsToDouble( 
+   PtsUtils::getHash256(dataCopy_.getPtr(), HEADER_SIZE, thisHash_);
+   difficultyDbl_ = PtsUtils::convertDiffBitsToDouble( 
                               BinaryDataRef(dataCopy_.getPtr()+72, 4));
    isInitialized_ = true;
    nextHash_ = BinaryData(0);
@@ -96,7 +96,7 @@ uint32_t BlockHeader::findNonce(void)
    for(uint32_t nonce=0; nonce<(uint32_t)(-1); nonce++)
    {
       *(uint32_t*)(playHeader.getPtr()+76) = nonce;
-      BtcUtils::getHash256_NoSafetyCheck(playHeader.getPtr(), HEADER_SIZE, hashResult);
+      PtsUtils::getHash256_NoSafetyCheck(playHeader.getPtr(), HEADER_SIZE, hashResult);
       if(hashResult.getSliceRef(28,4) == fourZeros)
       {
          cout << "NONCE FOUND! " << nonce << endl;
@@ -203,14 +203,14 @@ OutPoint TxIn::getOutPoint(void) const
 /////////////////////////////////////////////////////////////////////////////
 BinaryData TxIn::getScript(void) const
 { 
-   uint32_t scrLen = (uint32_t)BtcUtils::readVarInt(getPtr()+36);
+   uint32_t scrLen = (uint32_t)PtsUtils::readVarInt(getPtr()+36);
    return BinaryData(getPtr() + getScriptOffset(), scrLen);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 BinaryDataRef TxIn::getScriptRef(void) const
 { 
-   uint32_t scrLen = (uint32_t)BtcUtils::readVarInt(getPtr()+36);
+   uint32_t scrLen = (uint32_t)PtsUtils::readVarInt(getPtr()+36);
    return BinaryDataRef(getPtr() + getScriptOffset(), scrLen);
 }
 
@@ -224,12 +224,12 @@ void TxIn::unserialize(uint8_t const * ptr,
 {
    parentTx_ = parent;
    index_ = idx;
-   uint32_t numBytes = (nbytes==0 ? BtcUtils::TxInCalcLength(ptr) : nbytes);
+   uint32_t numBytes = (nbytes==0 ? PtsUtils::TxInCalcLength(ptr) : nbytes);
    dataCopy_.copyFrom(ptr, numBytes);
 
-   scriptOffset_ = 36 + BtcUtils::readVarIntLength(getPtr()+36);
+   scriptOffset_ = 36 + PtsUtils::readVarIntLength(getPtr()+36);
 
-   scriptType_ = BtcUtils::getTxInScriptType(getScriptRef(),
+   scriptType_ = PtsUtils::getTxInScriptType(getScriptRef(),
                                              BinaryDataRef(getPtr(),32));
 
    if(!parentTx_.isInitialized())
@@ -277,11 +277,11 @@ bool TxIn::getSenderScrAddrIfAvail(BinaryData & addrTarget) const
    if(scriptType_ == TXIN_SCRIPT_NONSTANDARD ||
       scriptType_ == TXIN_SCRIPT_COINBASE)
    {
-      addrTarget = BtcUtils::BadAddress_;
+      addrTarget = PtsUtils::BadAddress_;
       return false;
    }
    
-   addrTarget = BtcUtils::getTxInAddrFromType(getScript(), scriptType_);
+   addrTarget = PtsUtils::getTxInAddrFromType(getScript(), scriptType_);
    return true;
 }
 
@@ -364,13 +364,13 @@ void TxOut::unserialize( uint8_t const * ptr,
 {
    parentTx_ = parent;
    index_ = idx;
-   uint32_t numBytes = (nbytes==0 ? BtcUtils::TxOutCalcLength(ptr) : nbytes);
+   uint32_t numBytes = (nbytes==0 ? PtsUtils::TxOutCalcLength(ptr) : nbytes);
    dataCopy_.copyFrom(ptr, numBytes);
 
-   scriptOffset_ = 8 + BtcUtils::readVarIntLength(getPtr()+8);
+   scriptOffset_ = 8 + PtsUtils::readVarIntLength(getPtr()+8);
    BinaryDataRef scriptRef(dataCopy_.getPtr()+scriptOffset_, getScriptSize());
-   scriptType_ = BtcUtils::getTxOutScriptType(scriptRef);
-   uniqueScrAddr_ = BtcUtils::getTxOutScrAddr(scriptRef);
+   scriptType_ = PtsUtils::getTxOutScriptType(scriptRef);
+   uniqueScrAddr_ = PtsUtils::getTxOutScrAddr(scriptRef);
 
    if(!parentTx_.isInitialized())
    {
@@ -440,7 +440,7 @@ void TxOut::pprint(ostream & os, int nIndent, bool pBigendian)
    {
    case TXOUT_SCRIPT_STDHASH160:  os << "StdHash160" << endl; break;
    case TXOUT_SCRIPT_STDPUBKEY65: os << "StdPubKey65" << endl; break;
-   case TXOUT_SCRIPT_STDPUBKEY33: os << "StdPubKey65" << endl; break;
+   case TXOUT_SCRIPT_STDPUBKEY33: os << "StdPubKey33" << endl; break;
    case TXOUT_SCRIPT_P2SH:        os << "Pay2ScrHash" << endl; break;
    case TXOUT_SCRIPT_NONSTANDARD: os << "UNKNOWN " << endl; break;
    }
@@ -466,9 +466,9 @@ Tx::Tx(TxRef  txref)
 /////////////////////////////////////////////////////////////////////////////
 void Tx::unserialize(uint8_t const * ptr)
 {
-   uint32_t nBytes = BtcUtils::TxCalcLength(ptr, &offsetsTxIn_, &offsetsTxOut_);
+   uint32_t nBytes = PtsUtils::TxCalcLength(ptr, &offsetsTxIn_, &offsetsTxOut_);
    dataCopy_.copyFrom(ptr, nBytes);
-   BtcUtils::getHash256(ptr, nBytes, thisHash_);
+   PtsUtils::getHash256(ptr, nBytes, thisHash_);
 
    uint32_t numTxOut = offsetsTxOut_.size()-1;
    version_  = READ_UINT32_LE(ptr);
@@ -491,7 +491,7 @@ bool Tx::isMainBranch(void) const
 /////////////////////////////////////////////////////////////////////////////
 BinaryData Tx::getThisHash(void) const
 {
-   return BtcUtils::getHash256(dataCopy_.getPtr(), dataCopy_.getSize());
+   return PtsUtils::getHash256(dataCopy_.getPtr(), dataCopy_.getSize());
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -517,7 +517,7 @@ uint64_t Tx::getSumOfOutputs(void)
 BinaryData Tx::getScrAddrForTxOut(uint32_t txOutIndex) 
 {
    TxOut txout = getTxOutCopy(txOutIndex);
-   return BtcUtils::getTxOutScrAddr(txout.getScript());
+   return PtsUtils::getTxOutScrAddr(txout.getScript());
 }
 
 
@@ -701,7 +701,7 @@ BinaryData TxRef::getBlockHash(void) const
       return sbh.thisHash_;
    }
    else
-      return BtcUtils::EmptyHash_;
+      return PtsUtils::EmptyHash_;
 }
 
 
@@ -849,7 +849,7 @@ TxIOPair::TxIOPair(BinaryData txOutKey8B, uint64_t val) :
 HashString TxIOPair::getTxHashOfOutput(void)
 {
    if(!hasTxOut())
-      return BtcUtils::EmptyHash_;
+      return PtsUtils::EmptyHash_;
    else if(txRefOfOutput_.isInitialized())
       return txRefOfOutput_.getThisHash();
    else
@@ -860,7 +860,7 @@ HashString TxIOPair::getTxHashOfOutput(void)
 HashString TxIOPair::getTxHashOfInput(void)
 {
    if(!hasTxIn())
-      return BtcUtils::EmptyHash_;
+      return PtsUtils::EmptyHash_;
    else if(txRefOfInput_.isInitialized())
       return txRefOfInput_.getThisHash();
    else
@@ -1107,7 +1107,7 @@ void TxIOPair::pprintOneLine(void)
 
 ////////////////////////////////////////////////////////////////////////////////
 UnspentTxOut::UnspentTxOut(void) :
-   txHash_(BtcUtils::EmptyHash_),
+   txHash_(PtsUtils::EmptyHash_),
    txOutIndex_(0),
    txHeight_(0),
    value_(0),
@@ -1133,7 +1133,7 @@ void UnspentTxOut::init(TxOut & txout, uint32_t blkNum, bool isMulti)
 ////////////////////////////////////////////////////////////////////////////////
 BinaryData UnspentTxOut::getRecipientScrAddr(void) const
 {
-   return BtcUtils::getTxOutScrAddr(getScript());
+   return PtsUtils::getTxOutScrAddr(getScript());
 }
 
 
@@ -1204,7 +1204,7 @@ void UnspentTxOut::sortTxOutVect(vector<UnspentTxOut> & utovect, int sortType)
 void UnspentTxOut::pprintOneLine(uint32_t currBlk)
 {
    updateNumConfirm(currBlk);
-   printf(" Tx:%s:%02d   BTC:%0.3f   nConf:%04d\n",
+   printf(" Tx:%s:%02d   PTS:%0.3f   nConf:%04d\n",
              txHash_.copySwapEndian().getSliceCopy(0,8).toHexStr().c_str(),
              txOutIndex_,
              value_/1e8,
@@ -1217,7 +1217,7 @@ void UnspentTxOut::pprintOneLine(uint32_t currBlk)
 
 ////////////////////////////////////////////////////////////////////////////////
 /*
-RegisteredScrAddr::RegisteredScrAddr(BtcAddress const & addrObj, 
+RegisteredScrAddr::RegisteredScrAddr(PtsAddress const & addrObj, 
                                      int32_t blkCreated)
 {
    uniqueKey_ = addrObj.getAddrStr20();

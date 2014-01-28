@@ -123,6 +123,6 @@ If you don't have it, install msvc10 express, it comes with msvc9/10 binaries as
 Note that it uses an old version of LevelDB, but you can always attempt to upgrade it on your own. It also needs ATL to build. You'll need a pay version of msvc 9 and above. Or, if you're using msvc10+ express, download and install ATL binaries from the Windows Driver Devellopement Kit 7.1 (WinDDK). Don't go for ver 8.0 and above as they don't come with ATL anymore.
 
 
-Have questions? Need help? Or just want to comment? Pm goatpig on the bitcoin forums (bitcointalk.org)
+Have questions? Need help? Or just want to comment? Pm goatpig on the protoshares forums (protosharestalk.org)
 
 

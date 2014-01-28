@@ -1,5 +1,5 @@
 ********************************************************************************
-* All non-standard scripts found on the Bitcoin test-network
+* All non-standard scripts found on the Protoshares test-network
 ********************************************************************************
 
 Attempting to interpret script:

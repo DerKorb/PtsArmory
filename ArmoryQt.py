@@ -64,13 +64,13 @@ class ArmoryMainWindow(QMainWindow):
       # SETUP THE WINDOWS DECORATIONS
       self.lblLogoIcon = QLabel()
       if USE_TESTNET:
-         self.setWindowTitle('Armory - Bitcoin Wallet Management [TESTNET]')
+         self.setWindowTitle('Armory - Protoshares Wallet Management [TESTNET]')
          self.iconfile = ':/armory_icon_green_32x32.png'
          self.lblLogoIcon.setPixmap(QPixmap(':/armory_logo_green_h56.png'))
          if Colors.isDarkBkgd:
             self.lblLogoIcon.setPixmap(QPixmap(':/armory_logo_white_text_green_h56.png'))
       else:
-         self.setWindowTitle('Armory - Bitcoin Wallet Management')
+         self.setWindowTitle('Armory - Protoshares Wallet Management')
          self.iconfile = ':/armory_icon_32x32.png'
          self.lblLogoIcon.setPixmap(QPixmap(':/armory_logo_h44.png'))
          if Colors.isDarkBkgd:
@@ -106,7 +106,7 @@ class ArmoryMainWindow(QMainWindow):
 
       # We want to determine whether the user just upgraded to a new version
       self.firstLoadNewVersion = False
-      currVerStr = 'v'+getVersionString(BTCARMORY_VERSION)
+      currVerStr = 'v'+getVersionString(PTSARMORY_VERSION)
       if self.settings.hasSetting('LastVersionLoad'):
          lastVerStr = self.settings.get('LastVersionLoad')
          if not lastVerStr==currVerStr:
@@ -145,11 +145,11 @@ class ArmoryMainWindow(QMainWindow):
 
       # If we're going into online mode, start loading blockchain
       if self.doManageSatoshi:
-         self.startBitcoindIfNecessary()
+         self.startProtosharesdIfNecessary()
       else:
          self.loadBlockchainIfNecessary()
 
-      # Setup system tray and register "bitcoin:" URLs with the OS
+      # Setup system tray and register "protoshares:" URLs with the OS
       self.setupSystemTray()
       self.setupUriRegistration()
 
@@ -311,9 +311,9 @@ class ArmoryMainWindow(QMainWindow):
       self.lblSpd.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
       self.lblUcn.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
-      self.lblBTC1 = QRichLabel('<b>BTC</b>', doWrap=False)
-      self.lblBTC2 = QRichLabel('<b>BTC</b>', doWrap=False)
-      self.lblBTC3 = QRichLabel('<b>BTC</b>', doWrap=False)
+      self.lblPTS1 = QRichLabel('<b>PTS</b>', doWrap=False)
+      self.lblPTS2 = QRichLabel('<b>PTS</b>', doWrap=False)
+      self.lblPTS3 = QRichLabel('<b>PTS</b>', doWrap=False)
       self.ttipTot = self.createToolTipWidget( \
             'Funds if all current transactions are confirmed.  '
             'Value appears gray when it is the same as your spendable funds.')
@@ -333,9 +333,9 @@ class ArmoryMainWindow(QMainWindow):
       frmTotalsLayout.addWidget(self.lblSpendFunds,  1,1)
       frmTotalsLayout.addWidget(self.lblUnconfFunds, 2,1)
 
-      frmTotalsLayout.addWidget(self.lblBTC1, 0,2)
-      frmTotalsLayout.addWidget(self.lblBTC2, 1,2)
-      frmTotalsLayout.addWidget(self.lblBTC3, 2,2)
+      frmTotalsLayout.addWidget(self.lblPTS1, 0,2)
+      frmTotalsLayout.addWidget(self.lblPTS2, 1,2)
+      frmTotalsLayout.addWidget(self.lblPTS3, 2,2)
 
       frmTotalsLayout.addWidget(self.ttipTot, 0,3)
       frmTotalsLayout.addWidget(self.ttipSpd, 1,3)
@@ -415,18 +415,18 @@ class ArmoryMainWindow(QMainWindow):
       self.mainDisplayTabs.addTab(self.tabActivity,  'Transactions')
 
 
-      btnSendBtc   = QPushButton("Send Bitcoins")
-      btnRecvBtc   = QPushButton("Receive Bitcoins")
+      btnSendPts   = QPushButton("Send Protoshares")
+      btnRecvPts   = QPushButton("Receive Protoshares")
       btnWltProps  = QPushButton("Wallet Properties")
       btnOfflineTx = QPushButton("Offline Transactions")
  
 
       self.connect(btnWltProps, SIGNAL('clicked()'), self.execDlgWalletDetails)
-      self.connect(btnRecvBtc,  SIGNAL('clicked()'), self.clickReceiveCoins)
-      self.connect(btnSendBtc,  SIGNAL('clicked()'), self.clickSendBitcoins)
+      self.connect(btnRecvPts,  SIGNAL('clicked()'), self.clickReceiveCoins)
+      self.connect(btnSendPts,  SIGNAL('clicked()'), self.clickSendProtoshares)
       self.connect(btnOfflineTx,SIGNAL('clicked()'), self.execOfflineTx)
 
-      verStr = 'Armory %s-beta / %s' % (getVersionString(BTCARMORY_VERSION), \
+      verStr = 'Armory %s-beta / %s' % (getVersionString(PTSARMORY_VERSION), \
                                               UserModeStr(self.usermode))
       lblInfo = QRichLabel(verStr, doWrap=False)
       lblInfo.setFont(GETFONT('var',10))
@@ -434,8 +434,8 @@ class ArmoryMainWindow(QMainWindow):
 
       logoBtnFrame = []
       logoBtnFrame.append(self.lblLogoIcon)
-      logoBtnFrame.append(btnSendBtc)
-      logoBtnFrame.append(btnRecvBtc)
+      logoBtnFrame.append(btnSendPts)
+      logoBtnFrame.append(btnRecvPts)
       logoBtnFrame.append(btnWltProps)
       if self.usermode in (USERMODE.Advanced, USERMODE.Expert):
          logoBtnFrame.append(btnOfflineTx)
@@ -651,8 +651,8 @@ class ArmoryMainWindow(QMainWindow):
          be cleared allowing you to retry any stuck transactions.""")
       if not self.getSettingOrSetDefault('ManageSatoshi', True):
          msg += tr("""
-         <br><br>Make sure you also restart Bitcoin-Qt 
-         (or bitcoind) and let it synchronize again before you restart 
+         <br><br>Make sure you also restart Protoshares-Qt 
+         (or protosharesd) and let it synchronize again before you restart 
          Armory.  Doing so will clear its memory pool, as well""")
       QMessageBox.information(self, tr('Memory Pool'), msg, QMessageBox.Ok)
 
@@ -789,20 +789,20 @@ class ArmoryMainWindow(QMainWindow):
 
       def traySend():
          self.bringArmoryToFront()
-         self.clickSendBitcoins()
+         self.clickSendProtoshares()
 
       def trayRecv():
          self.bringArmoryToFront()
          self.clickReceiveCoins()
 
       actShowArmory = self.createAction('Show Armory', self.bringArmoryToFront)
-      actSendBtc    = self.createAction('Send Bitcoins', traySend)
-      actRcvBtc     = self.createAction('Receive Bitcoins', trayRecv)
+      actSendPts    = self.createAction('Send Protoshares', traySend)
+      actRcvPts     = self.createAction('Receive Protoshares', trayRecv)
       actClose      = self.createAction('Quit Armory', self.closeForReal)
       # Create a short menu of options
       menu.addAction(actShowArmory)
-      menu.addAction(actSendBtc)
-      menu.addAction(actRcvBtc)
+      menu.addAction(actSendPts)
+      menu.addAction(actRcvPts)
       menu.addSeparator()
       menu.addAction(actClose)
       self.sysTray.setContextMenu(menu)
@@ -811,11 +811,11 @@ class ArmoryMainWindow(QMainWindow):
 
    #############################################################################
    @AllowAsync
-   def registerBitcoinWithFF(self):
-      #the 3 nodes needed to add to register bitcoin as a protocol in FF   
-      rdfschemehandler = 'about=\"urn:scheme:handler:bitcoin\"'
-      rdfscheme = 'about=\"urn:scheme:bitcoin\"'
-      rdfexternalApp = 'about=\"urn:scheme:externalApplication:bitcoin\"'
+   def registerProtosharesWithFF(self):
+      #the 3 nodes needed to add to register protoshares as a protocol in FF   
+      rdfschemehandler = 'about=\"urn:scheme:handler:protoshares\"'
+      rdfscheme = 'about=\"urn:scheme:protoshares\"'
+      rdfexternalApp = 'about=\"urn:scheme:externalApplication:protoshares\"'
 
       #find mimeTypes.rdf file
       home = os.getenv('HOME')
@@ -849,22 +849,22 @@ class ArmoryMainWindow(QMainWindow):
 
             #add the missing nodes
             if rdfsch == -1:
-               FFrdf.write(' <RDF:Description RDF:about=\"urn:scheme:handler:bitcoin\"\n')
+               FFrdf.write(' <RDF:Description RDF:about=\"urn:scheme:handler:protoshares\"\n')
                FFrdf.write('                  NC:alwaysAsk=\"false\">\n')
-               FFrdf.write('    <NC:externalApplication RDF:resource=\"urn:scheme:externalApplication:bitcoin\"/>\n')
+               FFrdf.write('    <NC:externalApplication RDF:resource=\"urn:scheme:externalApplication:protoshares\"/>\n')
                FFrdf.write('    <NC:possibleApplication RDF:resource=\"urn:handler:local:/usr/bin/xdg-open\"/>\n')
                FFrdf.write(' </RDF:Description>\n')
                i+=1
    
             if rdfsc == -1:
-               FFrdf.write(' <RDF:Description RDF:about=\"urn:scheme:bitcoin\"\n')
-               FFrdf.write('                  NC:value=\"bitcoin\">\n')
-               FFrdf.write('    <NC:handlerProp RDF:resource=\"urn:scheme:handler:bitcoin\"/>\n')
+               FFrdf.write(' <RDF:Description RDF:about=\"urn:scheme:protoshares\"\n')
+               FFrdf.write('                  NC:value=\"protoshares\">\n')
+               FFrdf.write('    <NC:handlerProp RDF:resource=\"urn:scheme:handler:protoshares\"/>\n')
                FFrdf.write(' </RDF:Description>\n')
                i+=1
          
             if rdfea == -1:
-               FFrdf.write(' <RDF:Description RDF:about=\"urn:scheme:externalApplication:bitcoin\"\n')
+               FFrdf.write(' <RDF:Description RDF:about=\"urn:scheme:externalApplication:protoshares\"\n')
                FFrdf.write('                  NC:prettyName=\"xdg-open\"\n')
                FFrdf.write('                  NC:path=\"/usr/bin/xdg-open\" />\n')               
                i+=1
@@ -877,25 +877,25 @@ class ArmoryMainWindow(QMainWindow):
    #############################################################################
    def setupUriRegistration(self, justDoIt=False):
       """
-      Setup Armory as the default application for handling bitcoin: links
+      Setup Armory as the default application for handling protoshares: links
       """
       LOGINFO('setupUriRegistration')
 
       if OS_LINUX:
-         out,err = execAndWait('gconftool-2 --get /desktop/gnome/url-handlers/bitcoin/command')
-         out2,err = execAndWait('xdg-mime query default x-scheme-handler/bitcoin')
+         out,err = execAndWait('gconftool-2 --get /desktop/gnome/url-handlers/protoshares/command')
+         out2,err = execAndWait('xdg-mime query default x-scheme-handler/protoshares')
     
          #check FF protocol association
-         #checkFF_thread = threading.Thread(target=self.registerBitcoinWithFF)
+         #checkFF_thread = threading.Thread(target=self.registerProtosharesWithFF)
          #checkFF_thread.start()
-         self.registerBitcoinWithFF(async=True)
+         self.registerProtosharesWithFF(async=True)
 
          def setAsDefault():
             LOGINFO('Setting up Armory as default URI handler...')
-            execAndWait('gconftool-2 -t string -s /desktop/gnome/url-handlers/bitcoin/command "python /usr/lib/armory/ArmoryQt.py \"%s\""')
-            execAndWait('gconftool-2 -s /desktop/gnome/url-handlers/bitcoin/needs_terminal false -t bool')
-            execAndWait('gconftool-2 -t bool -s /desktop/gnome/url-handlers/bitcoin/enabled true')
-            execAndWait('xdg-mime default armory.desktop x-scheme-handler/bitcoin')
+            execAndWait('gconftool-2 -t string -s /desktop/gnome/url-handlers/protoshares/command "python /usr/lib/armory/ArmoryQt.py \"%s\""')
+            execAndWait('gconftool-2 -s /desktop/gnome/url-handlers/protoshares/needs_terminal false -t bool')
+            execAndWait('gconftool-2 -t bool -s /desktop/gnome/url-handlers/protoshares/enabled true')
+            execAndWait('xdg-mime default armory.desktop x-scheme-handler/protoshares')
 
 
          if ('no value' in out.lower() or 'no value' in err.lower()) and not 'armory.desktop' in out2.lower():
@@ -908,7 +908,7 @@ class ArmoryMainWindow(QMainWindow):
             if not self.getSettingOrSetDefault('DNAA_DefaultApp', False):
                reply = MsgBoxWithDNAA(MSGBOX.Question, 'Default URL Handler', \
                   'Armory is not set as your default application for handling '
-                  '"bitcoin:" links.  Would you like to use Armory as the '
+                  '"protoshares:" links.  Would you like to use Armory as the '
                   'default?', 'Do not ask this question again')
                if reply[0]==True:
                   setAsDefault()
@@ -929,7 +929,7 @@ class ArmoryMainWindow(QMainWindow):
          LOGWARN("running from: %s, key: %s", app_path, modulepathname)
          
 
-         rootKey = 'bitcoin\\shell\\open\\command'
+         rootKey = 'protoshares\\shell\\open\\command'
          try:
             userKey = 'Software\\Classes\\' + rootKey
             registryKey = OpenKey(HKEY_CURRENT_USER, userKey, 0, KEY_READ)
@@ -972,7 +972,7 @@ class ArmoryMainWindow(QMainWindow):
             # needed.  They have enough to worry about with this weird new program...
             reply = MsgBoxWithDNAA(MSGBOX.Question, 'Default URL Handler', \
                'Armory is not set as your default application for handling '
-               '"bitcoin:" links.  Would you like to use Armory as the '
+               '"protoshares:" links.  Would you like to use Armory as the '
                'default?', 'Do not ask this question again')
 
             if reply[1]==True:
@@ -993,13 +993,13 @@ class ArmoryMainWindow(QMainWindow):
             LOGINFO('Registering Armory  for current user')
             baseDir = app_dir
             regKeys = []
-            regKeys.append(['Software\\Classes\\bitcoin', '', 'URL:bitcoin Protocol'])
-            regKeys.append(['Software\\Classes\\bitcoin', 'URL Protocol', ""])
-            regKeys.append(['Software\\Classes\\bitcoin\\shell', '', None])
-            regKeys.append(['Software\\Classes\\bitcoin\\shell\\open', '',  None])
-            regKeys.append(['Software\\Classes\\bitcoin\\shell\\open\\command',  '', \
+            regKeys.append(['Software\\Classes\\protoshares', '', 'URL:protoshares Protocol'])
+            regKeys.append(['Software\\Classes\\protoshares', 'URL Protocol', ""])
+            regKeys.append(['Software\\Classes\\protoshares\\shell', '', None])
+            regKeys.append(['Software\\Classes\\protoshares\\shell\\open', '',  None])
+            regKeys.append(['Software\\Classes\\protoshares\\shell\\open\\command',  '', \
                            modulepathname])
-            regKeys.append(['Software\\Classes\\bitcoin\\DefaultIcon', '',  \
+            regKeys.append(['Software\\Classes\\protoshares\\DefaultIcon', '',  \
                            '"%s\\armory48x48.ico"' % baseDir])
 
             for key,name,val in regKeys:
@@ -1031,7 +1031,7 @@ class ArmoryMainWindow(QMainWindow):
             else:
                wltID = dlg.selectedID 
                wlt = self.walletMap[wltID]
-               dlgSend = DlgSendBitcoins(wlt, self, self)
+               dlgSend = DlgSendProtoshares(wlt, self, self)
                dlgSend.exec_()
                return
 
@@ -1251,7 +1251,7 @@ class ArmoryMainWindow(QMainWindow):
                return None
             
 
-         thisVerString = getVersionString(BTCARMORY_VERSION)
+         thisVerString = getVersionString(PTSARMORY_VERSION)
          changeLog = []
          vernum = ''
 
@@ -1368,7 +1368,7 @@ class ArmoryMainWindow(QMainWindow):
             
 
       LOGINFO('Internet connection is Available: %s', self.internetAvail)
-      LOGINFO('Bitcoin-Qt/bitcoind is Available: %s', self.bitcoindIsAvailable())
+      LOGINFO('Protoshares-Qt/protosharesd is Available: %s', self.protosharesdIsAvailable())
       LOGINFO('The first blk*.dat was Available: %s', str(self.checkHaveBlockfiles()))
       LOGINFO('Online mode currently possible:   %s', self.onlineModeIsPossible())
 
@@ -1376,18 +1376,18 @@ class ArmoryMainWindow(QMainWindow):
       TimerStop('setupNetworking')
 
    ############################################################################
-   def startBitcoindIfNecessary(self):
-      LOGINFO('startBitcoindIfNecessary')
+   def startProtosharesdIfNecessary(self):
+      LOGINFO('startProtosharesdIfNecessary')
       if not (self.forceOnline or self.internetAvail) or CLI_OPTIONS.offline:
-         LOGWARN('Not online, will not start bitcoind')
+         LOGWARN('Not online, will not start protosharesd')
          return False
 
       if not self.doManageSatoshi:
-         LOGWARN('Tried to start bitcoind, but ManageSatoshi==False')
+         LOGWARN('Tried to start protosharesd, but ManageSatoshi==False')
          return False
 
       if satoshiIsAvailable():
-         LOGWARN('Tried to start bitcoind, but satoshi already running')
+         LOGWARN('Tried to start protosharesd, but satoshi already running')
          return False
       
       self.setSatoshiPaths()
@@ -1395,11 +1395,11 @@ class ArmoryMainWindow(QMainWindow):
       TheSDM.setDisabled(False)
       try:
          # "satexe" is actually just the install directory, not the direct
-         # path the executable.  That dir tree will be searched for bitcoind
+         # path the executable.  That dir tree will be searched for protosharesd
          TheSDM.setupSDM(None, self.satoshiHomePath, \
                          extraExeSearch=self.satoshiExeSearchPath)
-         TheSDM.startBitcoind()
-         LOGDEBUG('Bitcoind started without error')
+         TheSDM.startProtosharesd()
+         LOGDEBUG('Protosharesd started without error')
          return True
       except:
          LOGEXCEPT('Failed to setup SDM')
@@ -1414,16 +1414,16 @@ class ArmoryMainWindow(QMainWindow):
       # it if it doesn't exist
       if self.settings.hasSetting('SatoshiExe'):
          if not os.path.exists(self.settings.get('SatoshiExe')):
-            LOGERROR('Bitcoin installation setting is a non-existent directory')
+            LOGERROR('Protoshares installation setting is a non-existent directory')
          self.satoshiExeSearchPath = [self.settings.get('SatoshiExe')]
       else:
          self.satoshiExeSearchPath = []
 
    
-      self.satoshiHomePath = BTC_HOME_DIR
+      self.satoshiHomePath = PTS_HOME_DIR
       if self.settings.hasSetting('SatoshiDatadir') and \
          CLI_OPTIONS.satoshiHome=='DEFAULT':
-         # Setting override BTC_HOME_DIR only if it wasn't explicitly
+         # Setting override PTS_HOME_DIR only if it wasn't explicitly
          # set as the command line.  
          self.satoshiHomePath = self.settings.get('SatoshiDatadir')
   
@@ -1460,18 +1460,18 @@ class ArmoryMainWindow(QMainWindow):
 
    #############################################################################
    def checkHaveBlockfiles(self):
-      return os.path.exists(os.path.join(TheBDM.btcdir, 'blocks'))
+      return os.path.exists(os.path.join(TheBDM.ptsdir, 'blocks'))
 
    #############################################################################
    def onlineModeIsPossible(self):
       return ((self.internetAvail or self.forceOnline) and \
-               self.bitcoindIsAvailable() and \
+               self.protosharesdIsAvailable() and \
                self.checkHaveBlockfiles())
 
 
    #############################################################################
-   def bitcoindIsAvailable(self):
-      return satoshiIsAvailable('127.0.0.1', BITCOIN_PORT)
+   def protosharesdIsAvailable(self):
+      return satoshiIsAvailable('127.0.0.1', PROTOSHARES_PORT)
 
                   
 
@@ -1497,8 +1497,8 @@ class ArmoryMainWindow(QMainWindow):
    
             try:
                self.sysTray.showMessage('Disconnected', \
-                     'Connection to Bitcoin-Qt client lost!  Armory cannot send \n'
-                     'or receive bitcoins until connection is re-established.', \
+                     'Connection to Protoshares-Qt client lost!  Armory cannot send \n'
+                     'or receive protoshares until connection is re-established.', \
                      QSystemTrayIcon.Critical, 10000)
             except:
                LOGEXCEPT('Failed to show disconnect notification')
@@ -1517,7 +1517,7 @@ class ArmoryMainWindow(QMainWindow):
             try:
                if self.connectCount>0:
                   self.sysTray.showMessage('Connected', \
-                     'Connection to Bitcoin-Qt re-established', \
+                     'Connection to Protoshares-Qt re-established', \
                      QSystemTrayIcon.Information, 10000)
                self.connectCount += 1
             except:
@@ -1530,7 +1530,7 @@ class ArmoryMainWindow(QMainWindow):
                                           func_newTx=self.newTxFunc)
                                           #func_newTx=newTxFunc)
          reactor.callWhenRunning(reactor.connectTCP, '127.0.0.1', \
-                                          BITCOIN_PORT, self.NetworkingFactory)
+                                          PROTOSHARES_PORT, self.NetworkingFactory)
 
    
 
@@ -1553,20 +1553,20 @@ class ArmoryMainWindow(QMainWindow):
       LOGINFO('URI link clicked!')
       LOGINFO('The following URI string was parsed:')
       LOGINFO(uriStr.replace('%','%%'))
-      uriDict = parseBitcoinURI(uriStr)
+      uriDict = parseProtosharesURI(uriStr)
       if TheBDM.getBDMState() in ('Offline','Uninitialized'):
-         LOGERROR('%sed "bitcoin:" link in offline mode.' % ClickOrEnter)
+         LOGERROR('%sed "protoshares:" link in offline mode.' % ClickOrEnter)
          self.bringArmoryToFront() 
          QMessageBox.warning(self, 'Offline Mode',
-            'You %sed on a "bitcoin:" link, but Armory is in '
+            'You %sed on a "protoshares:" link, but Armory is in '
             'offline mode, and is not capable of creating transactions. '
             '%sing links will only work if Armory is connected '
-            'to the Bitcoin network!' % (clickOrEnter, ClickOrEnter), \
+            'to the Protoshares network!' % (clickOrEnter, ClickOrEnter), \
              QMessageBox.Ok)
          return {}
          
       if len(uriDict)==0:
-         warnMsg = ('It looks like you just %sed a "bitcoin:" link, but '
+         warnMsg = ('It looks like you just %sed a "protoshares:" link, but '
                     'that link is malformed.  ' % clickOrEnter)
          if self.usermode == USERMODE.Standard:
             warnMsg += ('Please check the source of the link and enter the '
@@ -1578,10 +1578,10 @@ class ArmoryMainWindow(QMainWindow):
          return {}
 
       if not uriDict.has_key('address'):
-         QMessageBox.warning(self, 'The "bitcoin:" link you just %sed '
+         QMessageBox.warning(self, 'The "protoshares:" link you just %sed '
             'does not even contain an address!  There is nothing that '
             'Armory can do with this link!' % clickOrEnter, QMessageBox.Ok)
-         LOGERROR('No address in "bitcoin:" link!  Nothing to do!')
+         LOGERROR('No address in "protoshares:" link!  Nothing to do!')
          return {}
 
       # Verify the URI is for the same network as this Armory instnance
@@ -1591,7 +1591,7 @@ class ArmoryMainWindow(QMainWindow):
          if NETWORKS.has_key(theAddrByte):
             net = NETWORKS[theAddrByte]
          QMessageBox.warning(self, 'Wrong Network!', \
-            'The address for the "bitcoin:" link you just %sed is '
+            'The address for the "protoshares:" link you just %sed is '
             'for the wrong network!  You are on the <b>%s</b> '
             'and the address you supplied is for the the '
             '<b>%s</b>!' % (clickOrEnter, NETWORKS[ADDRBYTE], net), \
@@ -1603,7 +1603,7 @@ class ArmoryMainWindow(QMainWindow):
       recognized = ['address','version','amount','label','message']
       for key,value in uriDict.iteritems():
          if key.startswith('req-') and not key[4:] in recognized:
-            QMessageBox.warning(self,'Unsupported URI', 'The "bitcoin:" link '
+            QMessageBox.warning(self,'Unsupported URI', 'The "protoshares:" link '
                'you just %sed contains fields that are required but not '
                'recognized by Armory.  This may be an older version of Armory, '
                'or the link you %sed on uses an exotic, unsupported format.'
@@ -1621,7 +1621,7 @@ class ArmoryMainWindow(QMainWindow):
       LOGINFO('uriLinkClicked')
       if not TheBDM.getBDMState()=='BlockchainReady':
          QMessageBox.warning(self, 'Offline', \
-            'You just clicked on a "bitcoin:" link, but Armory is offline ' 
+            'You just clicked on a "protoshares:" link, but Armory is offline ' 
             'and cannot send transactions.  Please click the link '
             'again when Armory is online.', \
             QMessageBox.Ok)
@@ -1631,7 +1631,7 @@ class ArmoryMainWindow(QMainWindow):
          
       if len(uriDict)>0:
          self.bringArmoryToFront() 
-         return self.uriSendBitcoins(uriDict)
+         return self.uriSendProtoshares(uriDict)
       
 
    #############################################################################
@@ -1698,7 +1698,7 @@ class ArmoryMainWindow(QMainWindow):
       wltOffline = self.settings.get('Offline_WalletIDs', expectList=True)
       for fpath in wltPaths:
          try:
-            wltLoad = PyBtcWallet().readWalletFile(fpath)
+            wltLoad = PyPtsWallet().readWalletFile(fpath)
             wltID = wltLoad.uniqueIDB58
             if fpath in wltExclude or wltID in wltExclude:
                continue
@@ -1936,7 +1936,7 @@ class ArmoryMainWindow(QMainWindow):
                'Blockchain Loaded!', 'Blockchain loading is complete.  '
                'Your balances and transaction history are now available '
                'under the "Transactions" tab.  You can also send and '
-               'receive bitcoins.', \
+               'receive protoshares.', \
                dnaaMsg='Do not show me this notification again ', yesStr='OK')
                   
             if remember==True:
@@ -2083,12 +2083,12 @@ class ArmoryMainWindow(QMainWindow):
             return
             
          uncolor =  htmlColor('MoneyNeg')  if unconfFunds>0          else htmlColor('Foreground')
-         btccolor = htmlColor('DisableFG') if spendFunds==totalFunds else htmlColor('MoneyPos')
+         ptscolor = htmlColor('DisableFG') if spendFunds==totalFunds else htmlColor('MoneyPos')
          lblcolor = htmlColor('DisableFG') if spendFunds==totalFunds else htmlColor('Foreground')
          goodColor= htmlColor('TextGreen')
-         self.lblTotalFunds.setText( '<b><font color="%s">%s</font></b>' % (btccolor,coin2str(totalFunds)))
+         self.lblTotalFunds.setText( '<b><font color="%s">%s</font></b>' % (ptscolor,coin2str(totalFunds)))
          self.lblTot.setText('<b><font color="%s">Maximum Funds:</font></b>' % lblcolor)
-         self.lblBTC1.setText('<b><font color="%s">BTC</font></b>' % lblcolor)
+         self.lblPTS1.setText('<b><font color="%s">PTS</font></b>' % lblcolor)
          self.lblSpendFunds.setText( '<b><font color=%s>%s</font></b>' % (goodColor, coin2str(spendFunds)))
          self.lblUnconfFunds.setText('<b><font color="%s">%s</font></b>' % \
                                              (uncolor, coin2str(unconfFunds)))
@@ -2382,7 +2382,7 @@ class ArmoryMainWindow(QMainWindow):
 
       newWallet = None
       if passwd:
-          newWallet = PyBtcWallet().createNewWallet( \
+          newWallet = PyPtsWallet().createNewWallet( \
                                            withEncrypt=True, \
                                            securePassphrase=passwd, \
                                            kdfTargSec=kdfSec, \
@@ -2391,7 +2391,7 @@ class ArmoryMainWindow(QMainWindow):
                                            longLabel=descr, \
                                            doRegisterWithBDM=False)
       else:
-          newWallet = PyBtcWallet().createNewWallet( \
+          newWallet = PyPtsWallet().createNewWallet( \
                                            withEncrypt=False, \
                                            shortLabel=name, \
                                            longLabel=descr, \
@@ -2410,7 +2410,7 @@ class ArmoryMainWindow(QMainWindow):
       # let the user use a wallet that triggers errors on reading it
       wltpath = newWallet.walletPath
       newWallet = None
-      newWallet = PyBtcWallet().readWalletFile(wltpath)
+      newWallet = PyPtsWallet().readWalletFile(wltpath)
       
 
       self.addWalletToApplication(newWallet, walletIsNew=True)
@@ -2451,7 +2451,7 @@ class ArmoryMainWindow(QMainWindow):
 
       inputSide = []
       for utxo in utxoList:
-         # The PyCreateAndSignTx method require PyTx and PyBtcAddress objects
+         # The PyCreateAndSignTx method require PyTx and PyPtsAddress objects
          CppPrevTx = TheBDM.getTxByHash(utxo.getTxHash()) 
          PyPrevTx = PyTx().unserialize(CppPrevTx.serialize())
          addr160 = CheckHash160(utxo.getRecipientScrAddr())
@@ -2469,7 +2469,7 @@ class ArmoryMainWindow(QMainWindow):
          return [None, outValue, minFee]
 
       outputSide = []
-      outputSide.append( [PyBtcAddress().createFromPublicKeyHash160(sweepTo160), outValue] )
+      outputSide.append( [PyPtsAddress().createFromPublicKeyHash160(sweepTo160), outValue] )
 
       pytx = PyCreateAndSignTx(inputSide, outputSide)
       return (pytx, outValue, minFee)
@@ -2479,7 +2479,7 @@ class ArmoryMainWindow(QMainWindow):
 
 
    #############################################################################
-   def confirmSweepScan(self, pybtcaddrList, targAddr160):
+   def confirmSweepScan(self, pyptsaddrList, targAddr160):
       LOGINFO('confirmSweepScan')
       gt1 = len(self.sweepAfterScanList)>1
 
@@ -2493,7 +2493,7 @@ class ArmoryMainWindow(QMainWindow):
             'addresses to sweep.  There is no limit on the number that can be '
             'specified, but they must all be entered at once.', QMessageBox.Ok)
          # Destroy the private key data
-         for addr in pybtcaddrList:
+         for addr in pyptsaddrList:
             addr.binPrivKey32_Plain.destroy()
          return False
 
@@ -2516,7 +2516,7 @@ class ArmoryMainWindow(QMainWindow):
       else:
          msgConfirm = ( \
             'Armory must scan the global transaction history in order to '
-            'find any bitcoins associated with the %s you supplied. '
+            'find any protoshares associated with the %s you supplied. '
             'Armory will go into offline mode temporarily while the scan '
             'is performed, and you will not have access to balances or be '
             'able to create transactions.  The scan may take several minutes.'
@@ -2536,9 +2536,9 @@ class ArmoryMainWindow(QMainWindow):
                                                 QMessageBox.Yes | QMessageBox.No)
 
       if confirmed==QMessageBox.Yes:
-         for addr in pybtcaddrList:
+         for addr in pyptsaddrList:
             TheBDM.registerImportedScrAddr(Hash160ToScrAddr(addr.getAddr160()))
-         self.sweepAfterScanList = pybtcaddrList
+         self.sweepAfterScanList = pyptsaddrList
          self.sweepAfterScanTarg = targAddr160
          #TheBDM.rescanBlockchain('AsNeeded', wait=False)
          self.startRescanBlockchain()
@@ -2610,9 +2610,9 @@ class ArmoryMainWindow(QMainWindow):
          if modified:
             reply = QMessageBox.warning(self, 'Old signature format detected', \
                  'The transaction that you are about to execute '
-                 'has been signed with an older version Bitcoin Armory '
+                 'has been signed with an older version Protoshares Armory '
                  'that has added unnecessary padding to the signature. '
-                 'If you are running version Bitcoin 0.8.2 or later the unnecessary '
+                 'If you are running version Protoshares 0.8.2 or later the unnecessary '
                  'the unnecessary signature padding will not be broadcast. '
                  'Note that removing the unnecessary padding will change the hash value '
                  'of the transaction. Do you want to remove the unnecessary padding?', QMessageBox.Yes | QMessageBox.No)
@@ -2646,16 +2646,16 @@ class ArmoryMainWindow(QMainWindow):
                searchstr = binary_to_hex(newTxHash, BIGENDIAN)
                QMessageBox.warning(self, 'Invalid Transaction', \
                   'The transaction that you just executed, does not '
-                  'appear to have been accepted by the Bitcoin network. '
+                  'appear to have been accepted by the Protoshares network. '
                   'This can happen for a variety of reasons, but it is '
                   'usually due to a bug in the Armory software.  '
                   '<br><br>On some occasions the transaction actually did succeed '
                   'and this message is the bug itself!  To confirm whether the '
                   'the transaction actually succeeded, you can try this direct link '
-                  'to blockchain.info:'
+                  'to coinplorer.com:'
                   '<br><br>'
-                  '<a href="https://blockchain.info/search/%s">'
-                  'https://blockchain.info/search/%s...</a>.  '
+                  '<a href="https://coinplorer.com/PTS/Transactions/%s">'
+                  'https://coinplorer.com/PTS/Transactions/%s...</a>.  '
                   '<br><br>'
                   'If you do not see the '
                   'transaction on that webpage within one minute, it failed and you '
@@ -2676,7 +2676,7 @@ class ArmoryMainWindow(QMainWindow):
          reactor.callLater(5, checkForTxInBDM)
 
          #QMessageBox.information(self, 'Broadcast Complete!', \
-            #'The transaction has been broadcast to the Bitcoin network.  However '
+            #'The transaction has been broadcast to the Protoshares network.  However '
             #'there is no way to know for sure whether it was accepted until you '
             #'see it in the blockchain with 1+ confirmations.  Please search '
             #'www.blockchain.info for the for recipient\'s address, to '
@@ -2707,7 +2707,7 @@ class ArmoryMainWindow(QMainWindow):
    def execImportWallet(self):
       sdm = TheSDM.getSDMState()
       bdm = TheBDM.getBDMState()
-      if sdm in ['BitcoindInitializing','BitcoindSynchronizing'] or \
+      if sdm in ['ProtosharesdInitializing','ProtosharesdSynchronizing'] or \
          bdm in ['Scanning']:
          QMessageBox.warning(self, tr('Scanning'), tr("""
             Armory is currently in the middle of scanning the blockchain for
@@ -2724,7 +2724,7 @@ class ArmoryMainWindow(QMainWindow):
       if not os.path.exists(fn):
          return
 
-      wlt = PyBtcWallet().readWalletFile(fn, verifyIntegrity=False, \
+      wlt = PyPtsWallet().readWalletFile(fn, verifyIntegrity=False, \
                                              doScanNow=False)
       wltID = wlt.uniqueIDB58
       wlt = None
@@ -2742,7 +2742,7 @@ class ArmoryMainWindow(QMainWindow):
 
       LOGINFO('Copying imported wallet to: %s', newpath)
       shutil.copy(fn, newpath)
-      newWlt = PyBtcWallet().readWalletFile(newpath)
+      newWlt = PyPtsWallet().readWalletFile(newpath)
       newWlt.fillAddressPool()
       
       self.addWalletToAppAndAskAboutRescan(newWlt)
@@ -2905,19 +2905,19 @@ class ArmoryMainWindow(QMainWindow):
    #############################################################################
    def execMigrateSatoshi(self):
       reply = MsgBoxCustom(MSGBOX.Question, 'Wallet Version Warning', \
-           'This wallet migration tool only works with regular Bitcoin wallets '
+           'This wallet migration tool only works with regular Protoshares wallets '
            'produced using version 0.5.X and earlier.  '
            'You can determine the version by '
-           'opening the regular Bitcoin client, then choosing "Help"'
-           '-->"About Bitcoin-Qt" from the main menu.  '
+           'opening the regular Protoshares client, then choosing "Help"'
+           '-->"About Protoshares-Qt" from the main menu.  '
            '<br><br>'
            '<b>If you have used your wallet with any version of the regular '
-           'Bitcoin client 0.6.0 or higher, this tool <u>will fail</u></b>.  '
+           'Protoshares client 0.6.0 or higher, this tool <u>will fail</u></b>.  '
            'In fact, it is highly recommended that you do not even attempt '
            'to use the tool on such wallets until it is officially supported '
            'by Armory.'
            '<br><br>'
-           'Has your wallet ever been opened in the 0.6.0+ Bitcoin-Qt client?', \
+           'Has your wallet ever been opened in the 0.6.0+ Protoshares-Qt client?', \
            yesStr='Yes, Abort!', noStr='No, Carry On!')
             
       if reply:
@@ -3010,7 +3010,7 @@ class ArmoryMainWindow(QMainWindow):
          return
       
       actViewTx     = menu.addAction("View Details")
-      actViewBlkChn = menu.addAction("View on www.blockchain.info")
+      actViewBlkChn = menu.addAction("View on www.coinplorer.com")
       actComment    = menu.addAction("Change Comment")
       actCopyTxID   = menu.addAction("Copy Transaction ID")
       actOpenWallet = menu.addAction("Open Relevant Wallet")
@@ -3021,7 +3021,7 @@ class ArmoryMainWindow(QMainWindow):
       txHash = hex_switchEndian(txHash)
       wltID  = str(self.ledgerView.model().index(row, LEDGERCOLS.WltID).data().toString())
 
-      blkchnURL = 'https://blockchain.info/tx/%s' % txHash
+      blkchnURL = 'https://coinplorer.com/PTS/Transactions/%s' % txHash
 
       if action==actViewTx:
          self.showLedgerTx()
@@ -3032,7 +3032,7 @@ class ArmoryMainWindow(QMainWindow):
             LOGEXCEPT('Failed to open webbrowser')
             QMessageBox.critical(self, 'Could not open browser', \
                'Armory encountered an error opening your web browser.  To view '
-               'this transaction on blockchain.info, please copy and paste '
+               'this transaction on coinplorer.com, please copy and paste '
                'the following URL into your browser: '
                '<br><br>%s' % blkchnURL, QMessageBox.Ok)
       elif action==actCopyTxID:
@@ -3047,7 +3047,7 @@ class ArmoryMainWindow(QMainWindow):
 
 
    #############################################################################
-   def clickSendBitcoins(self):
+   def clickSendProtoshares(self):
       if TheBDM.getBDMState() in ('Offline', 'Uninitialized'):
          QMessageBox.warning(self, 'Offline Mode', \
            'Armory is currently running in offline mode, and has no '
@@ -3071,7 +3071,7 @@ class ArmoryMainWindow(QMainWindow):
       selectionMade = True
       if len(self.walletMap)==0:
          reply = QMessageBox.information(self, 'No Wallets!', \
-            'You cannot send any bitcoins until you create a wallet and '
+            'You cannot send any protoshares until you create a wallet and '
             'receive some coins.  Would you like to create a wallet?', \
             QMessageBox.Yes | QMessageBox.No)
          if reply==QMessageBox.Yes:
@@ -3093,13 +3093,13 @@ class ArmoryMainWindow(QMainWindow):
       if selectionMade:
          wlt = self.walletMap[wltID]
          wlttype = determineWalletType(wlt, self)[0]
-         dlgSend = DlgSendBitcoins(wlt, self, self)
+         dlgSend = DlgSendProtoshares(wlt, self, self)
          dlgSend.exec_()
    
 
    #############################################################################
-   def uriSendBitcoins(self, uriDict):
-      # Because Bitcoin-Qt doesn't store the message= field we have to assume
+   def uriSendProtoshares(self, uriDict):
+      # Because Protoshares-Qt doesn't store the message= field we have to assume
       # that the label field holds the Tx-info.  So we concatenate them for 
       # the display message
       uri_has = lambda s: uriDict.has_key(s)
@@ -3116,7 +3116,7 @@ class ArmoryMainWindow(QMainWindow):
          newMsg = uriDict['label']
       
       descrStr = ''
-      descrStr = ('You just clicked on a "bitcoin:" link requesting bitcoins ' 
+      descrStr = ('You just clicked on a "protoshares:" link requesting protoshares ' 
                 'to be sent to the following address:<br> ')
 
       descrStr += '<br>--<b>Address</b>:\t%s ' % uriDict['address']
@@ -3131,7 +3131,7 @@ class ArmoryMainWindow(QMainWindow):
       if uri_has('amount'):
          amt     = uriDict['amount']
          amtstr  = coin2str(amt, maxZeros=1)
-         descrStr += '<br>--<b>Amount</b>:\t%s BTC' % amtstr
+         descrStr += '<br>--<b>Amount</b>:\t%s PTS' % amtstr
 
 
       if newMsg:
@@ -3154,7 +3154,7 @@ class ArmoryMainWindow(QMainWindow):
       selectedWalletID = None
       if len(self.walletMap)==0:
          reply = QMessageBox.information(self, 'No Wallets!', \
-            'You just clicked on a "bitcoin:" link to send money, but you '
+            'You just clicked on a "protoshares:" link to send money, but you '
             'currently have no wallets!  Would you like to create a wallet '
             'now?', QMessageBox.Yes | QMessageBox.No)
          if reply==QMessageBox.Yes:
@@ -3170,20 +3170,20 @@ class ArmoryMainWindow(QMainWindow):
          selectedWalletID = self.walletIDList[0]
          
       wlt = self.walletMap[selectedWalletID]
-      dlgSend = DlgSendBitcoins(wlt, self, self, uriDict)
+      dlgSend = DlgSendProtoshares(wlt, self, self, uriDict)
       dlgSend.exec_()
       return True
       
 
    #############################################################################
    def clickReceiveCoins(self):
-      LOGDEBUG('Clicked "Receive Bitcoins Button"')
+      LOGDEBUG('Clicked "Receive Protoshares Button"')
       wltID = None
       selectionMade = True
       if len(self.walletMap)==0:
          reply = QMessageBox.information(self, 'No Wallets!', \
             'You have not created any wallets which means there is nowhere to '
-            'store you bitcoins!  Would you like to create a wallet now?', \
+            'store you protoshares!  Would you like to create a wallet now?', \
             QMessageBox.Yes | QMessageBox.No)
          if reply==QMessageBox.Yes:
             self.createNewWallet(initLabel='Primary Wallet')
@@ -3296,8 +3296,8 @@ class ArmoryMainWindow(QMainWindow):
       
 
    #############################################################################
-   def lookForBitcoind(self):
-      LOGDEBUG('lookForBitcoind')
+   def lookForProtosharesd(self):
+      LOGDEBUG('lookForProtosharesd')
       if satoshiIsAvailable():
          return 'Running'
       
@@ -3317,33 +3317,33 @@ class ArmoryMainWindow(QMainWindow):
    #############################################################################
    def pressModeSwitchButton(self):
       LOGDEBUG('pressModeSwitchButton')
-      if TheSDM.getSDMState() == 'BitcoindExeMissing':
-         bitcoindStat = self.lookForBitcoind()
-         if bitcoindStat=='Running':
+      if TheSDM.getSDMState() == 'ProtosharesdExeMissing':
+         protosharesdStat = self.lookForProtosharesd()
+         if protosharesdStat=='Running':
             result = QMessageBox.warning(self, 'Already running!', \
-               'The Bitcoin software appears to be installed now, but it '
+               'The Protoshares software appears to be installed now, but it '
                'needs to be closed for Armory to work.  Would you like Armory '
                'to close it for you?', QMessageBox.Yes | QMessageBox.No)
             if result==QMessageBox.Yes:
-               self.closeExistingBitcoin()
-               self.startBitcoindIfNecessary() 
-         elif bitcoindStat=='StillMissing':
+               self.closeExistingProtoshares()
+               self.startProtosharesdIfNecessary() 
+         elif protosharesdStat=='StillMissing':
             QMessageBox.warning(self, 'Still Missing', \
-               'The Bitcoin software still appears to be missing.  If you '
+               'The Protoshares software still appears to be missing.  If you '
                'just installed it, then please adjust your settings to point '
                'to the installation directory.', QMessageBox.Ok)
-         self.startBitcoindIfNecessary() 
-      elif self.doManageSatoshi and not TheSDM.isRunningBitcoind():
+         self.startProtosharesdIfNecessary() 
+      elif self.doManageSatoshi and not TheSDM.isRunningProtosharesd():
          if satoshiIsAvailable():
             result = QMessageBox.warning(self, 'Still Running', \
-               'Bitcoin-Qt is still running.  Armory cannot start until '
+               'Protoshares-Qt is still running.  Armory cannot start until '
                'it is closed.  Do you want Armory to close it for you?', \
                QMessageBox.Yes | QMessageBox.No)
             if result==QMessageBox.Yes:
-               self.closeExistingBitcoin()
-               self.startBitcoindIfNecessary() 
+               self.closeExistingProtoshares()
+               self.startProtosharesdIfNecessary() 
          else:
-            self.startBitcoindIfNecessary() 
+            self.startProtosharesdIfNecessary() 
       elif TheBDM.getBDMState() == 'BlockchainReady' and TheBDM.isDirty():
          #self.resetBdmBeforeScan()
          self.startRescanBlockchain()
@@ -3445,21 +3445,21 @@ class ArmoryMainWindow(QMainWindow):
          lbl.setOpenExternalLinks(True)
 
       # Set up an array of buttons in the middle of the dashboard, to be used 
-      # to help the user install bitcoind.
+      # to help the user install protosharesd.
       self.lblDashBtnDescr = QRichLabel('')
       self.lblDashBtnDescr.setOpenExternalLinks(True)
       BTN,LBL,TTIP = range(3)
       self.dashBtns = [[None]*3 for i in range(5)]
-      self.dashBtns[DASHBTNS.Close   ][BTN] = QPushButton('Close Bitcoin Process')
-      self.dashBtns[DASHBTNS.Install ][BTN] = QPushButton('Auto-Install Bitcoin')
-      self.dashBtns[DASHBTNS.Browse  ][BTN] = QPushButton('Open www.bitcoin.org')
+      self.dashBtns[DASHBTNS.Close   ][BTN] = QPushButton('Close Protoshares Process')
+      self.dashBtns[DASHBTNS.Install ][BTN] = QPushButton('Auto-Install Protoshares')
+      self.dashBtns[DASHBTNS.Browse  ][BTN] = QPushButton('Open www.protoshares.org')
       self.dashBtns[DASHBTNS.Instruct][BTN] = QPushButton('Installation Instructions')
       self.dashBtns[DASHBTNS.Settings][BTN] = QPushButton('Change Settings')
 
 
       #####
-      def openBitcoinOrg(): 
-         webbrowser.open('http://www.bitcoin.org/en/download')
+      def openProtosharesOrg(): 
+         webbrowser.open('http://www.protoshares.org/en/download')
 
 
       #####
@@ -3477,38 +3477,38 @@ class ArmoryMainWindow(QMainWindow):
             
 
       self.connect(self.dashBtns[DASHBTNS.Close][BTN], SIGNAL('clicked()'), \
-                                                   self.closeExistingBitcoin) 
+                                                   self.closeExistingProtoshares) 
       self.connect(self.dashBtns[DASHBTNS.Install][BTN], SIGNAL('clicked()'), \
                                                      self.installSatoshiClient)
       self.connect(self.dashBtns[DASHBTNS.Browse][BTN], SIGNAL('clicked()'), \
-                                                             openBitcoinOrg)
+                                                             openProtosharesOrg)
       self.connect(self.dashBtns[DASHBTNS.Settings][BTN], SIGNAL('clicked()'), \
                                                            self.openSettings)
       #self.connect(self.dashBtns[DASHBTNS.Instruct][BTN], SIGNAL('clicked()'), \
                                                      #self.openInstructWindow) 
 
       self.dashBtns[DASHBTNS.Close][LBL] = QRichLabel( \
-           'Stop existing Bitcoin processes so that Armory can open its own')
+           'Stop existing Protoshares processes so that Armory can open its own')
       self.dashBtns[DASHBTNS.Browse][LBL]     = QRichLabel( \
-           'Open browser to Bitcoin webpage to download and install Bitcoin software')
+           'Open browser to Protoshares webpage to download and install Protoshares software')
       self.dashBtns[DASHBTNS.Instruct][LBL] = QRichLabel( \
-           'Instructions for manually installing Bitcoin for operating system')
+           'Instructions for manually installing Protoshares for operating system')
       self.dashBtns[DASHBTNS.Settings][LBL]  = QRichLabel( \
-           'Open Armory settings window to change Bitcoin software management')
+           'Open Armory settings window to change Protoshares software management')
 
 
       self.dashBtns[DASHBTNS.Browse][TTIP] = self.createToolTipWidget( \
-           'Will open your default browser to http://www.bitcoin.org where you can '
-           'download the latest version of Bitcoin-Qt, and get other information '
-           'and links about Bitcoin, in general.')
+           'Will open your default browser to http://www.protoshares.org where you can '
+           'download the latest version of Protoshares-Qt, and get other information '
+           'and links about Protoshares, in general.')
       self.dashBtns[DASHBTNS.Instruct][TTIP] = self.createToolTipWidget( \
            'Instructions are specific to your operating system and include '
            'information to help you verify you are installing the correct software')
       self.dashBtns[DASHBTNS.Settings][TTIP] = self.createToolTipWidget(
-           'Change Bitcoin-Qt/bitcoind management settings or point Armory to '
-           'a non-standard Bitcoin installation')
+           'Change Protoshares-Qt/protosharesd management settings or point Armory to '
+           'a non-standard Protoshares installation')
       self.dashBtns[DASHBTNS.Close][TTIP] = self.createToolTipWidget( \
-           'Armory has detected a running Bitcoin-Qt or bitcoind instance and '
+           'Armory has detected a running Protoshares-Qt or protosharesd instance and '
            'will force it to exit')
 
       self.dashBtns[DASHBTNS.Install][BTN].setEnabled(False)
@@ -3522,16 +3522,16 @@ class ArmoryMainWindow(QMainWindow):
          self.dashBtns[DASHBTNS.Install][BTN].setEnabled(True)
          self.dashBtns[DASHBTNS.Install][LBL] = QRichLabel('')
          self.dashBtns[DASHBTNS.Install][LBL].setText( \
-            'Securely download Bitcoin software for Windows %s' % OS_VARIANT[0])
+            'Securely download Protoshares software for Windows %s' % OS_VARIANT[0])
          self.dashBtns[DASHBTNS.Install][TTIP] = self.createToolTipWidget( \
             'The downloaded files are cryptographically verified.  '
             'Using this option will start the installer, you will '
             'have to click through it to complete installation.')
 
          #self.lblDashInstallForMe = QRichLabel( \
-           #'Armory will download, verify, and start the Bitcoin installer for you')
+           #'Armory will download, verify, and start the Protoshares installer for you')
          #self.ttipInstallForMe = self.createToolTipWidget( \
-           #'Armory will download the latest version of the Bitcoin software '
+           #'Armory will download the latest version of the Protoshares software '
            #'for Windows and verify its digital signatures.  You will have to '
            #'click through the installation options.<u></u>')
       elif OS_LINUX:
@@ -3542,7 +3542,7 @@ class ArmoryMainWindow(QMainWindow):
             self.dashBtns[DASHBTNS.Install][LBL] = QRichLabel( \
                'Automatic installation for Ubuntu/Debian')
             self.dashBtns[DASHBTNS.Install][TTIP] = self.createToolTipWidget( \
-               'Will download and install Bitcoin from trusted sources.')
+               'Will download and install Protoshares from trusted sources.')
       elif OS_MACOSX:
          pass
       else:
@@ -3585,7 +3585,7 @@ class ArmoryMainWindow(QMainWindow):
 
       if closeWhenDone:
          # It's a long story why I need this, and only when closing...
-         TheSDM.stopBitcoind()
+         TheSDM.stopProtosharesd()
          #self.resetBdmBeforeScan()
          self.switchNetworkMode(NETWORKMODE.Offline)
          from twisted.internet import reactor
@@ -3599,32 +3599,32 @@ class ArmoryMainWindow(QMainWindow):
             QMessageBox.warning(self, 'Verification Unavaiable', \
                'Armory cannot verify the authenticity of any downloaded '
                'files.  You will need t download it yourself from '
-               'bitcoin.org.', QMessageBox.Ok)
+               'protoshares.org.', QMessageBox.Ok)
             self.dashBtns[DASHBTNS.Install][BTN].setEnabled(False)
             self.dashBtns[DASHBTNS.Install][LBL].setText( \
-               'This option is currently unavailable.  Please visit bitcoin.org '
+               'This option is currently unavailable.  Please visit protoshares.org '
                'to download and install the software.', color='DisableFG')
             self.dashBtns[DASHBTNS.Install][TTIP] = self.createToolTipWidget( \
                'Armory has an internet connection but no way to verify '
                'the authenticity of the downloaded files.  You should '
                'download the installer yourself.')
-            webbrowser.open('http://www.bitcoin.org/en/download')
+            webbrowser.open('http://www.protoshares.org/en/download')
             return
             
          print self.downloadDict['SATOSHI']['Windows']
          theLink = self.downloadDict['SATOSHI']['Windows'][0]
          theHash = self.downloadDict['SATOSHI']['Windows'][1]
          dlg = DlgDownloadFile(self, self, theLink, theHash, \
-            'The Bitcoin installer will start when the download is finished '
+            'The Protoshares installer will start when the download is finished '
             'and digital signatures are verified.  Please finish the installation '
             'when it appears.')
          dlg.exec_()
          fileData = dlg.dlFileData
          if len(fileData)==0 or dlg.dlVerifyFailed:
             QMessageBox.critical(self, 'Download Failed', \
-               'The download failed.  Please visit www.bitcoin.org '
-               'to download and install Bitcoin-Qt manually.', QMessageBox.Ok)
-            webbrowser.open('http://www.bitcoin.org/en/download')
+               'The download failed.  Please visit www.protoshares.org '
+               'to download and install Protoshares-Qt manually.', QMessageBox.Ok)
+            webbrowser.open('http://www.protoshares.org/en/download')
             return
          
          installerPath = os.path.join(ARMORY_HOME_DIR, os.path.basename(theLink))
@@ -3635,10 +3635,10 @@ class ArmoryMainWindow(QMainWindow):
       
          def startInstaller():
             execAndWait('"'+installerPath+'"', useStartInfo=False)
-            self.startBitcoindIfNecessary()
+            self.startProtosharesdIfNecessary()
    
          DlgExecLongProcess(startInstaller, tr("""
-            Please Complete Bitcoin Installation<br> (installer should 
+            Please Complete Protoshares Installation<br> (installer should 
             have opened in your taskbar)"""), self, self).exec_()
       elif OS_MACOSX:
          LOGERROR('Cannot install on OSX')
@@ -3648,17 +3648,17 @@ class ArmoryMainWindow(QMainWindow):
          self.closeForReal(None)
 
    #############################################################################
-   def closeExistingBitcoin(self):
+   def closeExistingProtoshares(self):
       for proc in psutil.process_iter():
-         if proc.name.lower() in ['bitcoind.exe','bitcoin-qt.exe',\
-                                     'bitcoind','bitcoin-qt']:
+         if proc.name.lower() in ['protosharesd.exe','protoshares-qt.exe',\
+                                     'protosharesd','protoshares-qt']:
             killProcess(proc.pid)
             time.sleep(2)
             return
 
       # If got here, never found it
       QMessageBox.warning(self, 'Not Found', \
-         'Attempted to kill the running Bitcoin-Qt/bitcoind instance, '
+         'Attempted to kill the running Protoshares-Qt/protosharesd instance, '
          'but it was not found.  ', QMessageBox.Ok)
 
    #############################################################################
@@ -3693,7 +3693,7 @@ class ArmoryMainWindow(QMainWindow):
             self.lblTimeLeftScan.setText(secondsToHumanTime(tleft15))
             self.barProgressScan.setValue(pct*100)
 
-      elif TheSDM.getSDMState() in ['BitcoindInitializing','BitcoindSynchronizing']:
+      elif TheSDM.getSDMState() in ['ProtosharesdInitializing','ProtosharesdSynchronizing']:
          ssdm = TheSDM.getSDMState() 
          lastBlkNum  = self.getSettingOrSetDefault('LastBlkRecv',     0)
          lastBlkTime = self.getSettingOrSetDefault('LastBlkRecvTime', 0)
@@ -3740,11 +3740,11 @@ class ArmoryMainWindow(QMainWindow):
          strPct = '%d%%' % intPct
    
          self.barProgressSync.setFormat('%p%')
-         if ssdm == 'BitcoindReady':
+         if ssdm == 'ProtosharesdReady':
             return (0,0,0.99)  # because it's probably not completely done...
             self.lblTimeLeftSync.setText('Almost Done...')
             self.barProgressSync.setValue(99)
-         elif ssdm == 'BitcoindSynchronizing':
+         elif ssdm == 'ProtosharesdSynchronizing':
             self.barProgressSync.setValue(int(99.9*self.approxPctSoFar))
             if self.approxBlkLeft < 10000:
                if self.approxBlkLeft < 200:
@@ -3761,7 +3761,7 @@ class ArmoryMainWindow(QMainWindow):
                   self.lblTimeLeftSync.setText(secondsToHumanTime(timeRemain))
                else:
                   self.lblTimeLeftSync.setText('')
-         elif ssdm == 'BitcoindInitializing':
+         elif ssdm == 'ProtosharesdInitializing':
             self.barProgressSync.setValue(0)
             self.barProgressSync.setFormat('')
          else:
@@ -3789,7 +3789,7 @@ class ArmoryMainWindow(QMainWindow):
          '<li>Sign transactions created from an online system</li>'
          '<li>Sign messages</li>'
          '</ul>'
-         '<br><br><b>NOTE:</b>  The Bitcoin network <u>will</u> process transactions '
+         '<br><br><b>NOTE:</b>  The Protoshares network <u>will</u> process transactions '
          'to your addresses, even if you are offline.  It is perfectly '
          'okay to create and distribute payment addresses while Armory is offline, '
          'you just won\'t be able to verify those payments until the next time '
@@ -3806,7 +3806,7 @@ class ArmoryMainWindow(QMainWindow):
          '<li>Sign messages</li>'
          '<li><b>Sign transactions created from an online system</b></li>'
          '</ul>'
-         '<br><br><b>NOTE:</b>  The Bitcoin network <u>will</u> process transactions '
+         '<br><br><b>NOTE:</b>  The Protoshares network <u>will</u> process transactions '
          'to your addresses, regardless of whether you are online.  It is perfectly '
          'okay to create and distribute payment addresses while Armory is offline, '
          'you just won\'t be able to verify those payments until the next time '
@@ -3816,9 +3816,9 @@ class ArmoryMainWindow(QMainWindow):
          '<ul>'
          '<li>Create, import or recover Armory wallets</li>'
          '<li>Generate new addresses to receive coins</li>'
-         '<li>Send bitcoins to other people</li>'
+         '<li>Send protoshares to other people</li>'
          '<li>Create one-time backups of your wallets (in printed or digital form)</li>'
-         '<li>Click on "bitcoin:" links in your web browser '
+         '<li>Click on "protoshares:" links in your web browser '
             '(not supported on all operating systems)</li>'
          '<li>Import private keys to wallets</li>'
          '<li>Monitor payments to watching-only wallets and create '
@@ -3840,7 +3840,7 @@ class ArmoryMainWindow(QMainWindow):
       # A few states don't care which mgmtMode you are in...
       if state == 'NewUserInfo':
          return tr("""
-         For more information about Armory, and even Bitcoin itself, you should 
+         For more information about Armory, and even Protoshares itself, you should 
          visit the <a href="https://bitcoinarmory.com/faqs/">frequently 
          asked questions page</a>.  If 
          you are experiencing problems using this software, please visit the 
@@ -3853,7 +3853,7 @@ class ArmoryMainWindow(QMainWindow):
          hard-drive failure, and make it easy for your family to recover 
          your funds if something terrible happens to you.  <i>Each wallet 
          only needs to be backed up once, ever!</i>  Without it, you are at 
-         risk of losing all of your Bitcoins!  For more information, 
+         risk of losing all of your Protoshares!  For more information, 
          visit the <a href="https://bitcoinarmory.com/armory-backups-are-forever/">Armory 
          Backups page</a>.
          <br><br>
@@ -3868,15 +3868,15 @@ class ArmoryMainWindow(QMainWindow):
          '<p><b>You now have access to all the features Armory has to offer!</b><br>'
          'To see your balances and transaction history, please click '
          'on the "Transactions" tab above this text.  <br>'
-         'Here\'s some things you can do with Armory Bitcoin Client:'
+         'Here\'s some things you can do with Armory Protoshares Client:'
          '<br>')
       elif state == 'OnlineFull2':
          return ( \
          ('If you experience any performance issues with Armory, '
-         'please confirm that Bitcoin-Qt is running and <i>fully '
-         'synchronized with the Bitcoin network</i>.  You will see '
+         'please confirm that Protoshares-Qt is running and <i>fully '
+         'synchronized with the Protoshares network</i>.  You will see '
          'a green checkmark in the bottom right corner of the '
-         'Bitcoin-Qt window if it is synchronized.  If not, it is '
+         'Protoshares-Qt window if it is synchronized.  If not, it is '
          'recommended you close Armory and restart it only when you '
          'see that checkmark.'
          '<br><br>'  if not self.doManageSatoshi else '') + (
@@ -3913,7 +3913,7 @@ class ArmoryMainWindow(QMainWindow):
       elif state == 'OfflineNoSatoshiNoInternet':
          return ( \
          'There is no connection to the internet, and there is no other '
-         'Bitcoin software running.  Most likely '
+         'Protoshares software running.  Most likely '
          'you are here because this is a system dedicated '
          'to manage offline wallets! '
          '<br><br>'
@@ -3924,9 +3924,9 @@ class ArmoryMainWindow(QMainWindow):
          'then you can restart Armory with the "--skip-online-check" '
          'option, or change it in the Armory settings.'
          '<br><br>'
-         'If you do not have Bitcoin-Qt installed, you can '
-         'download it from <a href="http://www.bitcoin.org">'
-         'http://www.bitcoin.org</a>.')
+         'If you do not have Protoshares-Qt installed, you can '
+         'download it from <a href="http://www.protoshares.org">'
+         'http://www.protoshares.org</a>.')
 
       # Branch the available display text based on which Satoshi-Management
       # mode Armory is using.  It probably wasn't necessary to branch the 
@@ -3938,41 +3938,41 @@ class ArmoryMainWindow(QMainWindow):
             'You are currently in offline mode, but can '
             'switch to online mode by pressing the button above.  However, '
             'it is not recommended that you switch until '
-            'Bitcoin-Qt/bitcoind is fully synchronized with the bitcoin network.  '
+            'Protoshares-Qt/protosharesd is fully synchronized with the protoshares network.  '
             'You will see a green checkmark in the bottom-right corner of '
-            'the Bitcoin-Qt window when it is finished.'
+            'the Protoshares-Qt window when it is finished.'
             '<br><br>'
             'Switching to online mode will give you access '
             'to more Armory functionality, including sending and receiving '
-            'bitcoins and viewing the balances and transaction histories '
+            'protoshares and viewing the balances and transaction histories '
             'of each of your wallets.<br><br>')
          elif state == 'OfflineNoSatoshi':
-            bitconf = os.path.join(BTC_HOME_DIR, 'bitcoin.conf')
+            bitconf = os.path.join(PTS_HOME_DIR, 'protoshares.conf')
             return ( \
             'You are currently in offline mode because '
-            'Bitcoin-Qt is not running.  To switch to online ' 
-            'mode, start Bitcoin-Qt and let it synchronize with the network '
+            'Protoshares-Qt is not running.  To switch to online ' 
+            'mode, start Protoshares-Qt and let it synchronize with the network '
             '-- you will see a green checkmark in the bottom-right corner when '
-            'it is complete.  If Bitcoin-Qt is already running and you believe '
+            'it is complete.  If Protoshares-Qt is already running and you believe '
             'the lack of connection is an error (especially if using proxies), '
             'please see <a href="'
-            'https://bitcointalk.org/index.php?topic=155717.msg1719077#msg1719077">'
+            'https://protosharestalk.org/index.php?topic=155717.msg1719077#msg1719077">'
             'this link</a> for options.'
             '<br><br>'
             '<b>If you prefer to have Armory do this for you</b>, '
             'then please check "Let Armory run '
-            'Bitcoin-Qt in the background" under "File"->"Settings."'
+            'Protoshares-Qt in the background" under "File"->"Settings."'
             '<br><br>'
-            'If you are new to Armory and/or Bitcoin-Qt, '
+            'If you are new to Armory and/or Protoshares-Qt, '
             'please visit the Armory '
             'webpage for more information.  Start at '
-            '<a href="https://bitcoinarmory.com/armory-and-bitcoin-qt">'
-            'Why Armory needs Bitcoin-Qt</a> or go straight to our <a '
+            '<a href="https://bitcoinarmory.com/armory-and-protoshares-qt">'
+            'Why Armory needs Protoshares-Qt</a> or go straight to our <a '
             'href="https://bitcoinarmory.com/faqs/">'
             'frequently asked questions</a> page for more general information.  '
             'If you already know what you\'re doing and simply need '
-            'to fetch the latest version of Bitcoin-Qt, you can download it from '
-            '<a href="http://www.bitcoin.org">http://www.bitcoin.org</a>.')
+            'to fetch the latest version of Protoshares-Qt, you can download it from '
+            '<a href="http://www.protoshares.org">http://www.protoshares.org</a>.')
          elif state == 'OfflineNoInternet':
             return ( \
             'You are currently in offline mode because '
@@ -3982,13 +3982,13 @@ class ArmoryMainWindow(QMainWindow):
             'or adjust the Armory settings.  Then restart Armory.'
             '<br><br>'
             'If this is intended to be an offline computer, note '
-            'that it is not necessary to have Bitcoin-Qt or bitcoind '
+            'that it is not necessary to have Protoshares-Qt or protosharesd '
             'running.' )
          elif state == 'OfflineNoBlkFiles':
             return ( \
             'You are currently in offline mode because '
             'Armory could not find the blockchain files produced '
-            'by Bitcoin-Qt.  Do you run Bitcoin-Qt (or bitcoind) '
+            'by Protoshares-Qt.  Do you run Protoshares-Qt (or protosharesd) '
             'from a non-standard directory?   Armory expects to '
             'find the blkXXXX.dat files in <br><br>%s<br><br> '
             'If you know where they are located, please restart '
@@ -3996,13 +3996,13 @@ class ArmoryMainWindow(QMainWindow):
             'to notify Armory where to find them.') % BLKFILE_DIR
          elif state == 'Disconnected':
             return ( \
-            'Armory was previously online, but the connection to Bitcoin-Qt/'
-            'bitcoind was interrupted.  You will not be able to send bitcoins '
-            'or confirm receipt of bitcoins until the connection is '
-            'reestablished.  br><br>Please check that Bitcoin-Qt is open '
+            'Armory was previously online, but the connection to Protoshares-Qt/'
+            'protosharesd was interrupted.  You will not be able to send protoshares '
+            'or confirm receipt of protoshares until the connection is '
+            'reestablished.  br><br>Please check that Protoshares-Qt is open '
             'and synchronized with the network.  Armory will <i>try to '
             'reconnect</i> automatically when the connection is available '
-            'again.  If Bitcoin-Qt is available again, and reconnection does '
+            'again.  If Protoshares-Qt is available again, and reconnection does '
             'not happen, please restart Armory.<br><br>')
          elif state == 'ScanNoWallets':
             return ( \
@@ -4020,36 +4020,36 @@ class ArmoryMainWindow(QMainWindow):
                                                           mgmtMode, state)
             return ''
       elif mgmtMode.lower()=='auto':
-         if state == 'OfflineBitcoindRunning':
+         if state == 'OfflineProtosharesdRunning':
             return ( \
-            'It appears you are already running Bitcoin software '
-            '(Bitcoin-Qt or bitcoind). '
+            'It appears you are already running Protoshares software '
+            '(Protoshares-Qt or protosharesd). '
             'Unlike previous versions of Armory, you should <u>not</u> run '
             'this software yourself --  Armory '
             'will run it in the background for you.  Either close the '
-            'Bitcoin application or adjust your settings.  If you change '
+            'Protoshares application or adjust your settings.  If you change '
             'your settings, then please restart Armory.')
-         if state == 'OfflineNeedBitcoinInst':
+         if state == 'OfflineNeedProtosharesInst':
             return ( \
             '<b>Only one more step to getting online with Armory!</b>   You '
-            'must install the Bitcoin software from www.bitcoin.org in order '
-            'for Armory to communicate with the Bitcoin network.  If the '
-            'Bitcoin software is already installed and/or you would prefer '
+            'must install the Protoshares software from www.protoshares.org in order '
+            'for Armory to communicate with the Protoshares network.  If the '
+            'Protoshares software is already installed and/or you would prefer '
             'to manage it yourself, please adjust your settings and '
             'restart Armory.')
          if state == 'InitializingLongTime':
             return ( \
-            '<b>To maximize your security, the Bitcoin engine is downloading '
+            '<b>To maximize your security, the Protoshares engine is downloading '
             'and verifying the global transaction ledger.  <u>This will take '
             'several hours, but only needs to be done once</u>!</b>  It is usually '
             'best to leave it running over night for this initialization process.  '
             'Subsequent loads will only take a few minutes.'
             '<br><br>'
             'While you wait, you can manage your wallets.  Make new wallets, '
-            'make digital or paper backups, create Bitcoin addresses to receive '
+            'make digital or paper backups, create Protoshares addresses to receive '
             'payments, '
             'sign messages, and/or import private keys.  You will always '
-            'receive Bitcoin payments regardless of whether you are online, '
+            'receive Protoshares payments regardless of whether you are online, '
             'but you will have to verify that payment through another service '
             'until Armory is finished this initialization.')
          if state == 'InitializingDoneSoon':
@@ -4062,25 +4062,25 @@ class ArmoryMainWindow(QMainWindow):
             'your wallet%s if you have not done so already!  You are protected '
             '<i>forever</i> from hard-drive loss, or forgetting you password. '
             'If you do not have a backup, you could lose all of your '
-            'Bitcoins forever!  See the <a href="https://bitcoinarmory.com/">'
+            'Protoshares forever!  See the <a href="https://bitcoinarmory.com/">'
             'Armory Backups page</a> for more info.' % \
             (('' if len(self.walletMap)==1 else 's',)*2))
          if state == 'OnlineDisconnected':
             return ( \
-            'Armory\'s communication with the Bitcoin network was interrupted. '
+            'Armory\'s communication with the Protoshares network was interrupted. '
             'This usually does not happen unless you closed the process that '
             'Armory was using to communicate with the network. Armory requires '
             '%s to be running in the background, and this error pops up if it '
             'disappears.'
             '<br><br>You may continue in offline mode, or you can close '
-            'all Bitcoin processes and restart Armory.' \
+            'all Protoshares processes and restart Armory.' \
             % os.path.basename(TheSDM.executable))
          if state == 'OfflineBadConnection':
             return ( \
             'Armory has experienced an issue trying to communicate with the '
-            'Bitcoin software.  The software is running in the background, '
+            'Protoshares software.  The software is running in the background, '
             'but Armory cannot communicate with it through RPC as it expects '
-            'to be able to.  If you changed any settings in the Bitcoin home '
+            'to be able to.  If you changed any settings in the Protoshares home '
             'directory, please make sure that RPC is enabled and that it is '
             'accepting connections from localhost.  '
             '<br><br>'
@@ -4089,9 +4089,9 @@ class ArmoryMainWindow(QMainWindow):
          if state == 'OfflineSatoshiAvail':
             return ( \
             'Armory does not detect internet access, but it does detect '
-            'running Bitcoin software.  Armory is in offline-mode. <br><br>'
+            'running Protoshares software.  Armory is in offline-mode. <br><br>'
             'If you are intending to run an offline system, you will not '
-            'need to have the Bitcoin software installed on the offline '
+            'need to have the Protoshares software installed on the offline '
             'computer.  It is only needed for the online computer. '
             'If you expected to be online and '
             'the absence of internet is an error, please restart Armory '
@@ -4099,56 +4099,56 @@ class ArmoryMainWindow(QMainWindow):
          if state == 'OfflineForcedButSatoshiAvail':
             return ( \
             'Armory was started in offline-mode, but detected you are '
-            'running Bitcoin software.  If you are intending to run an '
-            'offline system, you will <u>not</u> need to have the Bitcoin '
+            'running Protoshares software.  If you are intending to run an '
+            'offline system, you will <u>not</u> need to have the Protoshares '
             'software installed or running on the offline '
             'computer.  It is only required for being online. ')
          if state == 'OfflineBadDBEnv':
             return ( \
-            'The Bitcoin software indicates there '
+            'The Protoshares software indicates there '
             'is a problem with its databases.  This can occur when '
-            'Bitcoin-Qt/bitcoind is upgraded or downgraded, or sometimes '
+            'Protoshares-Qt/protosharesd is upgraded or downgraded, or sometimes '
             'just by chance after an unclean shutdown.'
             '<br><br>'
-            'You can either revert your installed Bitcoin software to the '
+            'You can either revert your installed Protoshares software to the '
             'last known working version (but not earlier than version 0.8.1) '
-            'or delete everything <b>except</b> "wallet.dat" from the your Bitcoin '
+            'or delete everything <b>except</b> "wallet.dat" from the your Protoshares '
             'home directory:<br><br>'
             '<font face="courier"><b>%s</b></font>'
             '<br><br>'
-            'If you choose to delete the contents of the Bitcoin home '
+            'If you choose to delete the contents of the Protoshares home '
             'directory, you will have to do a fresh download of the blockchain '
             'again, which will require a few hours the first '
             'time.' % self.satoshiHomePath)
-         if state == 'OfflineBtcdCrashed':
-            sout = '' if TheSDM.btcOut==None else str(TheSDM.btcOut)
-            serr = '' if TheSDM.btcErr==None else str(TheSDM.btcErr)
+         if state == 'OfflinePtsdCrashed':
+            sout = '' if TheSDM.ptsOut==None else str(TheSDM.ptsOut)
+            serr = '' if TheSDM.ptsErr==None else str(TheSDM.ptsErr)
             soutHtml = '<br><br>' + '<br>'.join(sout.strip().split('\n'))
             serrHtml = '<br><br>' + '<br>'.join(serr.strip().split('\n'))
             soutDisp = '<b><font face="courier">StdOut: %s</font></b>' % soutHtml
             serrDisp = '<b><font face="courier">StdErr: %s</font></b>' % serrHtml
             if len(sout)>0 or len(serr)>0:
                return ( \
-               'There was an error starting the underlying Bitcoin engine.  '
+               'There was an error starting the underlying Protoshares engine.  '
                'This should not normally happen.  Usually it occurs when you '
-               'have been using Bitcoin-Qt prior to using Armory, especially '
-               'if you have upgraded or downgraded Bitcoin-Qt recently (manually, '
+               'have been using Protoshares-Qt prior to using Armory, especially '
+               'if you have upgraded or downgraded Protoshares-Qt recently (manually, '
                'or through the Armory automatic installation).  Output from '
-               'bitcoind:<br>' +
+               'protosharesd:<br>' +
                (soutDisp if len(sout)>0 else '') +
                (serrDisp if len(serr)>0 else '') )
             else:
                return ( tr("""
-                  There was an error starting the underlying Bitcoin engine.  
+                  There was an error starting the underlying Protoshares engine.  
                   This should not normally happen.  Usually it occurs when you 
-                  have been using Bitcoin-Qt prior to using Armory, especially 
-                  if you have upgraded or downgraded Bitcoin-Qt recently (manually, 
+                  have been using Protoshares-Qt prior to using Armory, especially 
+                  if you have upgraded or downgraded Protoshares-Qt recently (manually, 
                   or through the Armory automatic installation).  
                   <br><br>
                   Unfortunately, this error is so strange, Armory does not 
                   recognize it.  Please go to "Export Log File" from the "File" 
                   menu and email at as an attachment to <a href="mailto:
-                  support@bitcoinarmory.com?Subject=Bitcoind%20Crash">
+                  support@bitcoinarmory.com?Subject=Protosharesd%20Crash">
                   support@bitcoinarmory.com</a>.  We apologize for the 
                   inconvenience!"""))
          
@@ -4206,7 +4206,7 @@ class ArmoryMainWindow(QMainWindow):
          setOnlyDashModeVisible()
          self.btnModeSwitch.setVisible(False)
 
-      if self.doManageSatoshi and not sdmState=='BitcoindReady':
+      if self.doManageSatoshi and not sdmState=='ProtosharesdReady':
          # User is letting Armory manage the Satoshi client for them.
          
          if not sdmState==self.lastSDMState:
@@ -4232,7 +4232,7 @@ class ArmoryMainWindow(QMainWindow):
                   self.frmDashMidButtons.setVisible(True)
                   setBtnRowVisible(DASHBTNS.Close, True)
                   if CLI_OPTIONS.offline:
-                     # Forced offline but bitcoind is running
+                     # Forced offline but protosharesd is running
                      LOGINFO('Dashboard switched to auto-OfflineForcedButSatoshiAvail')
                      descr1 += self.GetDashStateText('Auto', 'OfflineForcedButSatoshiAvail')
                      descr2 += self.GetDashFunctionalityText('Offline')
@@ -4258,35 +4258,35 @@ class ArmoryMainWindow(QMainWindow):
                   descr2 += self.GetDashFunctionalityText('Offline')
                   self.lblDashDescr1.setText(descr1)
                   self.lblDashDescr2.setText(descr2)
-            elif not TheSDM.isRunningBitcoind():
+            elif not TheSDM.isRunningProtosharesd():
                setOnlyDashModeVisible()
                self.mainDisplayTabs.setTabEnabled(self.MAINTABS.Transactions, False)
                self.lblDashModeSync.setText( 'Armory is <u>offline</u>', \
                                             size=4, color='TextWarn', bold=True)
-               # Bitcoind is not being managed, but we want it to be
-               if satoshiIsAvailable() or sdmState=='BitcoindAlreadyRunning':
-                  # But bitcoind/-qt is already running
+               # Protosharesd is not being managed, but we want it to be
+               if satoshiIsAvailable() or sdmState=='ProtosharesdAlreadyRunning':
+                  # But protosharesd/-qt is already running
                   LOGINFO('Dashboard switched to auto-butSatoshiRunning')
-                  self.lblDashModeSync.setText(' Please close Bitcoin-Qt', \
+                  self.lblDashModeSync.setText(' Please close Protoshares-Qt', \
                                                          size=4, bold=True)
                   setBtnFrameVisible(True, '')
                   setBtnRowVisible(DASHBTNS.Close, True)
                   self.btnModeSwitch.setVisible(True)
                   self.btnModeSwitch.setText('Check Again')
                   #setBtnRowVisible(DASHBTNS.Close, True)
-                  descr1 += self.GetDashStateText('Auto', 'OfflineBitcoindRunning')
+                  descr1 += self.GetDashStateText('Auto', 'OfflineProtosharesdRunning')
                   descr2 += self.GetDashStateText('Auto', 'NewUserInfo')
                   descr2 += self.GetDashFunctionalityText('Offline')
                   self.lblDashDescr1.setText(descr1)
                   self.lblDashDescr2.setText(descr2)
-                  #self.psutil_detect_bitcoin_exe_path()
-               elif sdmState in ['BitcoindExeMissing', 'BitcoindHomeMissing']:
+                  #self.psutil_detect_protoshares_exe_path()
+               elif sdmState in ['ProtosharesdExeMissing', 'ProtosharesdHomeMissing']:
                   LOGINFO('Dashboard switched to auto-cannotFindExeHome')
-                  if sdmState=='BitcoindExeMissing':
-                     self.lblDashModeSync.setText('Cannot find Bitcoin Installation', \
+                  if sdmState=='ProtosharesdExeMissing':
+                     self.lblDashModeSync.setText('Cannot find Protoshares Installation', \
                                                          size=4, bold=True)
                   else:
-                     self.lblDashModeSync.setText('Cannot find Bitcoin Home Directory', \
+                     self.lblDashModeSync.setText('Cannot find Protoshares Home Directory', \
                                                          size=4, bold=True)
                   setBtnRowVisible(DASHBTNS.Close, satoshiIsAvailable())
                   setBtnRowVisible(DASHBTNS.Install, True)
@@ -4296,12 +4296,12 @@ class ArmoryMainWindow(QMainWindow):
                   self.btnModeSwitch.setVisible(True)
                   self.btnModeSwitch.setText('Check Again')
                   setBtnFrameVisible(True)
-                  descr1 += self.GetDashStateText('Auto', 'OfflineNeedBitcoinInst')
+                  descr1 += self.GetDashStateText('Auto', 'OfflineNeedProtosharesInst')
                   descr2 += self.GetDashStateText('Auto', 'NewUserInfo')
                   descr2 += self.GetDashFunctionalityText('Offline')
                   self.lblDashDescr1.setText(descr1)
                   self.lblDashDescr2.setText(descr2)
-               elif sdmState in ['BitcoindDatabaseEnvError']:
+               elif sdmState in ['ProtosharesdDatabaseEnvError']:
                   LOGINFO('Dashboard switched to auto-BadDBEnv')
                   setOnlyDashModeVisible()
                   setBtnRowVisible(DASHBTNS.Install, True)
@@ -4314,29 +4314,29 @@ class ArmoryMainWindow(QMainWindow):
                   self.lblDashDescr1.setText(descr1)
                   self.lblDashDescr2.setText(descr2)
                   setBtnFrameVisible(True, '')
-               elif sdmState in ['BitcoindUnknownCrash']:
+               elif sdmState in ['ProtosharesdUnknownCrash']:
                   LOGERROR('Should not usually get here')
                   setOnlyDashModeVisible()
                   setBtnFrameVisible(True, \
-                     'Try reinstalling the Bitcoin '
+                     'Try reinstalling the Protoshares '
                      'software then restart Armory.  If you continue to have '
                      'problems, please contact Armory\'s core developer at '
-                     '<a href="mailto:support@bitcoinarmory.com?Subject=Bitcoind%20Crash"'
+                     '<a href="mailto:support@bitcoinarmory.com?Subject=Protosharesd%20Crash"'
                      '>support@bitcoinarmory.com</a>.')
                   setBtnRowVisible(DASHBTNS.Settings, True)
                   setBtnRowVisible(DASHBTNS.Install, True)
-                  LOGINFO('Dashboard switched to auto-BtcdCrashed')
+                  LOGINFO('Dashboard switched to auto-PtsdCrashed')
                   self.lblDashModeSync.setText( 'Armory is <u>offline</u>', \
                                             size=4, color='TextWarn', bold=True)
-                  descr1 += self.GetDashStateText('Auto', 'OfflineBtcdCrashed')
+                  descr1 += self.GetDashStateText('Auto', 'OfflinePtsdCrashed')
                   descr2 += self.GetDashFunctionalityText('Offline')
                   self.lblDashDescr1.setText(descr1)
                   self.lblDashDescr2.setText(descr2)
                   self.lblDashDescr1.setTextInteractionFlags( \
                                           Qt.TextSelectableByMouse | \
                                           Qt.TextSelectableByKeyboard)
-               elif sdmState in ['BitcoindNotAvailable']:
-                  LOGERROR('BitcoindNotAvailable: should not happen...')
+               elif sdmState in ['ProtosharesdNotAvailable']:
+                  LOGERROR('ProtosharesdNotAvailable: should not happen...')
                   self.notAvailErrorCount += 1
                   #if self.notAvailErrorCount < 5:
                      #LOGERROR('Auto-mode-switch')
@@ -4352,7 +4352,7 @@ class ArmoryMainWindow(QMainWindow):
                   self.lblDashDescr1.setText(descr1)
                   self.lblDashDescr2.setText(descr2)
             else:  # online detected/forced, and TheSDM has already been started
-               if sdmState in ['BitcoindWrongPassword', 'BitcoindNotAvailable']:
+               if sdmState in ['ProtosharesdWrongPassword', 'ProtosharesdNotAvailable']:
                   setOnlyDashModeVisible()
                   self.mainDisplayTabs.setTabEnabled(self.MAINTABS.Transactions, False)
                   LOGINFO('Dashboard switched to auto-BadConnection')
@@ -4362,7 +4362,7 @@ class ArmoryMainWindow(QMainWindow):
                   descr2 += self.GetDashFunctionalityText('Offline')
                   self.lblDashDescr1.setText(descr1)
                   self.lblDashDescr2.setText(descr2)
-               elif sdmState in ['BitcoindInitializing', 'BitcoindSynchronizing']:
+               elif sdmState in ['ProtosharesdInitializing', 'ProtosharesdSynchronizing']:
                   LOGINFO('Dashboard switched to auto-InitSync')
                   self.mainDisplayTabs.setTabEnabled(self.MAINTABS.Transactions, False)
                   self.updateSyncProgress()
@@ -4370,8 +4370,8 @@ class ArmoryMainWindow(QMainWindow):
                   setScanRowVisible(True)
                   self.lblBusy.setVisible(True)
 
-                  if sdmState=='BitcoindInitializing':
-                     self.lblDashModeSync.setText( 'Initializing Bitcoin Engine', \
+                  if sdmState=='ProtosharesdInitializing':
+                     self.lblDashModeSync.setText( 'Initializing Protoshares Engine', \
                                               size=4, bold=True, color='Foreground')
                   else:
                      self.lblDashModeSync.setText( 'Synchronizing with Network', \
@@ -4388,7 +4388,7 @@ class ArmoryMainWindow(QMainWindow):
 
                   setBtnRowVisible(DASHBTNS.Settings, True)
                   setBtnFrameVisible(True, \
-                     'Since version 0.88, Armory runs bitcoind in the '
+                     'Since version 0.88, Armory runs protosharesd in the '
                      'background.  You can switch back to '
                      'the old way in the Settings dialog. ')
    
@@ -4396,7 +4396,7 @@ class ArmoryMainWindow(QMainWindow):
                   self.lblDashDescr1.setText(descr1)
                   self.lblDashDescr2.setText(descr2)
       else:
-         # User is managing satoshi client, or bitcoind is already sync'd
+         # User is managing satoshi client, or protosharesd is already sync'd
          self.frmDashMidButtons.setVisible(False)
          if bdmState in ('Offline', 'Uninitialized'):
             if onlineAvail and not self.lastBDMState[1]==onlineAvail:
@@ -4420,13 +4420,13 @@ class ArmoryMainWindow(QMainWindow):
                self.lblDashModeSync.setText( 'Armory is <u>offline</u>', \
                                          size=4, color='TextWarn', bold=True)
    
-               if not self.bitcoindIsAvailable():
+               if not self.protosharesdIsAvailable():
                   if self.internetAvail:
                      descr = self.GetDashStateText('User','OfflineNoSatoshi')
                      setBtnRowVisible(DASHBTNS.Settings, True)
                      setBtnFrameVisible(True, \
-                        'If you would like Armory to manage the Bitcoin software '
-                        'for you (Bitcoin-Qt or bitcoind), then adjust your '
+                        'If you would like Armory to manage the Protoshares software '
+                        'for you (Protoshares-Qt or protosharesd), then adjust your '
                         'Armory settings, then restart Armory.')
                   else:
                      descr = self.GetDashStateText('User','OfflineNoSatoshiNoInternet')
@@ -4480,7 +4480,7 @@ class ArmoryMainWindow(QMainWindow):
             self.lblBusy.setVisible(True)
             self.btnModeSwitch.setVisible(False)
 
-            if TheSDM.getSDMState() == 'BitcoindReady':
+            if TheSDM.getSDMState() == 'ProtosharesdReady':
                self.barProgressSync.setVisible(True)
                self.lblTimeLeftSync.setVisible(True)
                self.lblDashModeSync.setVisible(True)
@@ -4570,18 +4570,18 @@ class ArmoryMainWindow(QMainWindow):
                LOGINFO('New version available!')
                self.satoshiVerWarnAlready = True
                doUpgrade = QMessageBox.warning(self, 'Updates Available', \
-                  'There is a new version of the Bitcoin software available.  '
+                  'There is a new version of the Protoshares software available.  '
                   'Newer version usually contain important security updates '
                   'so it is best to upgrade as soon as possible.' 
                   '<br><br>' 
-                  'Current Bitcoin Version: %s <br>'
-                  'Available Bitcoin Version: %s' 
+                  'Current Protoshares Version: %s <br>'
+                  'Available Protoshares Version: %s' 
                   '<br><br>'
-                  'Would you like to upgrade the Bitcoin software?' % \
+                  'Would you like to upgrade the Protoshares software?' % \
                   (peerVersion, self.latestVer['SATOSHI']) , \
                   QMessageBox.Yes | QMessageBox.No)
                if doUpgrade==QMessageBox.Yes:
-                  TheSDM.stopBitcoind() 
+                  TheSDM.stopProtosharesd() 
                   self.setDashboardDetails()
                   self.installSatoshiClient(closeWhenDone=True) 
                
@@ -4640,14 +4640,14 @@ class ArmoryMainWindow(QMainWindow):
    
 
          if self.doManageSatoshi:
-            if sdmState in ['BitcoindInitializing','BitcoindSynchronizing']:
+            if sdmState in ['ProtosharesdInitializing','ProtosharesdSynchronizing']:
                self.updateSyncProgress()
-            elif sdmState == 'BitcoindReady':
+            elif sdmState == 'ProtosharesdReady':
                if bdmState == 'Uninitialized':
                   LOGINFO('Starting load blockchain')
                   self.loadBlockchainIfNecessary()
                elif bdmState == 'Offline':
-                  LOGERROR('Bitcoind is ready, but we are offline... ?')
+                  LOGERROR('Protosharesd is ready, but we are offline... ?')
                elif bdmState=='Scanning':
                   self.checkSatoshiVersion()
                   self.updateSyncProgress()
@@ -4657,7 +4657,7 @@ class ArmoryMainWindow(QMainWindow):
          else:
             if bdmState in ('Offline','Uninitialized'):
                # This call seems out of place, but it's because if you are in offline
-               # mode, it needs to check periodically for the existence of Bitcoin-Qt
+               # mode, it needs to check periodically for the existence of Protoshares-Qt
                # so that it can enable the "Go Online" button
                self.setDashboardDetails()
                return
@@ -4722,17 +4722,17 @@ class ArmoryMainWindow(QMainWindow):
             self.detectNotSyncQ.pop()
             blksInLast5sec = sum(self.detectNotSyncQ)
             if( blksInLast5sec>20 ):
-               LOGERROR('Detected Bitcoin-Qt/bitcoind not synchronized')
+               LOGERROR('Detected Protoshares-Qt/protosharesd not synchronized')
                LOGERROR('New blocks added in last 5 sec: %d', blksInLast5sec)
                if self.noSyncWarnYet:
                   self.noSyncWarnYet = False
-                  QMessageBox.warning(self,'Bitcoin-Qt is not synchronized', \
-                     'Armory has detected that Bitcoin-Qt is not synchronized '
-                     'with the bitcoin network yet, and Armory <b>may</b> not '
+                  QMessageBox.warning(self,'Protoshares-Qt is not synchronized', \
+                     'Armory has detected that Protoshares-Qt is not synchronized '
+                     'with the protoshares network yet, and Armory <b>may</b> not '
                      'work properly.  If you experience any unusual behavior, it is '
                      'recommended that you close Armory and only restart it '
                      'when you see the green checkmark in the bottom-right '
-                     'corner of the Bitcoin-Qt window.', QMessageBox.Ok)
+                     'corner of the Protoshares-Qt window.', QMessageBox.Ok)
                return
             
          
@@ -4753,8 +4753,8 @@ class ArmoryMainWindow(QMainWindow):
                   le = wlt.cppWallet.calcLedgerEntryForTxStr(rawTx)
                   if not le.getTxHash()=='\x00'*32:
                      LOGDEBUG('ZerConf tx for wallet: %s.  Adding to notify queue.' % wltID)
-                     notifyIn  = self.getSettingOrSetDefault('NotifyBtcIn',  not OS_MACOSX)
-                     notifyOut = self.getSettingOrSetDefault('NotifyBtcOut', not OS_MACOSX)
+                     notifyIn  = self.getSettingOrSetDefault('NotifyPtsIn',  not OS_MACOSX)
+                     notifyOut = self.getSettingOrSetDefault('NotifyPtsOut', not OS_MACOSX)
                      if (le.getValue()<=0 and notifyOut) or (le.getValue()>0 and notifyIn):
                         self.notifyQueue.append([wltID, le, False])  # notifiedAlready=False
                      self.createCombinedLedger()
@@ -4839,8 +4839,8 @@ class ArmoryMainWindow(QMainWindow):
             for wltID,wlt in self.walletMap.iteritems():
                le = wlt.cppWallet.calcLedgerEntryForTx(tx)
                if not le.getTxHash() in notifiedAlready:
-                  notifyIn  = self.getSettingOrSetDefault('NotifyBtcIn',  not OS_MACOSX)
-                  notifyOut = self.getSettingOrSetDefault('NotifyBtcOut', not OS_MACOSX)
+                  notifyIn  = self.getSettingOrSetDefault('NotifyPtsIn',  not OS_MACOSX)
+                  notifyOut = self.getSettingOrSetDefault('NotifyPtsOut', not OS_MACOSX)
                   if (le.getValue()<=0 and notifyOut) or (le.getValue>0 and notifyIn):
                      self.notifyQueue.append([wltID, le, False])
                else:
@@ -4879,8 +4879,8 @@ class ArmoryMainWindow(QMainWindow):
          self.notifyQueue[i][2] = True
          if le.isSentToSelf():
             amt = determineSentToSelfAmt(le, wlt)[0]
-            self.sysTray.showMessage('Your bitcoins just did a lap!', \
-               'Wallet "%s" (%s) just sent %s BTC to itself!' % \
+            self.sysTray.showMessage('Your protoshares just did a lap!', \
+               'Wallet "%s" (%s) just sent %s PTS to itself!' % \
                (wlt.labelName, wltID, coin2str(amt,maxZeros=1).strip()),
                QSystemTrayIcon.Information, 10000)
          else:
@@ -4899,9 +4899,9 @@ class ArmoryMainWindow(QMainWindow):
             # Collected everything we need to display, now construct it and do it
             if le.getValue()>0:
                # Received!
-               title = 'Bitcoins Received!'
+               title = 'Protoshares Received!'
                totalStr = coin2str( sum([mine[i][1] for i in range(len(mine))]), maxZeros=1)
-               dispLines.append(   'Amount: \t%s BTC' % totalStr.strip())
+               dispLines.append(   'Amount: \t%s PTS' % totalStr.strip())
                if len(mine)==1:
                   dispLines.append('Address:\t%s' % hash160_to_addrStr(mine[0][0]))
                   addrComment = wlt.getComment(mine[0][0])
@@ -4910,9 +4910,9 @@ class ArmoryMainWindow(QMainWindow):
                dispLines.append(   'Wallet:\t"%s" (%s)' % (wlt.labelName, wltID))
             elif le.getValue()<0:
                # Sent!
-               title = 'Bitcoins Sent!'
+               title = 'Protoshares Sent!'
                totalStr = coin2str( sum([other[i][1] for i in range(len(other))]), maxZeros=1)
-               dispLines.append(   'Amount: \t%s BTC' % totalStr.strip())
+               dispLines.append(   'Amount: \t%s PTS' % totalStr.strip())
                if len(other)==1:
                   dispLines.append('Sent To:\t%s' % hash160_to_addrStr(other[0][0]))
                   addrComment = wlt.getComment(other[0][0])
@@ -4982,8 +4982,8 @@ class ArmoryMainWindow(QMainWindow):
             LOGINFO('BDM is safe for clean shutdown')
             TheBDM.execCleanShutdown(wait=True)
 
-         # This will do nothing if bitcoind isn't running.  
-         TheSDM.stopBitcoind()
+         # This will do nothing if protosharesd isn't running.  
+         TheSDM.stopProtosharesd()
 
          # Mostly for my own use, I'm curious how fast various things run
          if CLI_OPTIONS.doDebug:
@@ -5065,26 +5065,26 @@ def checkForAlreadyOpenError():
    # Sometimes in Windows, Armory actually isn't open, because it holds 
    # onto the socket even after it's closed.
    armoryExists = []
-   bitcoindExists = []
+   protosharesdExists = []
    aexe = os.path.basename(sys.argv[0])
-   bexe = 'bitcoind.exe' if OS_WINDOWS else 'bitcoind'
+   bexe = 'protosharesd.exe' if OS_WINDOWS else 'protosharesd'
    for proc in psutil.process_iter():
       if aexe in proc.name:
          LOGINFO('Found armory PID: %d', proc.pid)
          armoryExists.append(proc.pid)
       if bexe in proc.name:
-         LOGINFO('Found bitcoind PID: %d', proc.pid)
+         LOGINFO('Found protosharesd PID: %d', proc.pid)
          if ('testnet' in proc.name) == USE_TESTNET:
-            bitcoindExists.append(proc.pid)
+            protosharesdExists.append(proc.pid)
 
    if len(armoryExists)>0:
       LOGINFO('Not an error!  Armory really is open')
       return 
-   elif len(bitcoindExists)>0:
-      # Strange condition where bitcoind doesn't get killed by Armory/guardian
+   elif len(protosharesdExists)>0:
+      # Strange condition where protosharesd doesn't get killed by Armory/guardian
       # (I've only seen this happen on windows, though)
-      LOGERROR('Found zombie bitcoind process...killing it')
-      for pid in bitcoindExists:
+      LOGERROR('Found zombie protosharesd process...killing it')
+      for pid in protosharesdExists:
          killProcess(pid)
       time.sleep(0.5)
       raise

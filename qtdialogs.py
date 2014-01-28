@@ -791,7 +791,7 @@ class DlgPasswd3(ArmoryDialog):
          '<font color="red"><b>!!! DO NOT FORGET YOUR PASSPHRASE !!!</b></font>', size=4)
       lblWarnTxt1.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
       lblWarnTxt2 = QRichLabel( \
-         '<b>No one can help you recover you bitcoins if you forget the '
+         '<b>No one can help you recover you protoshares if you forget the '
          'passphrase and don\'t have a paper backup!</b> Your wallet and '
          'any <u>digital</u> backups are useless if you forget it.  '
          '<br><br>'
@@ -944,8 +944,8 @@ class DlgWalletDetails(ArmoryDialog):
          lbtnChangeCrypto = QLabelButton(s)
          self.connect(lbtnChangeCrypto, SIGNAL('clicked()'), self.changeEncryption)
 
-      lbtnSendBtc = QLabelButton('Send Bitcoins')
-      lbtnGenAddr = QLabelButton('Receive Bitcoins')
+      lbtnSendPts = QLabelButton('Send Protoshares')
+      lbtnGenAddr = QLabelButton('Receive Protoshares')
       lbtnImportA = QLabelButton('Import/Sweep Private Keys')
       lbtnDeleteA = QLabelButton('Remove Imported Address')
       #lbtnSweepA  = QLabelButton('Sweep Wallet/Address')
@@ -957,7 +957,7 @@ class DlgWalletDetails(ArmoryDialog):
       #fnfrag = lambda: DlgFragBackup(self, self.main, self.wlt).exec_()
       #LOGERROR('remove me!')
 
-      self.connect(lbtnSendBtc, SIGNAL('clicked()'), self.execSendBtc)
+      self.connect(lbtnSendPts, SIGNAL('clicked()'), self.execSendPts)
       self.connect(lbtnGenAddr, SIGNAL('clicked()'), self.getNewAddress)
       self.connect(lbtnBackups, SIGNAL('clicked()'), self.execBackupDlg)
       #self.connect(lbtnBackups, SIGNAL('clicked()'), fnfrag)
@@ -966,18 +966,18 @@ class DlgWalletDetails(ArmoryDialog):
       self.connect(lbtnDeleteA, SIGNAL('clicked()'), self.execDeleteAddress)
       self.connect(lbtnForkWlt, SIGNAL('clicked()'), self.forkOnlineWallet)
 
-      lbtnSendBtc.setToolTip('<u></u>Send bitcoins to other users, or transfer '
+      lbtnSendPts.setToolTip('<u></u>Send protoshares to other users, or transfer '
                              'between wallets')
       if self.wlt.watchingOnly:
-         lbtnSendBtc.setToolTip('<u></u>If you have a full-copy of this wallet '
+         lbtnSendPts.setToolTip('<u></u>If you have a full-copy of this wallet '
                                 'on another computer, you can prepare a '
                                 'transaction, to be signed by that computer.')
       lbtnGenAddr.setToolTip('<u></u>Get a new address from this wallet for receiving '
-                             'bitcoins.  Right click on the address list below '
+                             'protoshares.  Right click on the address list below '
                              'to copy an existing address.')
       lbtnImportA.setToolTip('<u></u>Import or "Sweep" an address which is not part '
                              'of your wallet.  Useful for VanityGen addresses '
-                             'and redeeming Casascius physical bitcoins.')
+                             'and redeeming Casascius physical protoshares.')
       lbtnDeleteA.setToolTip('<u></u>Permanently delete an imported address from '
                              'this wallet.  You cannot delete addresses that '
                              'were generated natively by this wallet.')
@@ -1007,7 +1007,7 @@ class DlgWalletDetails(ArmoryDialog):
          frm.setFrameStyle(QFrame.HLine | QFrame.Plain)
          return frm
 
-      if True:              optLayout.addWidget(lbtnSendBtc)
+      if True:              optLayout.addWidget(lbtnSendPts)
       if True:              optLayout.addWidget(lbtnGenAddr)
       if hasPriv:           optLayout.addWidget(lbtnChangeCrypto)
       if True:              optLayout.addWidget(lbtnChangeLabels)
@@ -1035,7 +1035,7 @@ class DlgWalletDetails(ArmoryDialog):
       spendFunds = self.wlt.getBalance('Spendable')
       unconfFunds= self.wlt.getBalance('Unconfirmed')
       uncolor =  htmlColor('MoneyNeg')  if unconfFunds>0          else htmlColor('Foreground')
-      btccolor = htmlColor('DisableFG') if spendFunds==totalFunds else htmlColor('MoneyPos')
+      ptscolor = htmlColor('DisableFG') if spendFunds==totalFunds else htmlColor('MoneyPos')
       lblcolor = htmlColor('DisableFG') if spendFunds==totalFunds else htmlColor('Foreground')
       goodColor= htmlColor('TextGreen')
 
@@ -1055,9 +1055,9 @@ class DlgWalletDetails(ArmoryDialog):
       self.lblUnc.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
 
 
-      self.lblBTC1 = QRichLabel('', doWrap=False)
-      self.lblBTC2 = QRichLabel('', doWrap=False)
-      self.lblBTC3 = QRichLabel('', doWrap=False)
+      self.lblPTS1 = QRichLabel('', doWrap=False)
+      self.lblPTS2 = QRichLabel('', doWrap=False)
+      self.lblPTS3 = QRichLabel('', doWrap=False)
 
       ttipTot = self.main.createToolTipWidget( \
             'Total funds if all current transactions are confirmed.  '
@@ -1081,9 +1081,9 @@ class DlgWalletDetails(ArmoryDialog):
       frmTotalsLayout.addWidget(self.lblSpendFunds,  1,1)
       frmTotalsLayout.addWidget(self.lblUnconfFunds, 2,1)
 
-      frmTotalsLayout.addWidget(self.lblBTC1, 0,2)
-      frmTotalsLayout.addWidget(self.lblBTC2, 1,2)
-      frmTotalsLayout.addWidget(self.lblBTC3, 2,2)
+      frmTotalsLayout.addWidget(self.lblPTS1, 0,2)
+      frmTotalsLayout.addWidget(self.lblPTS2, 1,2)
+      frmTotalsLayout.addWidget(self.lblPTS3, 2,2)
 
       frmTotalsLayout.addWidget(ttipTot, 0,3)
       frmTotalsLayout.addWidget(ttipSpd, 1,3)
@@ -1158,7 +1158,7 @@ class DlgWalletDetails(ArmoryDialog):
             'password before, only rely on a digital backup if you store '
             'the password with it!'
             '<br><br>'
-            '<a href="https://bitcointalk.org/index.php?topic=152151.0">'
+            '<a href="https://protosharestalk.org/index.php?topic=152151.0">'
             'Read more about Armory backups</a>', None, yesStr='Ok', \
             dnaaStartChk=True)
          self.main.setWltSetting(wlt.uniqueIDB58, 'DNAA_RemindBackup', result[1])
@@ -1189,7 +1189,7 @@ class DlgWalletDetails(ArmoryDialog):
       spendFunds = self.wlt.getBalance('Spendable')
       unconfFunds= self.wlt.getBalance('Unconfirmed')
       uncolor =  htmlColor('MoneyNeg')  if unconfFunds>0          else htmlColor('Foreground')
-      btccolor = htmlColor('DisableFG') if spendFunds==totalFunds else htmlColor('MoneyPos')
+      ptscolor = htmlColor('DisableFG') if spendFunds==totalFunds else htmlColor('MoneyPos')
       lblcolor = htmlColor('DisableFG') if spendFunds==totalFunds else htmlColor('Foreground')
       goodColor= htmlColor('TextGreen')
 
@@ -1203,7 +1203,7 @@ class DlgWalletDetails(ArmoryDialog):
          spdStr = '-'*12
          ucnStr = '-'*12
       else:
-         totStr = '<b><font color="%s">%s</font></b>' % (btccolor,  coin2str(totalFunds))
+         totStr = '<b><font color="%s">%s</font></b>' % (ptscolor,  coin2str(totalFunds))
          spdStr = '<b><font color="%s">%s</font></b>' % (goodColor, coin2str(spendFunds))
          ucnStr = '<b><font color="%s">%s</font></b>' % (uncolor,   coin2str(unconfFunds))
 
@@ -1211,9 +1211,9 @@ class DlgWalletDetails(ArmoryDialog):
       self.lblSpendFunds.setText(spdStr)
       self.lblUnconfFunds.setText(ucnStr)
 
-      self.lblBTC1.setText('<b><font color="%s">BTC</font></b>'%lblcolor)
-      self.lblBTC2.setText('<b>BTC</b>')
-      self.lblBTC3.setText('<b>BTC</b>')
+      self.lblPTS1.setText('<b><font color="%s">PTS</font></b>'%lblcolor)
+      self.lblPTS2.setText('<b>PTS</b>')
+      self.lblPTS3.setText('<b>PTS</b>')
 
 
    #############################################################################
@@ -1245,7 +1245,7 @@ class DlgWalletDetails(ArmoryDialog):
       
       if True:  actionCopyAddr    = menu.addAction("Copy Address")
       if True:  actionShowQRCode  = menu.addAction("Display Address QR Code")
-      if True:  actionBlkChnInfo  = menu.addAction("View Address on www.blockchain.info")
+      if True:  actionBlkChnInfo  = menu.addAction("View Address on www.coinplorer.com")
       if True:  actionReqPayment  = menu.addAction("Request Payment to this Address")
       if dev:   actionCopyHash160 = menu.addAction("Copy Hash160 (hex)")
       if True:  actionCopyComment = menu.addAction("Copy Comment")
@@ -1259,12 +1259,12 @@ class DlgWalletDetails(ArmoryDialog):
       elif action==actionBlkChnInfo:
          try:
             import webbrowser
-            blkchnURL = 'https://blockchain.info/address/%s' % addr
+            blkchnURL = 'https://coinplorer.com/PTS/Addresses/%s' % addr
             webbrowser.open(blkchnURL)
          except:
             QMessageBox.critical(self, 'Could not open browser', \
                'Armory encountered an error opening your web browser.  To view '
-               'this address on blockchain.info, please copy and paste '
+               'this address on coinplorer.com, please copy and paste '
                'the following URL into your browser: '
                '<br><br>%s' % blkchnURL, QMessageBox.Ok)
          return
@@ -1352,7 +1352,7 @@ class DlgWalletDetails(ArmoryDialog):
       self.wltAddrView.reset()
        
 
-   def execSendBtc(self):
+   def execSendPts(self):
       #if self.main.blkMode == BLOCKCHAINMODE.Offline:
       if TheBDM.getBDMState() in ('Offline', 'Uninitialized'):
          QMessageBox.warning(self, 'Offline Mode', \
@@ -1372,7 +1372,7 @@ class DlgWalletDetails(ArmoryDialog):
            'balance appears on the main window, then try again.', \
             QMessageBox.Ok)
          return
-      dlgSend = DlgSendBitcoins(self.wlt, self, self.main)
+      dlgSend = DlgSendProtoshares(self.wlt, self, self.main)
       dlgSend.exec_()
       self.wltAddrModel.reset()
    
@@ -1380,7 +1380,7 @@ class DlgWalletDetails(ArmoryDialog):
 
    def changeKdf(self):
       """ 
-      This is a low-priority feature.  I mean, the PyBtcWallet class has this
+      This is a low-priority feature.  I mean, the PyPtsWallet class has this
       feature implemented, but I don't have a GUI for it
       """
       pass
@@ -1866,7 +1866,7 @@ def showRecvCoinsWarningIfNecessary(wlt, main):
       result = QMessageBox.warning(main, tr('Careful!'), tr("""
          Armory is not online yet, and will eventually need to be online to 
          access any funds sent to your wallet.  Please <u><b>do not</b></u>
-         receive Bitcoins to your Armory wallets until you have successfully 
+         receive Protoshares to your Armory wallets until you have successfully 
          gotten online <i>at least one time</i>.
          <br><br>
          Armory is still beta software, and some users report difficulty
@@ -2061,7 +2061,7 @@ class DlgNewAddressDisp(ArmoryDialog):
       offlineWallet = (wlttype==WLTTYPES.Offline)
 
       lblDescr = QLabel( \
-            'The following address can be used to receive bitcoins:')
+            'The following address can be used to receive protoshares:')
       self.edtNewAddr = QLineEdit()
       self.edtNewAddr.setReadOnly(True)
       self.edtNewAddr.setText(addrStr)
@@ -2085,7 +2085,7 @@ class DlgNewAddressDisp(ArmoryDialog):
       tooltip1 = self.main.createToolTipWidget( \
             'You can securely use this address as many times as you want. '
             'However, all people to whom you give this address will '
-            'be able to see the number and amount of bitcoins <b>ever</b> '
+            'be able to see the number and amount of protoshares <b>ever</b> '
             'sent to it.  Therefore, using a new address for each transaction '
             'improves overall privacy, but there is no security issues '
             'with reusing any address.' )
@@ -2137,7 +2137,7 @@ class DlgNewAddressDisp(ArmoryDialog):
       frmComment.setLayout(frmCommentLayout)
 
       
-      lblRecvWlt = QRichLabel( 'Bitcoins sent to this address will '
+      lblRecvWlt = QRichLabel( 'Protoshares sent to this address will '
             'appear in the wallet:', doWrap=False)
       
       lblRecvWlt.setWordWrap(True)
@@ -2253,7 +2253,7 @@ class DlgImportAddress(ArmoryDialog):
                      'has access to it.  Otherwise, sweep it to get '
                      'the funds out of it.  All standard private-key formats '
                      'are supported <i>except for private keys created by '
-                     'Bitcoin-Qt version 0.6.0 and later (compressed)</i>.')
+                     'Protoshares-Qt version 0.6.0 and later (compressed)</i>.')
 
       lblPrivOne = QRichLabel('Private Key')
       self.edtPrivData = QLineEdit()
@@ -2262,7 +2262,7 @@ class DlgImportAddress(ArmoryDialog):
                        'Supported formats are any hexadecimal or Base58 '
                        'representation of a 32-byte private key (with or '
                        'without checksums), and mini-private-key format '
-                       'used on Casascius physical bitcoins.  Private keys '
+                       'used on Casascius physical protoshares.  Private keys '
                        'that use <i>compressed</i> public keys are not yet '
                        'supported by Armory.')
 
@@ -2326,7 +2326,7 @@ class DlgImportAddress(ArmoryDialog):
       sweepTooltip = self.main.createToolTipWidget( \
          'You should never add an untrusted key to your wallet.  By choosing this '
          'option, you are only moving the funds into your wallet, but not the key '
-         'itself.  You should use this option for Casascius physical bitcoins.')
+         'itself.  You should use this option for Casascius physical protoshares.')
 
       importTooltip = self.main.createToolTipWidget( \
          'This option will make the key part of your wallet, meaning that it '
@@ -2399,7 +2399,7 @@ class DlgImportAddress(ArmoryDialog):
          if binary_to_int(binKeyData, BIGENDIAN) >= SECP256K1_ORDER:
             QMessageBox.critical(self, 'Invalid Private Key', \
                'The private key you have entered is actually not valid '
-               'for the elliptic curve used by Bitcoin (secp256k1).  '
+               'for the elliptic curve used by Protoshares (secp256k1).  '
                'Almost any 64-character hex is a valid private key '
                '<b>except</b> for those greater than: '
                '<br><br>'
@@ -2426,7 +2426,7 @@ class DlgImportAddress(ArmoryDialog):
       except CompressedKeyError, e:
          QMessageBox.critical(self, 'Unsupported key type', 'You entered a key '
             'for an address that uses a compressed public key, usually produced '
-            'in Bitcoin-Qt/bitcoind wallets created after version 0.6.0.  Armory '
+            'in Protoshares-Qt/protosharesd wallets created after version 0.6.0.  Armory '
             'does not yet support this key type.')
          LOGERROR('Compressed key data recognized but not supported')
          return
@@ -2442,7 +2442,7 @@ class DlgImportAddress(ArmoryDialog):
       if not 'mini' in keyType.lower():
          reply = QMessageBox.question(self, 'Verify Address', \
                'The key data you entered appears to correspond to '
-               'the following Bitcoin address:\n\n\t' + addrStr +
+               'the following Protoshares address:\n\n\t' + addrStr +
                '\n\nIs this the correct address?',
                QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
          if reply==QMessageBox.Cancel:
@@ -2490,7 +2490,7 @@ class DlgImportAddress(ArmoryDialog):
                      '<b>Wallet Name</b>: ' + self.main.walletMap[wltID].labelName + '<br>'
                      '<b>Address Type</b>: ' + typ + 
                      '<br><br>'
-                     'The sweep operation will simply move bitcoins out of the wallet '
+                     'The sweep operation will simply move protoshares out of the wallet '
                      'above into this wallet.  If the network charges a fee for this '
                      'transaction, you balance will be reduced by that much.')
                result = QMessageBox.warning(self, 'Duplicate Address', msg, \
@@ -2501,13 +2501,13 @@ class DlgImportAddress(ArmoryDialog):
    
          #if not TheBDM.getBDMState()=='BlockchainReady':
             #reply = QMessageBox.critical(self, 'Cannot Sweep Address', \
-            #'You need access to the Bitcoin network and the blockchain in order '
+            #'You need access to the Protoshares network and the blockchain in order '
             #'to find the balance of this address and sweep its funds. ', \
             #QMessageBox.Ok)
             #return
 
          # Create the address object for the addr to be swept
-         sweepAddr = PyBtcAddress().createFromPlainKeyData(SecureBinaryData(binKeyData))
+         sweepAddr = PyPtsAddress().createFromPlainKeyData(SecureBinaryData(binKeyData))
          targAddr160 = self.wlt.getNextUnusedAddress().getAddr160()
 
          self.main.confirmSweepScan([sweepAddr], targAddr160)
@@ -2667,7 +2667,7 @@ class DlgImportAddress(ArmoryDialog):
             reply = QMessageBox.critical(self, 'Duplicate Addresses!', \
                'You are attempting to sweep %d addresses, but %d of them '
                'are already part of existing wallets.  That means that some or '
-               'all of the bitcoins you sweep may already be owned by you. '
+               'all of the protoshares you sweep may already be owned by you. '
                '<br><br>'
                'Would you like to continue anyway?' % \
                (len(allWltList), len(dupeWltList)), \
@@ -2676,7 +2676,7 @@ class DlgImportAddress(ArmoryDialog):
                return
          
    
-         cppWlt = Cpp.BtcWallet()
+         cppWlt = Cpp.PtsWallet()
          for addr160,addrStr,SecurePriv in privKeyList:
             cppWlt.addScrAddress_1_(Hash160ToScrAddr(addr160))
 
@@ -2684,7 +2684,7 @@ class DlgImportAddress(ArmoryDialog):
          # If we got here, let's go ahead and sweep!
          addrList = []
          for addr160,addrStr,SecurePriv in privKeyList:
-            pyAddr = PyBtcAddress().createFromPlainKeyData(SecurePriv)
+            pyAddr = PyPtsAddress().createFromPlainKeyData(SecurePriv)
             addrList.append(pyAddr)
 
          targAddr160 = self.wlt.getNextUnusedAddress().getAddr160()
@@ -2857,7 +2857,7 @@ class DlgVerifySweep(ArmoryDialog):
       #frmLayout.addWidget(QRichLabel('Funds will be <i>swept</i>...'), 0,0, 1,2)
       frmLayout.addWidget(QRichLabel('      From ' + inputStr, doWrap=False), 1,0, 1,2)
       frmLayout.addWidget(QRichLabel('      To ' + outputStr, doWrap=False),  2,0, 1,2)
-      frmLayout.addWidget(QRichLabel('      Total <b>%s</b> BTC %s'%(outStr,feeStr), doWrap=False),  3,0, 1,2)
+      frmLayout.addWidget(QRichLabel('      Total <b>%s</b> PTS %s'%(outStr,feeStr), doWrap=False),  3,0, 1,2)
       frm.setLayout(frmLayout)
 
       lblFinalConfirm = QLabel('Are you sure you want to execute this transaction?')
@@ -2891,25 +2891,25 @@ class DlgVerifySweep(ArmoryDialog):
 #
 #
 #      lblDescr = QRichLabel( \
-#         'Specify the location of your regular Bitcoin wallet (wallet.dat) '
+#         'Specify the location of your regular Protoshares wallet (wallet.dat) '
 #         'to be migrated into an Armory wallet.  All private '
 #         'keys will be imported, giving you full access to those addresses, as '
 #         'if Armory had generated them natively.'
 #         '<br><br>'
 #         '<b>NOTE:</b> It is strongly recommended that all '
-#         'Bitcoin addresses be used in only one program at a time.  If you '
+#         'Protoshares addresses be used in only one program at a time.  If you '
 #         'import your entire wallet.dat, it is recommended to stop using the '
-#         'regular Bitcoin client, and only use Armory to send transactions.  '
+#         'regular Protoshares client, and only use Armory to send transactions.  '
 #         'Armory developers will not be responsible for coins getting "locked" '
 #         'or "stuck" due to multiple applications attempting to spend coins '
 #         'from the same addresses.')
 #
 #      lblSatoshiWlt = QRichLabel('Wallet File to be Migrated (typically ' +
-#                                 os.path.join(BTC_HOME_DIR, 'wallet.dat') + ')', doWrap=False)
+#                                 os.path.join(PTS_HOME_DIR, 'wallet.dat') + ')', doWrap=False)
 #      ttipWlt = self.main.createToolTipWidget(\
-#         'This is the wallet file used by the standard Bitcoin client from '
-#         'bitcoin.org.  It contains all the information needed for Armory to '
-#         'know how to access the bitcoins maintained by that program')
+#         'This is the wallet file used by the standard Protoshares client from '
+#         'protoshares.org.  It contains all the information needed for Armory to '
+#         'know how to access the protoshares maintained by that program')
 #      self.txtWalletPath = QLineEdit()
 #
 #
@@ -2918,7 +2918,7 @@ class DlgVerifySweep(ArmoryDialog):
 #      ttipAllKeys = self.main.createToolTipWidget( \
 #         'The wallet.dat file typically '
 #         'holds a pool of 100 addresses beyond the ones you ever used. '
-#         'These are the next 100 addresses to be used by the main Bitcoin '
+#         'These are the next 100 addresses to be used by the main Protoshares '
 #         'client for the next 100 transactions.  '
 #         'If you are planning to switch to Armory exclusively, you will not '
 #         'need these addresses')
@@ -2931,7 +2931,7 @@ class DlgVerifySweep(ArmoryDialog):
 #      btnGetFilename = QPushButton('Find...')
 #      self.connect(btnGetFilename, SIGNAL('clicked()'), self.getSatoshiFilename)
 #
-#      defaultWalletPath = os.path.join(BTC_HOME_DIR,'wallet.dat')
+#      defaultWalletPath = os.path.join(PTS_HOME_DIR,'wallet.dat')
 #      if os.path.exists(defaultWalletPath):
 #         self.txtWalletPath.setText(defaultWalletPath)
 #
@@ -2981,16 +2981,16 @@ class DlgVerifySweep(ArmoryDialog):
 #      self.setLayout(dlgLayout)
 #
 #      self.setMinimumWidth(500)
-#      self.setWindowTitle('Migrate Bitcoin-Qt Wallet')
+#      self.setWindowTitle('Migrate Protoshares-Qt Wallet')
 #      self.setWindowIcon(QIcon( self.main.iconfile))
 #
 #
 #   def getSatoshiFilename(self):
 #      # Temporarily reset the "LastDir" to where the default wallet.dat is
 #      prevLastDir = self.main.settings.get('LastDirectory')
-#      self.main.writeSetting('LastDirectory', BTC_HOME_DIR)
-#      satoshiWltFile = self.main.getFileLoad('Load Bitcoin Wallet File', \
-#                                             ['Bitcoin Wallets (*.dat)'])
+#      self.main.writeSetting('LastDirectory', PTS_HOME_DIR)
+#      satoshiWltFile = self.main.getFileLoad('Load Protoshares Wallet File', \
+#                                             ['Protoshares Wallets (*.dat)'])
 #      self.main.writeSetting('LastDirectory', prevLastDir)
 #      if len(str(satoshiWltFile))>0:
 #         self.txtWalletPath.setText(satoshiWltFile)
@@ -3115,17 +3115,17 @@ class DlgVerifySweep(ArmoryDialog):
 #      wlt = None
 #      if toWalletID==None:
 #         lblShort = 'Migrated wallet.dat'
-#         lblLong  = 'Wallet created to hold addresses from the regular Bitcoin wallet.dat.'
+#         lblLong  = 'Wallet created to hold addresses from the regular Protoshares wallet.dat.'
 #
 #         if not satoshiPassphrase:
-#            wlt = PyBtcWallet().createNewWallet(    \
+#            wlt = PyPtsWallet().createNewWallet(    \
 #                               withEncrypt=False,   \
 #                               shortLabel=lblShort, \
 #                               longLabel=lblLong)
 #                                                     
 #         else:
 #            lblLong += ' (encrypted using same passphrase as the original wallet)'
-#            wlt = PyBtcWallet().createNewWallet( \
+#            wlt = PyPtsWallet().createNewWallet( \
 #                               withEncrypt=True, \
 #                               securePassphrase=satoshiPassphrase, \
 #                               shortLabel=lblShort, \
@@ -3163,7 +3163,7 @@ class DlgVerifySweep(ArmoryDialog):
 #               self.nError += 1
 #
 #
-#      DlgExecLongProcess(finallyDoMigrate, "Migrating Bitcoin-Qt Wallet", self, self.main).exec_()
+#      DlgExecLongProcess(finallyDoMigrate, "Migrating Protoshares-Qt Wallet", self, self.main).exec_()
 #
 #
 #      if self.nImport==0:
@@ -3401,9 +3401,9 @@ class DlgAddressInfo(ArmoryDialog):
       if cppAddr.getSpendableBalance()>0:
          goodColor = htmlColor('MoneyPos')
          lbls[-1].append( QRichLabel( \
-            '<font color=' + goodColor + '>' + balStr.strip() + '</font> BTC' ))
+            '<font color=' + goodColor + '>' + balStr.strip() + '</font> PTS' ))
       else:   
-         lbls[-1].append( QRichLabel( balStr.strip() + ' BTC'))
+         lbls[-1].append( QRichLabel( balStr.strip() + ' PTS'))
 
 
       # Number of transactions
@@ -3766,13 +3766,13 @@ class DlgEULA(ArmoryDialog):
 
 
       lblPleaseAgree = QRichLabel( \
-         '<b>Armory Bitcoin Client is licensed under the <i>Affero General '
+         '<b>Armory Protoshares Client is licensed under the <i>Affero General '
          'Public License, Version 3 (AGPLv3)</i></b>'
          '<br><br>'
          'Additionally, as a condition of receiving this software '
          'for free, you accept all risks associated with using it '
          'and the developers of Armory will not be held liable for any '
-         'loss of money or bitcoins due to software defects.'
+         'loss of money or protoshares due to software defects.'
          '<br><br>'
          '<b>Please read the full terms of the license and indicate your '
          'agreement with its terms.</b>')
@@ -3816,16 +3816,16 @@ class DlgIntroMessage(ArmoryDialog):
       lblWelcome = QRichLabel('<b>Welcome to Armory!</b>')
       lblWelcome.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
       lblWelcome.setFont(GETFONT('Var', 14))
-      lblSlogan  = QRichLabel('<i>The most advanced Bitcoin Client on Earth!</i>')
+      lblSlogan  = QRichLabel('<i>The most advanced Protoshares Client on Earth!</i>')
       lblSlogan.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
 
       lblDescr = QRichLabel( \
-         '<b>You are about to use the most secure and feature-rich Bitcoin client '
+         '<b>You are about to use the most secure and feature-rich Protoshares client '
          'software available!</b>  But please remember, this software '
          'is still <i>Beta</i> - Armory developers will not be held responsible '
-         'for loss of bitcoins resulting from the use of this software!'
+         'for loss of protoshares resulting from the use of this software!'
          '<br><br>'
-         'For more info about Armory, and Bitcoin itself, see '
+         'For more info about Armory, and Protoshares itself, see '
          '<a href="https://bitcoinarmory.com/faqs">frequently '
          'asked questions</a>.')
       lblDescr.setOpenExternalLinks(True)
@@ -4036,7 +4036,7 @@ class DlgImportPaperWallet(ArmoryDialog):
       privKey = ''.join(self.wltDataLines[:2])
       chain   = ''.join(self.wltDataLines[2:])
        
-      root  = PyBtcAddress().createFromPlainKeyData(SecureBinaryData(privKey))
+      root  = PyPtsAddress().createFromPlainKeyData(SecureBinaryData(privKey))
       root.chaincode = SecureBinaryData(chain)
       first = root.extendAddressChain()
       newWltID = binary_to_base58((ADDRBYTE + first.getAddr160()[:5])[::-1])
@@ -4073,7 +4073,7 @@ class DlgImportPaperWallet(ArmoryDialog):
             return
 
       if passwd:
-          self.newWallet = PyBtcWallet().createNewWallet( \
+          self.newWallet = PyPtsWallet().createNewWallet( \
                                  plainRootKey=SecureBinaryData(privKey), \
                                  chaincode=SecureBinaryData(chain), \
                                  shortLabel='PaperBackup - %s'%newWltID, \
@@ -4084,7 +4084,7 @@ class DlgImportPaperWallet(ArmoryDialog):
                                  isActuallyNew=False, \
                                  doRegisterWithBDM=False)
       else:
-         self.newWallet = PyBtcWallet().createNewWallet(  \
+         self.newWallet = PyPtsWallet().createNewWallet(  \
                                  plainRootKey=SecureBinaryData(privKey), \
                                  chaincode=SecureBinaryData(chain), \
                                  shortLabel='PaperBackup - %s'%newWltID, \
@@ -4186,11 +4186,11 @@ class DlgRemoveWallet(ArmoryDialog):
          lbls.append([])
          lbls[3].append(QLabel('Current Balance (w/ unconfirmed):'))
          if bal>0:
-            lbls[3].append(QLabel('<font color="red"><b>'+coin2str(bal, maxZeros=1).strip()+' BTC</b></font>'))
+            lbls[3].append(QLabel('<font color="red"><b>'+coin2str(bal, maxZeros=1).strip()+' PTS</b></font>'))
             lbls[3][-1].setTextFormat(Qt.RichText)
             wltEmpty = False
          else:
-            lbls[3].append(QLabel(coin2str(bal, maxZeros=1) + ' BTC'))
+            lbls[3].append(QLabel(coin2str(bal, maxZeros=1) + ' PTS'))
 
 
       # Add two WARNING images on either side of dialog
@@ -4407,7 +4407,7 @@ class DlgRemoveWallet(ArmoryDialog):
                LOGINFO('***Converting to watching-only wallet')
                newWltPath = wlt.getWalletPath('WatchOnly')
                wlt.forkOnlineWallet(newWltPath, wlt.labelName, wlt.labelDescr)
-               newWlt = PyBtcWallet().readWalletFile(newWltPath)
+               newWlt = PyPtsWallet().readWalletFile(newWltPath)
                newWlt.setBlockchainSyncFlag(BLOCKCHAIN_READONLY)
                newWlt.syncWithBlockchain()
 
@@ -4476,11 +4476,11 @@ class DlgRemoveAddress(ArmoryDialog):
          lbls.append([])
          lbls[-1].append(QLabel('Address Balance (w/ unconfirmed):'))
          if bal>0:
-            lbls[-1].append(QLabel('<font color="red"><b>'+coin2str(bal, maxZeros=1)+' BTC</b></font>'))
+            lbls[-1].append(QLabel('<font color="red"><b>'+coin2str(bal, maxZeros=1)+' PTS</b></font>'))
             lbls[-1][-1].setTextFormat(Qt.RichText)
             addrEmpty = False
          else:
-            lbls[3].append(QLabel(coin2str(bal, maxZeros=1) + ' BTC'))
+            lbls[3].append(QLabel(coin2str(bal, maxZeros=1) + ' PTS'))
 
 
       # Add two WARNING images on either side of dialog
@@ -4533,7 +4533,7 @@ class DlgRemoveAddress(ArmoryDialog):
            'Simply deleting an address does not prevent anyone '
            'from sending money to it.  If you have given this address '
            'to anyone in the past, make sure that they know not to '
-           'use it again, since any bitcoins sent to it will be '
+           'use it again, since any protoshares sent to it will be '
            'inaccessible.\n\n '
            'If you are maintaining an external copy of this address '
            'please ignore this warning\n\n'
@@ -4724,7 +4724,7 @@ class DlgConfirmSend(ArmoryDialog):
       sumStr = coin2str(totalSend, maxZeros=1)
 
       lblMsg = QRichLabel(
-         'You are about to spend <b>%s BTC</b> from wallet "<b>%s</b>" (%s).  You '
+         'You are about to spend <b>%s PTS</b> from wallet "<b>%s</b>" (%s).  You '
          'specified the following distribution:' % (sumStr, wlt.labelName, wlt.uniqueIDB58))
 
 
@@ -4744,7 +4744,7 @@ class DlgConfirmSend(ArmoryDialog):
          recipLbls[-1].setFont(GETFONT('Fixed'))
 
       recipLbls.append(HLINE(QFrame.Sunken))
-      recipLbls.append(QLabel( 'Total bitcoins : '.ljust(37)  +
+      recipLbls.append(QLabel( 'Total protoshares : '.ljust(37)  +
                         coin2str(totalSend, rJust=True, maxZeros=4)))
       recipLbls[-1].setFont(GETFONT('Fixed'))
 
@@ -4803,10 +4803,10 @@ class DlgConfirmSend(ArmoryDialog):
 
 
 
-class DlgSendBitcoins(ArmoryDialog):
-   COLS = enum('LblAddr','Addr','AddrBook', 'LblWltID', 'LblAmt','Btc','LblUnit','BtnMax',  'LblComm','Comm')
+class DlgSendProtoshares(ArmoryDialog):
+   COLS = enum('LblAddr','Addr','AddrBook', 'LblWltID', 'LblAmt','Pts','LblUnit','BtnMax',  'LblComm','Comm')
    def __init__(self, wlt, parent=None, main=None, prefill=None):
-      super(DlgSendBitcoins, self).__init__(parent, main)
+      super(DlgSendProtoshares, self).__init__(parent, main)
       self.maxHeight = tightSizeNChar(GETFONT('var'), 1)[1]+8
 
       self.wlt    = wlt  
@@ -4824,7 +4824,7 @@ class DlgSendBitcoins(ArmoryDialog):
 
       feetip = self.main.createToolTipWidget( \
             'Transaction fees go to users who contribute computing power to '
-            'keep the Bitcoin network secure, and in return they get your transaction '
+            'keep the Protoshares network secure, and in return they get your transaction '
             'included in the blockchain faster.  <b>Most transactions '
             'do not require a fee</b> but it is recommended anyway '
             'since it guarantees quick processing for less than $0.01 USD and '
@@ -4845,7 +4845,7 @@ class DlgSendBitcoins(ArmoryDialog):
       lbls.append( QRichLabel("Wallet ID:", doWrap=False) )
       lbls.append( QRichLabel("Name:", doWrap=False))
       lbls.append( QRichLabel("Description:", doWrap=False))
-      lbls.append( QRichLabel("Spendable BTC:", doWrap=False))
+      lbls.append( QRichLabel("Spendable PTS:", doWrap=False))
 
       for i in range(len(lbls)):
          lbls[i].setAlignment(Qt.AlignLeft | Qt.AlignTop)
@@ -4895,7 +4895,7 @@ class DlgSendBitcoins(ArmoryDialog):
          lblNoSend.setText(
             '<font color=%s>'
             'You can sign this transaction, but you do not have '
-            'access to the Bitcoin network in order to broadcast '
+            'access to the Protoshares network in order to broadcast '
             'it.  However, you can create the transaction that '
             'you <i>want</i> to send, and then broadcast it from a computer '
             'that <i>is</i> connected to the network.</font>' % htmlColor('TextWarn'))
@@ -4903,7 +4903,7 @@ class DlgSendBitcoins(ArmoryDialog):
          lblNoSend = QRichLabel( \
             '<font color=%s>'
             'This is an "offline" wallet, which means that the '
-            'private keys needed to send bitcoins are not on this computer. '
+            'private keys needed to send protoshares are not on this computer. '
             'However, you can create the transaction you would like to '
             'spend, then Armory will provide you with a file that can be '
             'signed by the computer that <i>does</i> have the private '
@@ -4927,7 +4927,7 @@ class DlgSendBitcoins(ArmoryDialog):
             'After clicking this button, you will be given directions for '
             'completing this transaction.')
          btnSend.setToolTip('This is a watching-only wallet! '
-                            'You cannot use it to send bitcoins!')
+                            'You cannot use it to send protoshares!')
          #btnSend.setEnabled(False)
          btnSend.setEnabled(True)
          btnSend.setText("Create Unsigned Transaction")
@@ -4938,7 +4938,7 @@ class DlgSendBitcoins(ArmoryDialog):
       self.connect(btnUnsigned, SIGNAL('clicked()'), self.createOfflineTxDPAndDisplay)
 
       if not TheBDM.getBDMState()=='BlockchainReady':
-         btnSend.setToolTip('<u></u>You are currently not connected to the Bitcoin network, '
+         btnSend.setToolTip('<u></u>You are currently not connected to the Protoshares network, '
                             'so you cannot initiate any transactions.')
          btnSend.setEnabled(False)
          btnUnsigned.setEnabled(False)
@@ -4946,7 +4946,7 @@ class DlgSendBitcoins(ArmoryDialog):
 
 
       def addDonation():
-         self.addOneRecipient(ARMORY_DONATION_ADDR, ONE_BTC, \
+         self.addOneRecipient(ARMORY_DONATION_ADDR, ONE_PTS, \
             'Donation to Armory Developers.  Thank you for your generosity!', \
             label='Armory Donation Address')
          
@@ -4960,7 +4960,7 @@ class DlgSendBitcoins(ArmoryDialog):
       self.connect(btnDonate, SIGNAL("clicked()"), self.addDonation)
 
 
-      btnEnterURI = QPushButton('Manually Enter "bitcoin:" Link')
+      btnEnterURI = QPushButton('Manually Enter "protoshares:" Link')
       ttipEnterURI = self.main.createToolTipWidget( \
          'Armory does not always succeed at registering itself to handle '
          'URL links from webpages and email.  '
@@ -5010,7 +5010,7 @@ class DlgSendBitcoins(ArmoryDialog):
                'created this wallet solely for managing imported addresses, '
                'and want to keep all funds within existing addresses.')
          self.ttipSpecify = self.main.createToolTipWidget( \
-               'You can specify any valid Bitcoin address for the change.  '
+               'You can specify any valid Protoshares address for the change.  '
                '<b>NOTE:</b> If the address you specify is not in this wallet, '
                'Armory will not be able to distinguish the outputs when it shows '
                'up in your ledger.  The change will look like a second recipient, '
@@ -5141,7 +5141,7 @@ class DlgSendBitcoins(ArmoryDialog):
       self.setLayout(layout)
 
       self.makeRecipFrame(1)
-      self.setWindowTitle('Send Bitcoins')
+      self.setWindowTitle('Send Protoshares')
       self.setMinimumHeight(self.maxHeight*20)
 
       loadCount      = self.main.settings.get('Load_Count')
@@ -5161,11 +5161,11 @@ class DlgSendBitcoins(ArmoryDialog):
       
       elif not self.main==None and loadCount%donateFreq==(donateFreq-1) and \
          not loadCount==lastPestering and not dnaaDonate and \
-         wlt.getBalance('Spendable') > 5*ONE_BTC and not USE_TESTNET:
+         wlt.getBalance('Spendable') > 5*ONE_PTS and not USE_TESTNET:
          result = MsgBoxWithDNAA(MSGBOX.Question, 'Please donate!', \
             '<i>Armory</i> is the result of over 3,000 hours of development '
             'and dozens of late nights bug-hunting and testing.  Yet, this software '
-            'has been given to you for free to benefit the greater Bitcoin '
+            'has been given to you for free to benefit the greater Protoshares '
             'community! '
             '<br><br>However, continued development may not be possible without '
             'donations.  If you are satisfied with this software, please consider '
@@ -5184,7 +5184,7 @@ class DlgSendBitcoins(ArmoryDialog):
          if result[1]==True:
             self.main.writeSetting('DonateDNAA', True)
       
-      hexgeom = self.main.settings.get('SendBtcGeometry')
+      hexgeom = self.main.settings.get('SendPtsGeometry')
       if len(hexgeom)>0:
          geom = QByteArray.fromHex(hexgeom)
          self.restoreGeometry(geom)
@@ -5200,22 +5200,22 @@ class DlgSendBitcoins(ArmoryDialog):
 
    #############################################################################
    def saveGeometrySettings(self):
-      self.main.writeSetting('SendBtcGeometry', str(self.saveGeometry().toHex()))
+      self.main.writeSetting('SendPtsGeometry', str(self.saveGeometry().toHex()))
 
    #############################################################################
    def closeEvent(self, event):
       self.saveGeometrySettings()
-      super(DlgSendBitcoins, self).closeEvent(event)
+      super(DlgSendProtoshares, self).closeEvent(event)
 
    #############################################################################
    def accept(self, *args):
       self.saveGeometrySettings()
-      super(DlgSendBitcoins, self).accept(*args)
+      super(DlgSendProtoshares, self).accept(*args)
 
    #############################################################################
    def reject(self, *args):
       self.saveGeometrySettings()
-      super(DlgSendBitcoins, self).reject(*args)
+      super(DlgSendProtoshares, self).reject(*args)
 
    #############################################################################
    def createOfflineTxDPAndDisplay(self):
@@ -5359,11 +5359,11 @@ class DlgSendBitcoins(ArmoryDialog):
       for i in range(len(self.widgetTable)):
          try:
             recipStr = str(self.widgetTable[i][COLS.Addr].text()).strip()
-            valueStr = str(self.widgetTable[i][COLS.Btc].text()).strip()
+            valueStr = str(self.widgetTable[i][COLS.Pts].text()).strip()
             value    = str2coin(valueStr, negAllowed=False)
             if value==0:
                QMessageBox.critical(self, 'Zero Amount', \
-                  'You cannot send 0 BTC to any recipients.  <br>Please enter '
+                  'You cannot send 0 PTS to any recipients.  <br>Please enter '
                   'a positive amount for recipient %d.' % (i+1), QMessageBox.Ok)
                return False
 
@@ -5374,8 +5374,8 @@ class DlgSendBitcoins(ArmoryDialog):
             return False
          except TooMuchPrecisionError:
             QMessageBox.critical(self, 'Too much precision', \
-               'Bitcoins can only be specified down to 8 decimal places. '
-               'The smallest value that can be sent is  0.0000 0001 BTC. '
+               'Protoshares can only be specified down to 8 decimal places. '
+               'The smallest value that can be sent is  0.0000 0001 PTS. '
                'Please enter a new amount for recipient %d.' % (i+1), QMessageBox.Ok)
             return False
          except ValueError:
@@ -5403,13 +5403,13 @@ class DlgSendBitcoins(ArmoryDialog):
          return False
       except TooMuchPrecisionError:
          QMessageBox.critical(self, 'Too much precision', \
-            'Bitcoins can only be specified down to 8 decimal places. '
-            'The smallest meaning Bitcoin amount is 0.0000 0001 BTC. '
+            'Protoshares can only be specified down to 8 decimal places. '
+            'The smallest meaning Protoshares amount is 0.0000 0001 PTS. '
             'Please enter a fee of at least 0.0000 0001', QMessageBox.Ok)
          return False
       except:
          QMessageBox.critical(self, 'Invalid Fee String', \
-            'The fee you specified is invalid.  A standard fee is 0.0001 BTC, '
+            'The fee you specified is invalid.  A standard fee is 0.0001 PTS, '
             'though some transactions may succeed with zero fee.', QMessageBox.Ok)
          LOGERROR('Invalid fee specified: "%s"', feeStr)
          return False
@@ -5421,12 +5421,12 @@ class DlgSendBitcoins(ArmoryDialog):
          valMax = coin2str(bal,           maxZeros=2).strip()
          if self.altBalance==None:
             QMessageBox.critical(self, 'Insufficient Funds', \
-            'You just tried to send %s BTC, including fee, but you only '
-            'have %s BTC (spendable) in this wallet!' % (valTry, valMax), QMessageBox.Ok)
+            'You just tried to send %s PTS, including fee, but you only '
+            'have %s PTS (spendable) in this wallet!' % (valTry, valMax), QMessageBox.Ok)
          else:
             QMessageBox.critical(self, 'Insufficient Funds', \
-            'You just tried to send %s BTC, including fee, but you only '
-            'have %s BTC with this coin control selection!' % (valTry, valMax), QMessageBox.Ok)
+            'You just tried to send %s PTS, including fee, but you only '
+            'have %s PTS with this coin control selection!' % (valTry, valMax), QMessageBox.Ok)
          return False
       
 
@@ -5454,11 +5454,11 @@ class DlgSendBitcoins(ArmoryDialog):
                'You have specified a valid amount to send, but the required '
                'transaction fee causes this transaction to exceed your balance.  '
                'In order to send this transaction, you will be required to '
-               'pay a fee of <b>' + coin2str(minFeeRec[1], maxZeros=0).strip() + ' BTC</b>.  '
+               'pay a fee of <b>' + coin2str(minFeeRec[1], maxZeros=0).strip() + ' PTS</b>.  '
                '<br><br>'
                'Please go back and adjust the value of your transaction, not '
                'to exceed a total of <b>' + coin2str(bal-minFeeRec[1], maxZeros=0).strip() +
-               ' BTC</b> (the necessary fee has been entered into the form, so you '
+               ' PTS</b> (the necessary fee has been entered into the form, so you '
                'can use the "MAX" button to enter the remaining balance for a '
                'recipient).', QMessageBox.Ok)
             return
@@ -5471,9 +5471,9 @@ class DlgSendBitcoins(ArmoryDialog):
          msgBtns = QMessageBox.Yes | QMessageBox.Cancel
 
          reply = QMessageBox.warning(self, 'Insufficient Fee', \
-            'The fee you have specified (%s BTC) is insufficient for the size '
+            'The fee you have specified (%s PTS) is insufficient for the size '
             'and priority of your transaction.  You must include at least '
-            '%s BTC to send this transaction.  \n\nDo you agree to the fee of %s BTC?  ' % \
+            '%s PTS to send this transaction.  \n\nDo you agree to the fee of %s PTS?  ' % \
             (feeStr, minRecStr, minRecStr),  msgBtns)
          if reply == QMessageBox.Cancel:
             return False
@@ -5580,10 +5580,10 @@ class DlgSendBitcoins(ArmoryDialog):
                
             
    #############################################################################
-   def addDonation(self, amt=ONE_BTC):
+   def addDonation(self, amt=ONE_PTS):
       COLS = self.COLS
       lastIsEmpty = True
-      for col in (COLS.Addr, COLS.Btc, COLS.Comm):
+      for col in (COLS.Addr, COLS.Pts, COLS.Comm):
          if len(str(self.widgetTable[-1][col].text()))>0:
             lastIsEmpty = False
          
@@ -5591,7 +5591,7 @@ class DlgSendBitcoins(ArmoryDialog):
          self.makeRecipFrame( len(self.widgetTable)+1 )
 
       self.widgetTable[-1][self.COLS.Addr].setText(ARMORY_DONATION_ADDR)
-      self.widgetTable[-1][self.COLS.Btc].setText(coin2str(amt, maxZeros=2).strip())
+      self.widgetTable[-1][self.COLS.Pts].setText(coin2str(amt, maxZeros=2).strip())
       self.widgetTable[-1][self.COLS.Comm].setText(\
             'Donation to Armory developers.  Thank you for your generosity!')
 
@@ -5603,7 +5603,7 @@ class DlgSendBitcoins(ArmoryDialog):
       if len(dlg.uriDict)>0:
          COLS = self.COLS
          lastIsEmpty = True
-         for col in (COLS.Addr, COLS.Btc, COLS.Comm):
+         for col in (COLS.Addr, COLS.Pts, COLS.Comm):
             if len(str(self.widgetTable[-1][col].text()))>0:
                lastIsEmpty = False
             
@@ -5613,7 +5613,7 @@ class DlgSendBitcoins(ArmoryDialog):
          self.widgetTable[-1][self.COLS.Addr].setText(dlg.uriDict['address'])
          if dlg.uriDict.has_key('amount'):
             amtStr = coin2str(dlg.uriDict['amount'], maxZeros=1).strip()
-            self.widgetTable[-1][self.COLS.Btc].setText( amtStr)
+            self.widgetTable[-1][self.COLS.Pts].setText( amtStr)
 
          
          haveLbl = dlg.uriDict.has_key('label')
@@ -5637,7 +5637,7 @@ class DlgSendBitcoins(ArmoryDialog):
 
       COLS = self.COLS
       lastIsEmpty = True
-      for col in (COLS.Addr, COLS.Btc, COLS.Comm):
+      for col in (COLS.Addr, COLS.Pts, COLS.Comm):
          if len(str(self.widgetTable[-1][col].text()))>0:
             lastIsEmpty = False
          
@@ -5649,8 +5649,8 @@ class DlgSendBitcoins(ArmoryDialog):
 
       self.widgetTable[-1][self.COLS.Addr].setText(hash160_to_addrStr(addr160))
       self.widgetTable[-1][self.COLS.Addr].setCursorPosition(0)
-      self.widgetTable[-1][self.COLS.Btc].setText(amt)
-      self.widgetTable[-1][self.COLS.Btc].setCursorPosition(0)
+      self.widgetTable[-1][self.COLS.Pts].setText(amt)
+      self.widgetTable[-1][self.COLS.Pts].setCursorPosition(0)
       self.widgetTable[-1][self.COLS.Comm].setText(msg)
       self.widgetTable[-1][self.COLS.Comm].setCursorPosition(0)
 
@@ -5667,11 +5667,11 @@ class DlgSendBitcoins(ArmoryDialog):
          txFee = str2coin(str(self.edtFeeAmt.text()))
          while r<nRecip:
             # Use while loop so 'r' is still in scope in the except-clause
-            if targWidget==self.widgetTable[r][self.COLS.Btc]:
+            if targWidget==self.widgetTable[r][self.COLS.Pts]:
                r+=1
                continue
 
-            amtStr = str(self.widgetTable[r][self.COLS.Btc].text()).strip()
+            amtStr = str(self.widgetTable[r][self.COLS.Pts].text()).strip()
             if len(amtStr)>0:
                totalOther += str2coin(amtStr)
             r+=1
@@ -5716,7 +5716,7 @@ class DlgSendBitcoins(ArmoryDialog):
       for i in range(nRecip):
          if i<prevNRecip and i<nRecip:
             inputs.append([])
-            for j in (self.COLS.Addr, self.COLS.Btc, self.COLS.Comm):
+            for j in (self.COLS.Addr, self.COLS.Pts, self.COLS.Comm):
                inputs[-1].append(str(self.widgetTable[i][j].text()))
 
 
@@ -5740,7 +5740,7 @@ class DlgSendBitcoins(ArmoryDialog):
          # This is the hack of all hacks -- but I have no other way to make this work. 
          # For some reason, the references on variable r are carrying over between loops
          # and all widgets are getting connected to the last one.  The only way I could 
-         # work around this was just ultra explicit garbage.  I'll pay 0.1 BTC to anyone
+         # work around this was just ultra explicit garbage.  I'll pay 0.1 PTS to anyone
          # who figures out why my original code was failing...
          #idx = r+0
          #chgColor = lambda x: self.updateAddrField(idx, COLS.Addr, QColor(255,255,255))
@@ -5779,7 +5779,7 @@ class DlgSendBitcoins(ArmoryDialog):
          self.widgetTable[r][-1].setMaximumHeight(self.maxHeight)
          self.widgetTable[r][-1].setAlignment(Qt.AlignLeft)
       
-         self.widgetTable[r].append( QLabel('BTC') )
+         self.widgetTable[r].append( QLabel('PTS') )
          self.widgetTable[r][-1].setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
          #self.widgetTable[r].append( QPushButton('MAX') )
@@ -5788,7 +5788,7 @@ class DlgSendBitcoins(ArmoryDialog):
                            #'Fills in the maximum spendable amount minus amounts '
                            #'specified for other recipients and the transaction fee ')
          #self.connect(self.widgetTable[r][-1], SIGNAL('clicked()'),  setMaxFunc)
-         self.widgetTable[r].append( self.createSetMaxButton(self.widgetTable[r][COLS.Btc]) )
+         self.widgetTable[r].append( self.createSetMaxButton(self.widgetTable[r][COLS.Pts]) )
 
          self.widgetTable[r].append( QLabel('Comment:') )
          self.widgetTable[r].append( QLineEdit() )
@@ -5797,7 +5797,7 @@ class DlgSendBitcoins(ArmoryDialog):
 
          if r<nRecip and r<prevNRecip:
             self.widgetTable[r][COLS.Addr].setText( inputs[r][0] )
-            self.widgetTable[r][COLS.Btc ].setText( inputs[r][1] )
+            self.widgetTable[r][COLS.Pts ].setText( inputs[r][1] )
             self.widgetTable[r][COLS.Comm].setText( inputs[r][2] )
 
          subfrm = QFrame()
@@ -5810,7 +5810,7 @@ class DlgSendBitcoins(ArmoryDialog):
          subLayout.addWidget(self.widgetTable[r][COLS.LblWltID], 1, 1, 1, 5)
 
          subLayout.addWidget(self.widgetTable[r][COLS.LblAmt],   2, 0, 1, 1)
-         subLayout.addWidget(self.widgetTable[r][COLS.Btc],      2, 1, 1, 2)
+         subLayout.addWidget(self.widgetTable[r][COLS.Pts],      2, 1, 1, 2)
          subLayout.addWidget(self.widgetTable[r][COLS.LblUnit],  2, 3, 1, 1)
          subLayout.addWidget(self.widgetTable[r][COLS.BtnMax],   2, 4, 1, 1)
          subLayout.addWidget(QLabel(''),                         2, 5, 1, 2)
@@ -5838,7 +5838,7 @@ class DlgSendBitcoins(ArmoryDialog):
       btnLayout.addWidget(lbtnRmRecip)
       btnFrm.setLayout(btnLayout)
 
-      #widgetsForWidth = [COLS.LblAddr, COLS.Addr, COLS.LblAmt, COLS.Btc]
+      #widgetsForWidth = [COLS.LblAddr, COLS.Addr, COLS.LblAmt, COLS.Pts]
       #minScrollWidth = sum([self.widgetTable[0][col].width() for col in widgetsForWidth])
 
       frmRecipLayout.addWidget(btnFrm)
@@ -5914,7 +5914,7 @@ class DlgOfflineTxCreated(ArmoryDialog):
          'signatures.  You must '
          'take this data to the computer holding the private keys for this '
          'wallet to get the necessary signatures, then bring back the completed '
-         'transaction to be broadcast to the Bitcoin network.'
+         'transaction to be broadcast to the Protoshares network.'
          '<br><br>'
          'Use the "Save as file..." button '
          'to copy the <i>*.unsigned.tx</i> file to a USB key or other removable media.  '
@@ -5925,7 +5925,7 @@ class DlgOfflineTxCreated(ArmoryDialog):
          'On the next screen, you will be able to load the signed transaction, '
          'and then broadcast it if all signatures are valid.   In fact, the final, '
          'signed transaction can be finalized from <i>any</i> '
-         'computer that is running Armory and connected to the Bitcoin network.')
+         'computer that is running Armory and connected to the Protoshares network.')
       elif determineWalletType(wlt, self.main)[0]==WLTTYPES.WatchOnly: 
          lblDescr.setText( \
          'The chunk of data shown below is the complete transaction you just '
@@ -5954,7 +5954,7 @@ class DlgOfflineTxCreated(ArmoryDialog):
          'will be able to recognize '
          'this block of data, and take appropriate action without having Armory '
          'software available.   Technical details of BIP 0010 can be found at: '
-         'https://en.bitcoin.it/wiki/BIP_0010')
+         'https://en.protoshares.it/wiki/BIP_0010')
 
 
       ttipDataIsSafe = self.main.createToolTipWidget( \
@@ -6270,7 +6270,7 @@ class DlgOfflineSelect(ArmoryDialog):
          the private keys needed for it """))
          
       lblBroadc = QRichLabel( tr( """
-         Send a pre-signed transaction to the Bitcoin network to finalize it"""))
+         Send a pre-signed transaction to the Protoshares network to finalize it"""))
 
       lblBroadc.setMinimumWidth( tightSizeNChar(lblBroadc, 45)[0] )
 
@@ -6330,7 +6330,7 @@ class DlgReviewOfflineTx(ArmoryDialog):
          'If the transaction is unsigned and you have the correct wallet, '
          'you will have the opportunity to sign it.  If it is already signed '
          'you will have the opportunity to broadcast it to '
-         'the Bitcoin network to make it final.')
+         'the Protoshares network to make it final.')
 
 
 
@@ -6384,7 +6384,7 @@ class DlgReviewOfflineTx(ArmoryDialog):
       ###
       self.infoLbls.append([])
       self.infoLbls[-1].append( self.main.createToolTipWidget( \
-            'This is wallet from which the offline transaction spends bitcoins'))
+            'This is wallet from which the offline transaction spends protoshares'))
       self.infoLbls[-1].append( QRichLabel('<b>Wallet:</b>'))
       self.infoLbls[-1].append( QRichLabel(''))
 
@@ -6524,7 +6524,7 @@ class DlgReviewOfflineTx(ArmoryDialog):
             self.btnBroadcast.setEnabled(True)
          else:
             self.btnBroadcast.setEnabled(False)
-            self.btnBroadcast.setToolTip('No connection to Bitcoin network!')
+            self.btnBroadcast.setToolTip('No connection to Protoshares network!')
 
       self.btnSave.setEnabled(True)
       self.btnCopyHex.setEnabled(False)
@@ -6653,7 +6653,7 @@ class DlgReviewOfflineTx(ArmoryDialog):
 
          ##### 3
          if self.leValue:
-            self.infoLbls[3][2].setText(coin2str(self.leValue, maxZeros=0).strip() + '  BTC')
+            self.infoLbls[3][2].setText(coin2str(self.leValue, maxZeros=0).strip() + '  PTS')
          else:
             self.infoLbls[3][2].setText('')
 
@@ -6777,15 +6777,15 @@ class DlgReviewOfflineTx(ArmoryDialog):
    def broadTx(self):
       if self.main.netMode == NETWORKMODE.Disconnected:
          QMessageBox.warning(self, 'No Internet!', \
-            'Armory lost its connection to Bitcoin-Qt, and cannot '
+            'Armory lost its connection to Protoshares-Qt, and cannot '
             'broadcast any transactions until it is reconnected. '
-            'Please verify that Bitcoin-Qt (or bitcoind) is open '
+            'Please verify that Protoshares-Qt (or protosharesd) is open '
             'and synchronized with the network.', QMessageBox.Ok)
          return
       elif self.main.netMode == NETWORKMODE.Offline:
          QMessageBox.warning(self, 'No Internet!', \
-            'You do not currently have a connection to the Bitcoin network. '
-            'If this does not seem correct, verify that Bitcoin-Qt is open '
+            'You do not currently have a connection to the Protoshares network. '
+            'If this does not seem correct, verify that Protoshares-Qt is open '
             'and synchronized with the network.', QMessageBox.Ok)
          return
 
@@ -7240,10 +7240,10 @@ class DlgTxFeeOptions(ArmoryDialog):
 
       lblDescr = QLabel( \
          'Transaction fees go to people who contribute processing power to '
-         'the Bitcoin network to process transactions and keep it secure.') 
+         'the Protoshares network to process transactions and keep it secure.') 
       lblDescr2 = QLabel( \
          'Nearly all transactions are guaranteed to be '
-         'processed if a fee of 0.0005 BTC is included (less than $0.01 USD).  You '
+         'processed if a fee of 0.0005 PTS is included (less than $0.01 USD).  You '
          'will be prompted for confirmation if a higher fee amount is required for '
          'your transaction.')
 
@@ -7477,7 +7477,7 @@ class DlgDispTxInfo(ArmoryDialog):
          #QMessageBox.critical(self, 'Non-Standard Transaction', \
            #'This is a non-standard transaction, which cannot be '
            #'interpretted by this program.  DO NOT ASSUME that you '
-           #'own these bitcoins, even if you see your address in '
+           #'own these protoshares, even if you see your address in '
            #'any part of the transaction.  Only an expert can tell '
            #'you if and how these coins can be redeemed!  \n\n'
            #'If you would like more information, please copy the '
@@ -7537,7 +7537,7 @@ class DlgDispTxInfo(ArmoryDialog):
       if self.mode in (USERMODE.Expert,):
          # Add protocol version and locktime to the display
          lbls.append([])
-         lbls[-1].append(self.main.createToolTipWidget('Bitcoin Protocol Version Number'))
+         lbls[-1].append(self.main.createToolTipWidget('Protoshares Protocol Version Number'))
          lbls[-1].append(QLabel('Tx Version:'))
          lbls[-1].append(QLabel( str(self.pytx.version)))
 
@@ -7618,11 +7618,11 @@ class DlgDispTxInfo(ArmoryDialog):
                'to determine which is which, and so this fields shows the sum '
                'of <b>all</b> outputs.'))
          lbls[-1].append(QLabel('Sum of Outputs:'))
-         lbls[-1].append(QLabel( coin2str(txAmt, maxZeros=1).strip() + '  BTC' ))
+         lbls[-1].append(QLabel( coin2str(txAmt, maxZeros=1).strip() + '  PTS' ))
       else:
          lbls.append([])
          lbls[-1].append(self.main.createToolTipWidget(
-               'Bitcoins were either sent or received, or sent-to-self'))
+               'Protoshares were either sent or received, or sent-to-self'))
          lbls[-1].append(QLabel('Transaction Direction:'))
          lbls[-1].append(QRichLabel( txdir ))
 
@@ -7631,7 +7631,7 @@ class DlgDispTxInfo(ArmoryDialog):
                'The value shown here is the net effect on your '
                'wallet, including transaction fee.'))
          lbls[-1].append(QLabel('Transaction Amount:'))
-         lbls[-1].append(QRichLabel( coin2str(txAmt, maxZeros=1).strip()  + '  BTC'))
+         lbls[-1].append(QRichLabel( coin2str(txAmt, maxZeros=1).strip()  + '  PTS'))
          if txAmt<0:
             lbls[-1][-1].setText('<font color="red">'+lbls[-1][-1].text()+'</font> ')
          elif txAmt>0:
@@ -7642,10 +7642,10 @@ class DlgDispTxInfo(ArmoryDialog):
          fee = data[FIELDS.SumIn]-data[FIELDS.SumOut]
          lbls.append([])
          lbls[-1].append(self.main.createToolTipWidget( 
-            'Transaction fees go to users supplying the Bitcoin network with '
+            'Transaction fees go to users supplying the Protoshares network with '
             'computing power for processing transactions and maintaining security.'))
          lbls[-1].append(QLabel('Tx Fee Paid:'))
-         lbls[-1].append(QLabel( coin2str(fee, maxZeros=0).strip() + '  BTC'))
+         lbls[-1].append(QLabel( coin2str(fee, maxZeros=0).strip() + '  PTS'))
 
 
 
@@ -7684,7 +7684,7 @@ class DlgDispTxInfo(ArmoryDialog):
                rlbls[-1].extend([QLabel(), QLabel()])
             rlbls[-1].append(QLabel(hash160_to_addrStr(rv[0])))
             if numRV>1:
-               rlbls[-1].append(QLabel(coin2str(rv[1], maxZeros=1) + '  BTC'))
+               rlbls[-1].append(QLabel(coin2str(rv[1], maxZeros=1) + '  PTS'))
             else:
                rlbls[-1].append(QLabel(''))
             ffixBold = GETFONT('Fixed', 10)
@@ -7953,7 +7953,7 @@ class DlgDispTxInfo(ArmoryDialog):
       elif action==actCopySender:
          s = str(self.txInView.model().index(idx.row(), TXINCOLS.Sender).data().toString())
       elif action==actCopyAmount:
-         s = str(self.txInView.model().index(idx.row(), TXINCOLS.Btc).data().toString())
+         s = str(self.txInView.model().index(idx.row(), TXINCOLS.Pts).data().toString())
       elif dev and action==actCopyOutPt:
          s1 = str(self.txInView.model().index(idx.row(), TXINCOLS.OutPt).data().toString())
          s2 = str(self.txInView.model().index(idx.row(), TXINCOLS.OutIdx).data().toString())
@@ -7986,7 +7986,7 @@ class DlgDispTxInfo(ArmoryDialog):
       elif action==actCopySender:
          s = self.txOutView.model().index(idx.row(), TXOUTCOLS.Recip).data().toString()
       elif action==actCopyAmount:
-         s = self.txOutView.model().index(idx.row(), TXOUTCOLS.Btc).data().toString()
+         s = self.txOutView.model().index(idx.row(), TXOUTCOLS.Pts).data().toString()
       elif dev and action==actCopyScript:
          s = self.txOutView.model().index(idx.row(), TXOUTCOLS.Script).data().toString()
       else:
@@ -8437,7 +8437,7 @@ class DlgPrintBackup(ArmoryDialog):
             <b><u>Print Wallet Backup Fragments</u></b><br><br>
             When any %d of these fragments are combined, all <u>previous 
             <b>and</b> future</u> addresses generated by this wallet will be 
-            restored, giving you complete access to your bitcoins.  The 
+            restored, giving you complete access to your protoshares.  The 
             data can be copied by hand if a working printer is not 
             available.  Please make sure that all data lines contain 
             <b>9 columns</b> 
@@ -8720,7 +8720,7 @@ class DlgPrintBackup(ArmoryDialog):
          container = 'this wallet' if printType=='SingleSheetFirstPage' else 'these addresses'
          warnMsg = tr(""" 
             <font color="#aa0000"><b>WARNING:</b></font> Anyone who has access to this 
-            page has access to all the bitcoins in %s!  Please keep this 
+            page has access to all the protoshares in %s!  Please keep this 
             page in a safe place.""" % container)
    
       self.scene.newLine()
@@ -9015,13 +9015,13 @@ class DlgBadConnection(ArmoryDialog):
             'restart Armory.<br><br>Would you like to continue in "Offline" mode? ')
       elif haveInternet and not haveSatoshi:
          lblDescr = QRichLabel( \
-            'Armory was not able to detect the presence of Bitcoin-Qt or bitcoind '
-            'client software (available at http://www.bitcoin.org).  Please make sure that '
+            'Armory was not able to detect the presence of Protoshares-Qt or protosharesd '
+            'client software (available at http://www.protoshares.org).  Please make sure that '
             'the one of those programs is... <br>'
             '<br><b>(1)</b> ...open and connected to the network '
             '<br><b>(2)</b> ...on the same network as Armory (main-network or test-network)'
             '<br><b>(3)</b> ...synchronized with the blockchain before '
-            'starting Armory<br><br>Without the Bitcoin-Qt or bitcoind open, you will only '
+            'starting Armory<br><br>Without the Protoshares-Qt or protosharesd open, you will only '
             'be able to run Armory in "Offline" mode, which will not have access '
             'to new blockchain data, and you will not be able to send outgoing '
             'transactions<br><br>If you do not want to be in "Offline" mode, please '
@@ -9382,9 +9382,9 @@ class DlgECDSACalc(ArmoryDialog):
       gystr = '483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8'
       
       lblDescr = QRichLabel( tr("""
-         Use this form to perform Bitcoin elliptic curve calculations.  All 
+         Use this form to perform Protoshares elliptic curve calculations.  All 
          operations are performed on the secp256k1 elliptic curve, which is 
-         the one used for Bitcoin. 
+         the one used for Protoshares. 
          Supply all values as 32-byte, big-endian, hex-encoded integers. 
          <br><br>
          The following is the secp256k1 generator point coordinates (G): <br>
@@ -9452,7 +9452,7 @@ class DlgECDSACalc(ArmoryDialog):
       if not CryptoECDSA().ECVerifyPoint(binBx, binBy):
          QMessageBox.critical(self, 'Invalid EC Point', \
             'The point you specified (<b>B</b>) is not on the '
-            'elliptic curved used in Bitcoin (secp256k1).', QMessageBox.Ok)
+            'elliptic curved used in Protoshares (secp256k1).', QMessageBox.Ok)
          return
 
       C = CryptoECDSA().ECMultiplyPoint(binA, binBx, binBy)
@@ -9474,13 +9474,13 @@ class DlgECDSACalc(ArmoryDialog):
       if not CryptoECDSA().ECVerifyPoint(binAx, binAy):
          QMessageBox.critical(self, 'Invalid EC Point', \
             'The point you specified (<b>A</b>) is not on the '
-            'elliptic curved used in Bitcoin (secp256k1).', QMessageBox.Ok)
+            'elliptic curved used in Protoshares (secp256k1).', QMessageBox.Ok)
          return
 
       if not CryptoECDSA().ECVerifyPoint(binBx, binBy):
          QMessageBox.critical(self, 'Invalid EC Point', \
             'The point you specified (<b>B</b>) is not on the '
-            'elliptic curved used in Bitcoin (secp256k1).', QMessageBox.Ok)
+            'elliptic curved used in Protoshares (secp256k1).', QMessageBox.Ok)
          return
 
       C = CryptoECDSA().ECAddPoints(binAx, binAy, binBx, binBy)
@@ -9548,7 +9548,7 @@ class DlgAddressBook(ArmoryDialog):
       if self.isBrowsingOnly or selectExistingOnly:
          lblDescr = QRichLabel('Browse all receiving addresses in '
                                'this wallet, and all addresses to which this '
-                               'wallet has sent bitcoins.')
+                               'wallet has sent protoshares.')
 
       lblToWlt  = QRichLabel('<b>Send to Wallet:</b>')
       lblToAddr = QRichLabel('<b>Send to Address:</b>')
@@ -9934,8 +9934,8 @@ class DlgHelpAbout(ArmoryDialog):
       imgLogo.setPixmap(QPixmap(':/armory_logo_h56.png'))
       imgLogo.setAlignment(Qt.AlignHCenter | Qt.AlignVCenter)
 
-      lblHead = QRichLabel('Armory Bitcoin Wallet : Version %s-beta' % \
-                                    getVersionString(BTCARMORY_VERSION), doWrap=False)
+      lblHead = QRichLabel('Armory Protoshares Wallet : Version %s-beta' % \
+                                    getVersionString(PTSARMORY_VERSION), doWrap=False)
       lblWebpage = QRichLabel('<a href="https://www.bitcoinarmory.com">https://www.bitcoinarmory.com</a>')
       lblWebpage.setOpenExternalLinks(True)
       lblCopyright = QRichLabel(u'Copyright \xa9 2011-2013 Armory Technologies, Inc.')
@@ -9966,8 +9966,8 @@ class DlgSettings(ArmoryDialog):
 
 
       ##########################################################################
-      # bitcoind-management settings
-      self.chkManageSatoshi   = QCheckBox('Let Armory run Bitcoin-Qt/bitcoind in the background')
+      # protosharesd-management settings
+      self.chkManageSatoshi   = QCheckBox('Let Armory run Protoshares-Qt/protosharesd in the background')
       self.edtSatoshiExePath  = QLineEdit()
       self.edtSatoshiHomePath = QLineEdit()
       self.edtSatoshiExePath.setMinimumWidth(tightSizeNChar(GETFONT('Fixed',10), 40)[0])
@@ -9978,19 +9978,19 @@ class DlgSettings(ArmoryDialog):
       if OS_MACOSX:
          self.chkManageSatoshi.setEnabled(False)
          lblManageSatoshi = QRichLabel( \
-            'Bitcoin-Qt/bitcoind management is not available on Mac/OSX')
+            'Protoshares-Qt/protosharesd management is not available on Mac/OSX')
       else:
          if self.main.settings.hasSetting('SatoshiExe'):
             satexe  = self.main.settings.get('SatoshiExe')
    
-         sathome = BTC_HOME_DIR
+         sathome = PTS_HOME_DIR
          if self.main.settings.hasSetting('SatoshiDatadir'):
             sathome = self.main.settings.get('SatoshiDatadir')
          
          lblManageSatoshi = QRichLabel( \
-            '<b>Bitcoin Software Management</b>'
+            '<b>Protoshares Software Management</b>'
             '<br><br>'
-            'By default, Armory will manage the Bitcoin engine/software in the '
+            'By default, Armory will manage the Protoshares engine/software in the '
             'background.  You can choose to manage it yourself, or tell Armory '
             'about non-standard installation configuration.')
       if self.main.settings.hasSetting('SatoshiExe'):
@@ -10000,12 +10000,12 @@ class DlgSettings(ArmoryDialog):
          self.edtSatoshiHomePath.setText(self.main.settings.get('SatoshiDatadir'))
          self.edtSatoshiHomePath.home(False)
 
-      lblDescrExe    = QRichLabel('Bitcoin Install Dir:')
-      lblDescrHome   = QRichLabel('Bitcoin Home Dir:')
+      lblDescrExe    = QRichLabel('Protoshares Install Dir:')
+      lblDescrHome   = QRichLabel('Protoshares Home Dir:')
       lblDefaultExe  = QRichLabel('Leave blank to have Armory search default '
                                   'locations for your OS', size=2)
       lblDefaultHome = QRichLabel('Leave blank to use default datadir '
-                                  '(%s)' % BTC_HOME_DIR, size=2)
+                                  '(%s)' % PTS_HOME_DIR, size=2)
 
       self.btnSetExe  = createDirectorySelectButton(self, self.edtSatoshiExePath)
       self.btnSetHome = createDirectorySelectButton(self, self.edtSatoshiHomePath)
@@ -10027,7 +10027,7 @@ class DlgSettings(ArmoryDialog):
       frmMgmt.setLayout(layoutMgmt)
 
       self.clickChkManage()
-      # bitcoind-management settings
+      # protosharesd-management settings
       ##########################################################################
 
       self.chkSkipOnlineCheck = QCheckBox('Skip online check on startup (assume '
@@ -10038,18 +10038,18 @@ class DlgSettings(ArmoryDialog):
 
       lblDefaultUriTitle = QRichLabel('<b>Set Armory as default URL handler</b>')
       lblDefaultURI = QRichLabel(
-         'Set Armory to be the default when you click on "bitcoin:" '
+         'Set Armory to be the default when you click on "protoshares:" '
          'links in your browser or in emails.  '
          'You can test if your operating system is supported by clicking '
-         'on a "bitcoin:" link right after clicking this button.', doWrap=True)
+         'on a "protoshares:" link right after clicking this button.', doWrap=True)
       btnFrmDefaultURI = QPushButton('Set Armory as Default')
       def clickRegURI():
          self.main.setupUriRegistration(justDoIt=True)
          QMessageBox.information(self, 'Registered', \
-            'Armory just attempted to register itself to handle "bitcoin:" '
+            'Armory just attempted to register itself to handle "protoshares:" '
             'links, but this does not work on all operating systems.  You can '
             'test it by going to the '
-            '<a href="http://www.bitcoinarmory.com">Bitcoin Armory website</a> and '
+            '<a href="http://www.bitcoinarmory.com">Protoshares Armory website</a> and '
             'clicking the link at the bottom of the homepage.', QMessageBox.Ok)
             
       self.connect(btnFrmDefaultURI, SIGNAL('clicked()'), clickRegURI)
@@ -10059,9 +10059,9 @@ class DlgSettings(ArmoryDialog):
       lblDefaultFee = QRichLabel('<b>Default fee to include with transactions:</b><br>')
       lblDefaultDescr = QRichLabel( \
                                  'Fees go to users that contribute computing power '
-                                 'to keep the Bitcoin network secure and increases '
+                                 'to keep the Protoshares network secure and increases '
                                  'the priority of your transactions on the network '
-                                 '(%s BTC is standard).' % \
+                                 '(%s PTS is standard).' % \
                                  coin2str(MIN_TX_FEE, maxZeros=0).strip())
       ttipDefaultFee = self.main.createToolTipWidget( \
                                  'NOTE: some transactions will require a certain fee '
@@ -10097,7 +10097,7 @@ class DlgSettings(ArmoryDialog):
                                 #'see only the value received by the recipient.')
       #ttipLedgerFee = self.main.createToolTipWidget( \
                                 #'If you send someone 1.0 '
-                                #'BTC with a 0.001 fee, the ledger will display '
+                                #'PTS with a 0.001 fee, the ledger will display '
                                 #'"1.001" in the "Amount" column if this option '
                                 #'is checked.')
       #self.chkInclFee = QCheckBox('')
@@ -10107,28 +10107,28 @@ class DlgSettings(ArmoryDialog):
       ###############################################################
       # Notifications -- Don't work right on OSX
       lblNotify = QRichLabel('<b>Enable notifcations from the system-tray:</b>')
-      notifyBtcIn  = self.main.getSettingOrSetDefault('NotifyBtcIn',  not OS_MACOSX)
-      notifyBtcOut = self.main.getSettingOrSetDefault('NotifyBtcOut', not OS_MACOSX)
+      notifyPtsIn  = self.main.getSettingOrSetDefault('NotifyPtsIn',  not OS_MACOSX)
+      notifyPtsOut = self.main.getSettingOrSetDefault('NotifyPtsOut', not OS_MACOSX)
       notifyDiscon = self.main.getSettingOrSetDefault('NotifyDiscon', not OS_MACOSX)
       notifyReconn = self.main.getSettingOrSetDefault('NotifyReconn', not OS_MACOSX)
 
-      self.chkBtcIn  = QCheckBox('Bitcoins Received')
-      self.chkBtcOut = QCheckBox('Bitcoins Sent')
-      self.chkDiscon = QCheckBox('Bitcoin-Qt/bitcoind disconnected')
-      self.chkReconn = QCheckBox('Bitcoin-Qt/bitcoind reconnected')
-      self.chkBtcIn.setChecked(notifyBtcIn)
-      self.chkBtcOut.setChecked(notifyBtcOut)
+      self.chkPtsIn  = QCheckBox('Protoshares Received')
+      self.chkPtsOut = QCheckBox('Protoshares Sent')
+      self.chkDiscon = QCheckBox('Protoshares-Qt/protosharesd disconnected')
+      self.chkReconn = QCheckBox('Protoshares-Qt/protosharesd reconnected')
+      self.chkPtsIn.setChecked(notifyPtsIn)
+      self.chkPtsOut.setChecked(notifyPtsOut)
       self.chkDiscon.setChecked(notifyDiscon)
       self.chkReconn.setChecked(notifyReconn)
 
       if OS_MACOSX:
          lblNotify = QRichLabel('<b>Sorry!  Notifications are not available on Mac/OSX</b>')
-         self.chkBtcIn.setChecked(False)
-         self.chkBtcOut.setChecked(False)
+         self.chkPtsIn.setChecked(False)
+         self.chkPtsOut.setChecked(False)
          self.chkDiscon.setChecked(False)
          self.chkReconn.setChecked(False)
-         self.chkBtcIn.setEnabled(False)
-         self.chkBtcOut.setEnabled(False)
+         self.chkPtsIn.setEnabled(False)
+         self.chkPtsOut.setEnabled(False)
          self.chkDiscon.setEnabled(False)
          self.chkReconn.setEnabled(False)
 	
@@ -10294,10 +10294,10 @@ class DlgSettings(ArmoryDialog):
       frmLayout.addWidget( lblNotify,             i,0, 1,3)
 
       i+=1
-      frmLayout.addWidget( self.chkBtcIn,         i,0, 1,3)
+      frmLayout.addWidget( self.chkPtsIn,         i,0, 1,3)
 
       i+=1
-      frmLayout.addWidget( self.chkBtcOut,        i,0, 1,3)
+      frmLayout.addWidget( self.chkPtsOut,        i,0, 1,3)
       
       i+=1
       frmLayout.addWidget( self.chkDiscon,        i,0, 1,3)
@@ -10353,7 +10353,7 @@ class DlgSettings(ArmoryDialog):
       #self.Options.append( ['LineEdit', 'Default_Fee', MIN_TX_FEE, \
                            #'Default fee to include with transactions.', \
                            #'Fees go to users that contribute computing power '
-                           #'to keep the Bitcoin network secure (0.0005 BTC is '
+                           #'to keep the Protoshares network secure (0.0005 PTS is '
                            #'standard).', \
                            #'NOTE: some transactions will require a fee '
                            #'regardless of your preferences -- in such cases '
@@ -10365,13 +10365,13 @@ class DlgSettings(ArmoryDialog):
    def accept(self, *args):
 
       if self.chkManageSatoshi.isChecked():
-         # Check valid path is supplied for bitcoin installation
+         # Check valid path is supplied for protoshares installation
          pathExe  = unicode(self.edtSatoshiExePath.text()).strip()
          if len(pathExe)>0:
             if not os.path.exists(pathExe):
-               exeName = 'bitcoin-qt.exe' if OS_WINDOWS else 'bitcoin-qt'
+               exeName = 'protoshares-qt.exe' if OS_WINDOWS else 'protoshares-qt'
                QMessageBox.warning(self, 'Invalid Path', \
-                  'The path you specified for the Bitcoin software installation '
+                  'The path you specified for the Protoshares software installation '
                   'does not exist.  Please select the directory that contains %s '
                   'or leave it blank to have Armory search the default location '
                   'for your operating system' % exeName, QMessageBox.Ok)
@@ -10382,17 +10382,17 @@ class DlgSettings(ArmoryDialog):
          else:
             self.main.settings.delete('SatoshiExe')
    
-         # Check valid path is supplied for bitcoind home directory
+         # Check valid path is supplied for protosharesd home directory
          pathHome = unicode(self.edtSatoshiHomePath.text()).strip()
          if len(pathHome)>0:
             if not os.path.exists(pathHome):
-               exeName = 'bitcoin-qt.exe' if OS_WINDOWS else 'bitcoin-qt'
+               exeName = 'protoshares-qt.exe' if OS_WINDOWS else 'protoshares-qt'
                QMessageBox.warning(self, 'Invalid Path', \
-                  'The path you specified for the Bitcoin software home directory '
+                  'The path you specified for the Protoshares software home directory '
                   'does not exist.  Only specify this directory if you use a '
-                  'non-standard "-datadir=" option when running Bitcoin-Qt or '
-                  'bitcoind.  If you leave this field blank, the following ' 
-                  'path will be used: <br><br> %s' % BTC_HOME_DIR, QMessageBox.Ok)
+                  'non-standard "-datadir=" option when running Protoshares-Qt or '
+                  'protosharesd.  If you leave this field blank, the following ' 
+                  'path will be used: <br><br> %s' % PTS_HOME_DIR, QMessageBox.Ok)
                return
             self.main.writeSetting('SatoshiDatadir', pathHome)
          else:
@@ -10411,7 +10411,7 @@ class DlgSettings(ArmoryDialog):
       except:
          QMessageBox.warning(self, 'Invalid Amount', \
             'The default fee specified could not be understood.  Please '
-            'specify in BTC with no more than 8 decimal places.', \
+            'specify in PTS with no more than 8 decimal places.', \
             QMessageBox.Ok)
          return
 
@@ -10433,8 +10433,8 @@ class DlgSettings(ArmoryDialog):
          self.main.writeSetting('MinimizeOrClose', 'Close')
 
       #self.main.writeSetting('LedgDisplayFee', self.chkInclFee.isChecked())
-      self.main.writeSetting('NotifyBtcIn',  self.chkBtcIn.isChecked())
-      self.main.writeSetting('NotifyBtcOut', self.chkBtcOut.isChecked())
+      self.main.writeSetting('NotifyPtsIn',  self.chkPtsIn.isChecked())
+      self.main.writeSetting('NotifyPtsOut', self.chkPtsOut.isChecked())
       self.main.writeSetting('NotifyDiscon', self.chkDiscon.isChecked())
       self.main.writeSetting('NotifyReconn', self.chkReconn.isChecked())
 
@@ -10449,7 +10449,7 @@ class DlgSettings(ArmoryDialog):
       if modestr.lower() == 'standard':
          strDescr += \
             ('"Standard" is for users that only need the core set of features '
-             'to send and receive bitcoins.  This includes maintaining multiple '
+             'to send and receive protoshares.  This includes maintaining multiple '
              'wallets, wallet encryption, and the ability to make backups '
              'of your wallets.')
       elif modestr.lower() == 'advanced':
@@ -10463,7 +10463,7 @@ class DlgSettings(ArmoryDialog):
             ('"Expert" mode is similar to "Advanced" but includes '
              'access to lower-level info about transactions, scripts, keys '
              'and network protocol.  Most extra functionality is geared '
-             'towards Bitcoin software developers.')
+             'towards Protoshares software developers.')
       self.lblUsermodeDescr.setText(strDescr)
 
 
@@ -10839,8 +10839,8 @@ class DlgRequestPayment(ArmoryDialog):
 
       lblDescr = QRichLabel( \
          'Create a clickable link that you can copy into email or webpage to '
-         'request a payment.   If the user is running a Bitcoin program ' 
-         'that supports "bitcoin:" links, that program will open with '
+         'request a payment.   If the user is running a Protoshares program ' 
+         'that supports "protoshares:" links, that program will open with '
          'all this information pre-filled after they click the link.')
 
       lblDescr.setContentsMargins(5, 5, 5, 5)
@@ -10848,17 +10848,17 @@ class DlgRequestPayment(ArmoryDialog):
 
 
       ttipPreview = self.main.createToolTipWidget( \
-         'The following Bitcoin desktop applications <i>try</i> to '
-         'register themselves with your computer to handle "bitcoin:" '
+         'The following Protoshares desktop applications <i>try</i> to '
+         'register themselves with your computer to handle "protoshares:" '
          'links: Armory, Multibit, Electrum')
       ttipLinkText = self.main.createToolTipWidget( \
          'This is the text to be shown as the clickable link.  It should '
          'usually begin with "Click here..." to reaffirm to the user it is '
          'is clickable.')
       ttipAmount = self.main.createToolTipWidget( \
-         'All amounts are specifed in BTC')
+         'All amounts are specifed in PTS')
       ttipAddress = self.main.createToolTipWidget( \
-         'The person clicking the link will be sending bitcoins to this address')
+         'The person clicking the link will be sending protoshares to this address')
       ttipMessage = self.main.createToolTipWidget( \
          'This text will be pre-filled as the label/comment field '
          'after the user clicks on the link. They '
@@ -10885,7 +10885,7 @@ class DlgRequestPayment(ArmoryDialog):
       layoutEntry.addWidget(ttipAddress,                            i,2)
 
       i+=1
-      layoutEntry.addWidget(QRichLabel('<b>Request (BTC):</b>'),    i,0)
+      layoutEntry.addWidget(QRichLabel('<b>Request (PTS):</b>'),    i,0)
       layoutEntry.addWidget(self.edtAmount,                         i,1)
 
       i+=1
@@ -11006,7 +11006,7 @@ class DlgRequestPayment(ArmoryDialog):
 
          errorIn = 'Inputs'
          # must have address, maybe have amount and/or message
-         self.rawURI = createBitcoinURI(addr, amt, msgStr)
+         self.rawURI = createProtosharesURI(addr, amt, msgStr)
       except:
          self.lblWarn.setText('<font color="red">Invalid %s</font>' % lastTry)
          self.btnCopyRaw.setEnabled(False)
@@ -11028,7 +11028,7 @@ class DlgRequestPayment(ArmoryDialog):
       self.dispText += '<br>'
       self.dispText += '<b>Pay to</b>:\t%s<br>' % addr
       if amtStr:
-         self.dispText += '<b>Amount</b>:\t%s BTC<br>' % coin2str(amt,maxZeros=0).strip()
+         self.dispText += '<b>Amount</b>:\t%s PTS<br>' % coin2str(amt,maxZeros=0).strip()
       if msgStr:
          self.dispText += '<b>Message</b>:\t%s<br>' % msgStr
       self.lblLink.setText(self.dispText)
@@ -11043,7 +11043,7 @@ class DlgRequestPayment(ArmoryDialog):
       self.plainText += 'If clicking on the line above does not work, use this payment info:\n'
       self.plainText += 'Pay to:  %s' % addr
       if amtStr:
-         self.plainText += '\nAmount:  %s BTC' % coin2str(amt,maxZeros=0).strip()
+         self.plainText += '\nAmount:  %s PTS' % coin2str(amt,maxZeros=0).strip()
       if msgStr:
          self.plainText += '\nMessage: %s' % msgStr
       self.plainText += '\n'
@@ -11149,9 +11149,9 @@ class DlgVersionNotify(ArmoryDialog):
    def __init__(self, parent, main, changelog, wasRequested=False):
       super(DlgVersionNotify, self).__init__(parent, main)
 
-      self.myVersion    = getVersionInt(BTCARMORY_VERSION)
+      self.myVersion    = getVersionInt(PTSARMORY_VERSION)
       self.latestVer    = getVersionInt(readVersionString(changelog[0][0]))
-      self.myVersionStr = getVersionString(BTCARMORY_VERSION)
+      self.myVersionStr = getVersionString(PTSARMORY_VERSION)
       self.latestVerStr = getVersionString(readVersionString(changelog[0][0]))
       lblDescr = QRichLabel('')
 
@@ -11258,11 +11258,11 @@ class DlgUriCopyAndPaste(ArmoryDialog):
       super(DlgUriCopyAndPaste, self).__init__(parent, main)
 
       self.uriDict = {}
-      lblDescr = QRichLabel('Copy and paste a raw bitcoin URL string here.  '
-                            'A valid string starts with "bitcoin:" followed '
-                            'by a bitcoin address.'
+      lblDescr = QRichLabel('Copy and paste a raw protoshares URL string here.  '
+                            'A valid string starts with "protoshares:" followed '
+                            'by a protoshares address.'
                             '<br><br>'
-                            'You should use this feature if there is a "bitcoin:" '
+                            'You should use this feature if there is a "protoshares:" '
                             'link in a webpage or email that does not load Armory '
                             'when you click on it.  Instead, right-click on the '
                             'link and select "Copy Link Location" then paste it '
@@ -11444,7 +11444,7 @@ class dlgRawTx(ArmoryDialog):
 
       
       lblRaw = QRichLabel('You may paste raw transaction data into the box below, '
-                          'and then click "Broadcast" to send it to the Bitcoin '
+                          'and then click "Broadcast" to send it to the Protoshares '
                           'network.  If the transaction has been broadcast before, '
                           'attempting to send it again is unlikely to do anything.')
 
@@ -11571,11 +11571,11 @@ class DlgInstallLinux(ArmoryDialog):
 
 
       lblOptions = QRichLabel( \
-         'If you have manually installed Bitcoin-Qt or bitcoind on this system '
+         'If you have manually installed Protoshares-Qt or protosharesd on this system '
          'before, it is recommended you use the method here you previously used.  '
          'If you get errors using this option, try using the manual instructions '
          'below.')
-      self.radioUbuntuPPA   = QRadioButton('Install from bitcoin.org PPA (Ubuntu only)')
+      self.radioUbuntuPPA   = QRadioButton('Install from protoshares.org PPA (Ubuntu only)')
       self.radioDlBinaries  = QRadioButton('Download and unpack binaries (All Linux)')
       btngrp = QButtonGroup(self)
       btngrp.addButton(self.radioDlBinaries)
@@ -11591,13 +11591,13 @@ class DlgInstallLinux(ArmoryDialog):
       lblAutoPPA = QRichLabel( \
          'Have Armory install the PPA for you.  The does not work on all '
          'systems, so try the manual instructions below, if it fails.  '
-         'Using the PPA will install the Bitcoin software using your '
+         'Using the PPA will install the Protoshares software using your '
          'system\'s package manager, and you will be notified of updates along with '
          'other software on your system.')
-      self.btnAutoPPA = QPushButton('Install Bitcoin PPA')
+      self.btnAutoPPA = QPushButton('Install Protoshares PPA')
       self.connect(self.btnAutoPPA, SIGNAL('clicked()'), self.doPPA)
       self.btnAutoPPA.setToolTip( \
-         'Click to install the Bitcoin PPA for Ubuntu')
+         'Click to install the Protoshares PPA for Ubuntu')
 
       frmDoItForMeBtn = makeHorizFrame(['Stretch', \
                                         self.btnAutoPPA, \
@@ -11611,11 +11611,11 @@ class DlgInstallLinux(ArmoryDialog):
          'the "Applications" menu under "Accessories".' )
          
       lblInstallPPACmds = QRichLabel( \
-         'sudo add-apt-repository ppa:bitcoin/bitcoin' 
+         'sudo add-apt-repository ppa:protoshares/protoshares' 
          '<br>'
          'sudo apt-get update' 
          '<br>'
-         'sudo apt-get install bitcoin-qt bitcoind')
+         'sudo apt-get install protoshares-qt protosharesd')
       lblInstallPPACmds.setFont(GETFONT('Courier',10))
       lblInstallPPACmds.setTextInteractionFlags(Qt.TextSelectableByMouse | \
                                                 Qt.TextSelectableByKeyboard)
@@ -11638,7 +11638,7 @@ class DlgInstallLinux(ArmoryDialog):
       lblManualExperiment = QRichLabel( \
          '<b>Download and set it up for me!  (All Linux):</b>'
          '<br><br>'
-         'Armory will download and verify the binaries from www.bitcoin.org.  '
+         'Armory will download and verify the binaries from www.protoshares.org.  '
          'Your Armory settings will automatically be adjusted to point to that '
          'as the installation directory.')
       btnManualExperiment = QPushButton('Install for me!')
@@ -11646,17 +11646,17 @@ class DlgInstallLinux(ArmoryDialog):
       self.chkCustomDLPath = QCheckBox('Select custom download location')
 
       lblInstallManualDescr = QRichLabel( \
-         '<b>Manual download and install of the Bitcoin software:</b><br>'
+         '<b>Manual download and install of the Protoshares software:</b><br>'
          '<ol>'
-         '<li>Go to <a href="http://www.bitcoin.org/en/download">'
-         'http://www.bitcoin.org/en/download</a></li>'
+         '<li>Go to <a href="http://www.protoshares.org/en/download">'
+         'http://www.protoshares.org/en/download</a></li>'
          '<li>Click on the link that says "Download for Linux (tgz, 32/64-bit)" </li>'
          '<li>Open a file browser and navigate to the download directory</li>'
          '<li>Right-click on the downloaded file, and select "Extract Here"</li>'
          '</ol>'
          '<br>'
          'Once the downloaded archive is unpacked, then click the button below '
-         'to open the Armory settings and change the "Bitcoin Installation Path" '
+         'to open the Armory settings and change the "Protoshares Installation Path" '
          'to point to the new directory.  Then restart Armory')
       lblInstallManualDescr.setOpenExternalLinks(True)
 
@@ -11702,7 +11702,7 @@ class DlgInstallLinux(ArmoryDialog):
    
       self.radioUbuntuPPA.setChecked(True)
       self.clickInstallOpt()
-      self.setWindowTitle('Install Bitcoin in Linux')
+      self.setWindowTitle('Install Protoshares in Linux')
 
       from twisted.internet import reactor
       reactor.callLater(0.2, self.main.checkForLatestVersion)
@@ -11713,8 +11713,8 @@ class DlgInstallLinux(ArmoryDialog):
       if not 'SATOSHI' in dlDict or not 'Linux' in dlDict['SATOSHI']:
          QMessageBox.warning(self, 'Not available', \
             'Armory does not actually have the information needed to execute '
-            'this process securely.  Please visit the bitcoin.org and download '
-            'the Linux version of the Bitcoin software, then modify your '
+            'this process securely.  Please visit the protoshares.org and download '
+            'the Linux version of the Protoshares software, then modify your '
             'settings to point to where it was unpacked. ', QMessageBox.Ok)
          return
       
@@ -11723,7 +11723,7 @@ class DlgInstallLinux(ArmoryDialog):
          if not os.path.exists(installPath):
             os.makedirs(installPath)
       else:
-         title = 'Download Bitcoin software to...'
+         title = 'Download Protoshares software to...'
          initPath = self.main.settings.get('LastDirectory')
          if not OS_MACOSX:
             installPath = unicode(QFileDialog.getExistingDirectory(self, title, initPath))
@@ -11746,10 +11746,10 @@ class DlgInstallLinux(ArmoryDialog):
       fileData = dlg.dlFileData
       if len(fileData)==0 or dlg.dlVerifyFailed:
          QMessageBox.critical(self, 'Download Failed', \
-            'The download failed.  Please visit www.bitcoin.org '
-            'to download and install Bitcoin-Qt manually.', QMessageBox.Ok)
+            'The download failed.  Please visit www.protoshares.org '
+            'to download and install Protoshares-Qt manually.', QMessageBox.Ok)
          import webbrowser
-         webbrowser.open('http://www.bitcoin.org/en/download')
+         webbrowser.open('http://www.protoshares.org/en/download')
          return
          
       fullPath = os.path.join(installPath, dlg.dlFileName)
@@ -11798,12 +11798,12 @@ class DlgInstallLinux(ArmoryDialog):
                       '--import %s/AndresenCodeSign.asc')
       cmdVerifyFile= ('gpg '
                       '--keyring ~/.armory/testkeyring.gpg '
-                      '--verify bitcoin.0.8.1.tar.gz')
+                      '--verify protoshares.0.8.1.tar.gz')
 
 
    #############################################################################
    def doPPA(self):
-      out,err = execAndWait('gksudo install_bitcoinqt', timeout=20)
+      out,err = execAndWait('gksudo install_protosharesqt', timeout=20)
       tryInstallLinux(self.main)
       self.main.settings.delete('SatoshiExe')
       self.accept()
@@ -11814,11 +11814,11 @@ def tryInstallLinux(main):
    def doit():
       print '\n'
       print '***** Executing auto-install in linux...'
-      out,err = execAndWait('gksudo "apt-get remove -y bitcoin-qt bitcoind"', \
+      out,err = execAndWait('gksudo "apt-get remove -y protoshares-qt protosharesd"', \
                              timeout=20)
-      out,err = execAndWait(('gksudo apt-add-repository ppa:bitcoin/bitcoin; '
+      out,err = execAndWait(('gksudo apt-add-repository ppa:protoshares/protoshares; '
                              'gksudo apt-get update; '
-                             'gksudo "apt-get install -y bitcoin-qt bitcoind"'), \
+                             'gksudo "apt-get install -y protoshares-qt protosharesd"'), \
                              timeout=120)
       try:
          TheSDM.setupSDM()
@@ -11832,12 +11832,12 @@ def tryInstallLinux(main):
          LOGINFO('***** Printing errors\n' + err)
          LOGINFO('***** End print errors\n')
          QMessageBox.warning(main, 'Unknown Error', \
-            'An error was reported while trying to install the Bitcoin '
+            'An error was reported while trying to install the Protoshares '
             'software.  The following information is given:<br><br>%s' % err, \
             QMessageBox.Ok)
          raise
             
-   DlgExecLongProcess(doit, 'Installing Bitcoin Software...', main, main).exec_()
+   DlgExecLongProcess(doit, 'Installing Protoshares Software...', main, main).exec_()
 
 
 ################################################################################
@@ -12210,7 +12210,7 @@ class DlgBackupCenter(ArmoryDialog):
    
       F = self.FEATURES
       self.featuresTips[F.ProtGen] = self.main.createToolTipWidget(  tr( """
-         Every time you click "Receive Bitcoins," a new address is generated. 
+         Every time you click "Receive Protoshares," a new address is generated. 
          All of these addresses are generated from a single seed value, which 
          is included in all backups.   Therefore, all addresses that you have
          generated so far <b>and</b> will ever generate with this wallet, are 
@@ -12230,7 +12230,7 @@ class DlgBackupCenter(ArmoryDialog):
             <i>Your wallet <u>does</u> contain imported addresses<i>."""))
       self.featuresTips[F.LostPass] = self.main.createToolTipWidget(  tr( """
          Lost/forgotten passphrases are, <b>by far</b>, the most common 
-         reason for users losing bitcoins.  It is critical you have
+         reason for users losing protoshares.  It is critical you have
          at least one backup that works if you forget your wallet 
          passphrase. """))
       self.featuresTips[F.Durable] = self.main.createToolTipWidget(  tr( """
@@ -12349,7 +12349,7 @@ class DlgBackupCenter(ArmoryDialog):
                gone!  """)
          txtDigCrypt = tr( """
                <b><u>IMPORTANT:</u> It is critical that you have at least
-               one unencrypted backup!</b>  Without it, your bitcoins will
+               one unencrypted backup!</b>  Without it, your protoshares will
                be lost forever if you forget your passphrase!  This is <b>
                by far</b> the most common reason users lose coins!  Having
                at least one paper backup is recommended.""")
@@ -12515,11 +12515,11 @@ class DlgSimpleBackup(ArmoryDialog):
       self.wlt = wlt
 
       lblDescrTitle = QRichLabel( tr(""" 
-         <b>Protect Your Bitcoins -- Make a Wallet Backup!</b>"""))
+         <b>Protect Your Protoshares -- Make a Wallet Backup!</b>"""))
 
       lblDescr = QRichLabel( tr("""
          A failed hard-drive or forgotten passphrase will lead to 
-         <u>permanent loss of bitcoins</u>!  Luckily, Armory wallets only 
+         <u>permanent loss of protoshares</u>!  Luckily, Armory wallets only 
          need to be backed up <u>one time</u>, and protect you in both
          of these events.   If you've ever forgotten a password or had
          a hardware failure, make a backup! """))
@@ -13316,7 +13316,7 @@ class DlgRestoreSingle(ArmoryDialog):
 
       # If we got here, the data is valid, let's create the wallet and accept the dlg
       # Now we should have a fully-plaintext rootkey and chaincode
-      root  = PyBtcAddress().createFromPlainKeyData(privKey)
+      root  = PyPtsAddress().createFromPlainKeyData(privKey)
       root.chaincode = chain
 
       first = root.extendAddressChain()
@@ -13362,7 +13362,7 @@ class DlgRestoreSingle(ArmoryDialog):
             return
 
       if passwd:
-          self.newWallet = PyBtcWallet().createNewWallet( \
+          self.newWallet = PyPtsWallet().createNewWallet( \
                                  plainRootKey=privKey, \
                                  chaincode=chain, \
                                  shortLabel='Restored - %s'%newWltID, \
@@ -13373,7 +13373,7 @@ class DlgRestoreSingle(ArmoryDialog):
                                  isActuallyNew=False, \
                                  doRegisterWithBDM=False)
       else:
-         self.newWallet = PyBtcWallet().createNewWallet(  \
+         self.newWallet = PyPtsWallet().createNewWallet(  \
                                  plainRootKey=privKey, \
                                  chaincode=chain, \
                                  shortLabel='Restored - %s'%newWltID, \
@@ -13812,7 +13812,7 @@ class DlgRestoreFragged(ArmoryDialog):
 
       # If we got here, the data is valid, let's create the wallet and accept the dlg
       # Now we should have a fully-plaintext rootkey and chaincode
-      root  = PyBtcAddress().createFromPlainKeyData(priv)
+      root  = PyPtsAddress().createFromPlainKeyData(priv)
       root.chaincode = chain
 
       first = root.extendAddressChain()
@@ -13857,7 +13857,7 @@ class DlgRestoreFragged(ArmoryDialog):
             return
 
       if passwd:
-          self.newWallet = PyBtcWallet().createNewWallet( \
+          self.newWallet = PyPtsWallet().createNewWallet( \
                                  plainRootKey=priv, \
                                  chaincode=chain, \
                                  shortLabel='Restored - %s'%newWltID, \
@@ -13868,7 +13868,7 @@ class DlgRestoreFragged(ArmoryDialog):
                                  isActuallyNew=False, \
                                  doRegisterWithBDM=False)
       else:
-         self.newWallet = PyBtcWallet().createNewWallet(  \
+         self.newWallet = PyPtsWallet().createNewWallet(  \
                                  plainRootKey=priv, \
                                  chaincode=chain, \
                                  shortLabel='Restored - %s'%newWltID, \

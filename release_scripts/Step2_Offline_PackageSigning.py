@@ -23,7 +23,7 @@ verType   = 'testing'
 gpgKeyID  = 'FB596985'
 builder   = 'Armory Technologies, Inc.'
 
-gitRepo   = './BitcoinArmory' 
+gitRepo   = './ProtosharesArmory' 
 gitBranch = 'testing'
 gituser   = 'Armory Technologies, Inc.'
 gitemail  = 'support@bitcoinarmory.com'

@@ -4,7 +4,7 @@ import sys
 from optparse import OptionParser
 
 sys.path.append('..')
-from pybtcengine import *
+from pyptsengine import *
 
 HASHCODE_HEADER = 1
 HASHCODE_MERKLE = 2
@@ -118,7 +118,7 @@ def figureOutMysteryHex(hexStr, hashDict={}):
    pkIdx = getIdxListNotIdYet(hintStr['PkStart'], maskAll)
    for idx in pkIdx:
       if binStr[idx+23:idx+25] == hintStr['PkEnd']:
-         addrStr = PyBtcAddress().createFromPublicKeyHash160(binStr[idx+3:idx+23])
+         addrStr = PyPtsAddress().createFromPublicKeyHash160(binStr[idx+3:idx+23])
          extraInfo = addrStr.getAddrStr()
          idListSimple.append(['TxOutScript', idx, idx+25, extraInfo, ''])
          maskAll[idx:idx+25] = [1]*25
@@ -129,7 +129,7 @@ def figureOutMysteryHex(hexStr, hashDict={}):
       if idx > len(binStr)-65:
          continue
       try:
-         addrStr = PyBtcAddress().createFromPublicKey(binStr[idx:idx+65])
+         addrStr = PyPtsAddress().createFromPublicKey(binStr[idx:idx+65])
          extraInfo = addrStr.calculateAddrStr()
          if not idx+65==len(binStr) and binStr[idx+65] == hex_to_binary('ac'):
             idListSimple.append(['CoinbaseScript', idx, idx+66, extraInfo, ''])
@@ -241,7 +241,7 @@ def figureOutMysteryHex(hexStr, hashDict={}):
 def updateHashList(hashfile, blkfile, rescan=False):
 
    print ''
-   print '\t.Updating hashlist from the blockchain file in your bitcoin directory'
+   print '\t.Updating hashlist from the blockchain file in your protoshares directory'
    print '\t.This will take 1-5 min the first time you run this script (and on rescan)'
    print '\t\t.Hashfile: ', hashfile
    print '\t\t.BlockFile:', blkfile
@@ -301,13 +301,13 @@ def updateHashList(hashfile, blkfile, rescan=False):
 
 
 if __name__ == '__main__':
-   print '\nTry to identify Bitcoin-related strings in a block of data'
+   print '\nTry to identify Protoshares-related strings in a block of data'
 
    parser = OptionParser(usage='USAGE: %prog [--binary|-b] -f FILE \n   or: %prog unidentifiedHex')
    parser.add_option('-f', '--file',   dest='filename', \
                   help='Get unidentified data from this file')
    parser.add_option('-k', '--blkfile', dest='blk0001file', default='', \
-                  help='Update hashlist from this file (default ~/.bitcoin/blk0001.dat)')
+                  help='Update hashlist from this file (default ~/.protoshares/blk0001.dat)')
    parser.add_option('-g', '--hashfile', dest='hashfile', default='./knownHashes.bin', \
                   help='The file to store and retrieve header/tx hashes')
    parser.add_option('-b', '--binary', action='store_false', dest='isHex', default=True, \
@@ -339,11 +339,11 @@ if __name__ == '__main__':
       import platform
       opsys = platform.system()
       if 'win' in opsys.lower():
-         blkfile = path.join(os.getenv('APPDATA'), 'Bitcoin', 'blk0001.dat')
+         blkfile = path.join(os.getenv('APPDATA'), 'Protoshares', 'blk0001.dat')
       if 'nix' in opsys.lower() or 'nux' in opsys.lower():
-         blkfile = path.join(os.getenv('HOME'), '.bitcoin', 'blk0001.dat')
+         blkfile = path.join(os.getenv('HOME'), '.protoshares', 'blk0001.dat')
       if 'mac' in opsys.lower() or 'osx' in opsys.lower():
-			blkfile = os.path.expanduser('~/Library/Application Support/Bitcoin/blk0001.dat')
+			blkfile = os.path.expanduser('~/Library/Application Support/Protoshares/blk0001.dat')
 
    # A variety of error conditions
    if fn == None and len(args)==0:

@@ -214,7 +214,7 @@ if doEncr.lower().startswith('y'):
    passwd = SecureBinaryData(passwd1)
          
    print 'Creating new wallet...'
-   newWallet = PyBtcWallet().createNewWallet( \
+   newWallet = PyPtsWallet().createNewWallet( \
                                      newWalletFilePath=filename, \
                                      plainRootKey=recon[:32], \
                                      chaincode=recon[32:], \
@@ -228,7 +228,7 @@ if doEncr.lower().startswith('y'):
    newWallet.unlock(securePassphrase=passwd)
 
 else:
-   newWallet = PyBtcWallet().createNewWallet( \
+   newWallet = PyPtsWallet().createNewWallet( \
                                      newWalletFilePath=filename, \
                                      plainRootKey=recon[:32], \
                                      chaincode=recon[32:], \

@@ -7,7 +7,7 @@
 # wallet after it has all your addresses:
 # 
 #    from armoryengine import *
-#    wlt = PyBtcWallet().readWalletFile('wltwith1miladdr.wallet')
+#    wlt = PyPtsWallet().readWalletFile('wltwith1miladdr.wallet')
 #    TheBDM.registerWallet(wlt)
 #    
 #    start = RightNow()
@@ -118,11 +118,11 @@ for i in xrange(NLINESTOREAD):
    pubBin  = CryptoECDSA().ComputePublicKey(SecureBinaryData(privBin)).toBinStr()
    addr20  = hash160(pubBin)
 
-   # Pre-PyBtcAddr Entry Header
+   # Pre-PyPtsAddr Entry Header
    addrDataToWrite.append('\x00')
    addrDataToWrite.append(addr20)
 
-   # PyBtcAddr itself
+   # PyPtsAddr itself
    addrDataToWrite.append(addr20)
    addrDataToWrite.append(computeChecksum(addr20))
 

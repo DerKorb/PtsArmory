@@ -55,7 +55,7 @@ if not os.path.exists(wltfile):
    exit(0)
 
 # Read the wallet file
-wlt  = PyBtcWallet().readWalletFile(wltfile)
+wlt  = PyPtsWallet().readWalletFile(wltfile)
 
 netbyte = wlt.uniqueIDBin[-1]
 if not netbyte==ADDRBYTE:

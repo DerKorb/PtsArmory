@@ -15,7 +15,7 @@ wltname = wltfile.readlines()[0].strip()
 wltpath = os.path.join(ARMORY_HOME_DIR, wltname)
 if not os.path.exists(wltpath):
    print 'No wallet!'
-wlt = PyBtcWallet().readWalletFile(wltpath)
+wlt = PyPtsWallet().readWalletFile(wltpath)
 LOGINFO('Wallet to use: %s', wltpath)
 
 passwd = SecureBinaryData(getpass.getpass('Unlock wallet %s: ' % wltname))

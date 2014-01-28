@@ -1,5 +1,7 @@
 CXX = g++
 
+DEBUG=1
+
 ifdef DEBUG
 CFLAGS=-g3 -Wall -pipe -fPIC
 CXXFLAGS=-g3 -Wall -pipe -fPIC
@@ -10,7 +12,7 @@ endif
 
 #**************************************************************************
 LINK = $(CXX)
-OBJS = UniversalTimer.o BinaryData.o leveldb_wrapper.o StoredBlockObj.o BtcUtils.o BlockObj.o BlockUtils.o EncryptionUtils.o libcryptopp.a libleveldb.a
+OBJS = UniversalTimer.o BinaryData.o leveldb_wrapper.o StoredBlockObj.o PtsUtils.o BlockObj.o BlockUtils.o EncryptionUtils.o libcryptopp.a libleveldb.a
 
 # This is a script created by goatpig which detects where the python 
 # dependencies are and writes them to the pypaths.txt file. It defines :
@@ -64,13 +66,13 @@ libleveldb.a: Makefile
 %.o: %.cpp %.h
 	$(CXX) $(CXXCPP) $(CXXFLAGS) -c $<
 
-BinaryData.o: BtcUtils.h log.h
-BtcUtils.o: log.h
-BlockObj.o: BinaryData.h BtcUtils.h
-StoredBlockObj.o: log.h BtcUtils.h BinaryData.h
-leveldb_wrapper.o: log.h BtcUtils.h BinaryData.h
+BinaryData.o: PtsUtils.h log.h
+PtsUtils.o: log.h
+BlockObj.o: BinaryData.h PtsUtils.h
+StoredBlockObj.o: log.h PtsUtils.h BinaryData.h
+leveldb_wrapper.o: log.h PtsUtils.h BinaryData.h
 BlockUtils.o: log.h BinaryData.h UniversalTimer.h PartialMerkle.h
-EncryptionUtils.o: log.h BtcUtils.h BinaryData.h
+EncryptionUtils.o: log.h PtsUtils.h BinaryData.h
 CppBlockUtils_wrap.cxx: log.h BlockUtils.h BinaryData.h BlockObj.h UniversalTimer.h BlockUtils.h BlockUtils.cpp CppBlockUtils.i
 	swig $(SWIG_OPTS) -outdir ../ -v CppBlockUtils.i 
 

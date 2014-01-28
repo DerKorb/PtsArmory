@@ -18,7 +18,7 @@
 #include <cassert>
 
 #include "BinaryData.h"
-#include "BtcUtils.h"
+#include "PtsUtils.h"
 
 
 
@@ -803,7 +803,7 @@ public:
          alreadyScannedUpToBlk_(blkCreated) { }
 
 
-   //RegisteredScrAddr(BtcAddress const & addrObj, int32_t blkCreated=-1);
+   //RegisteredScrAddr(PtsAddress const & addrObj, int32_t blkCreated=-1);
 
 
    bool operator==(RegisteredScrAddr const & ra2) const 

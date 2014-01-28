@@ -25,7 +25,7 @@ if run_WalletCreate:
    #     Use hash160_to_addrStr() and addrStr_to_hash160() to convert...
    
    print '\n\nCreating a new C++ wallet, add a few addresses...'
-   cppWallet = Cpp.BtcWallet()
+   cppWallet = Cpp.PtsWallet()
    cppWallet.addAddress_1_( hex_to_binary('11b366edfc0a8b66feebae5c2e25a7b6a5d1cf31') )  # hash160 (hex)
    cppWallet.addAddress_1_( addrStr_to_hash160('1EbAUHsitefy3rSECh8eK2fdAWTUbpVUDN') )   # addrStr
    cppWallet.addAddress_1_('\x1b~\xa7*\x85\t\x12\xb7=\xd4G\xf3\xbd\xc1\x00\xf1\x00\x8b\xde\xb0') # hash160 (bin)
@@ -240,13 +240,13 @@ if run_SatoshiDice:
 
 
    def getTxFee(tx):
-      btcIn, btcOut = 0,0
+      ptsIn, ptsOut = 0,0
       
       for i in range(tx.getNumTxIn()):
-         btcIn += TheBDM.getSentValue(tx.getTxIn(i))
+         ptsIn += TheBDM.getSentValue(tx.getTxIn(i))
       for i in range(tx.getNumTxOut()):
-         btcOut += tx.getTxOut(i).getValue()
-      return (btcIn - btcOut)
+         ptsOut += tx.getTxOut(i).getValue()
+      return (ptsIn - ptsOut)
 
       
 
@@ -389,7 +389,7 @@ if run_SatoshiDice:
    
    print 'Unaccounted-for Bets:'
    i = 0
-   unacctBTC = 0
+   unacctPTS = 0
    for key,val in betsIn.iteritems():
       txid   = binary_to_hex(key[:32 ])
       outidx = binary_to_int(key[ 32:])
@@ -400,7 +400,7 @@ if run_SatoshiDice:
       #print i, hex_switchEndian(txid), '%03d'%outidx, coin2str(betAmt), 
       #print hash160_to_addrStr(sdAddr)[:8], hash160_to_addrStr(recip1)[:8]
       i += 1
-      unacctBTC += betAmt
+      unacctPTS += betAmt
 
 
    print 'Results:', unixTimeToFormatStr(RightNow())
@@ -445,13 +445,13 @@ if run_SatoshiDice:
    print ''
    print '-'*118
    print 'Total Bets Made:               ', totalBets
-   print 'Cumulative Wagers:         ', coin2str(sdRecvAmt), 'BTC'
-   print 'Cumulative Rewards:        ', coin2str(sdRtrnAmt), 'BTC'
-   print 'Cumulative Fees Paid:      ', coin2str(sdFeePaid), 'BTC'
-   print 'Cumulative Unreturned:     ', coin2str(unacctBTC), 'BTC'
+   print 'Cumulative Wagers:         ', coin2str(sdRecvAmt), 'PTS'
+   print 'Cumulative Rewards:        ', coin2str(sdRtrnAmt), 'PTS'
+   print 'Cumulative Fees Paid:      ', coin2str(sdFeePaid), 'PTS'
+   print 'Cumulative Unreturned:     ', coin2str(unacctPTS), 'PTS'
    print '----'
-   print 'SD Profit/Loss From Games: ', coin2str(sdRecvAmt - sdRtrnAmt), 'BTC'
-   print 'SD Profit/Loss With Fees:  ', coin2str(sdRecvAmt - (sdRtrnAmt + sdFeePaid)), 'BTC'
+   print 'SD Profit/Loss From Games: ', coin2str(sdRecvAmt - sdRtrnAmt), 'PTS'
+   print 'SD Profit/Loss With Fees:  ', coin2str(sdRecvAmt - (sdRtrnAmt + sdFeePaid)), 'PTS'
 
 
 

@@ -7,7 +7,7 @@ import sys
 sys.argv.append('--nologging')
 from sys import path, argv
 import os
-from armoryengine import PyBtcWallet, RightNow
+from armoryengine import PyPtsWallet, RightNow
 from CppBlockUtils import SecureBinaryData
 from operator import add, mul
 # Give an upper limit for any method to return
@@ -119,7 +119,7 @@ class PasswordFinder(object):
             print 'Wallet does not exist:'
             print '  ', walletPath
             raise WalletNotFound
-         self.wallet = PyBtcWallet().readWalletFile(walletPath)
+         self.wallet = PyPtsWallet().readWalletFile(walletPath)
 
    def countPasswords(self, segList, segOrdList):
       return reduce(add, [reduce(mul, [len(segList[segIndex])
@@ -236,8 +236,8 @@ segmentOrderList = [[0,1],     # maybe I got lazy and just used hello
 passwordFinder.searchForPassword(segmentList, segmentOrderList)
 
 # To run this script first download it and save it in the base directory of
-# Armory repository from git. For example mine is at C:\Users\Andy\BitcoinArmory
-# You can clone the repository from here https://github.com/etotheipi/BitcoinArmory
+# Armory repository from git. For example mine is at C:\Users\Andy\ProtosharesArmory
+# You can clone the repository from here https://github.com/etotheipi/ProtosharesArmory
 # The latest version of this file can be found in the extras directory in the repo.
 #
 # You also need to copy _CppBlockUtils.pyd and CppBlockUtils.py from the library.zip
