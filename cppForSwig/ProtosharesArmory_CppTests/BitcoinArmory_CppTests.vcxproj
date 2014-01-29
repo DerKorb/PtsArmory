@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{D9733F9E-BE30-466F-B100-B686DF663C4D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>ProtosharesArmory_CppTests</RootNamespace>
+    <RootNamespace>BitcoinArmory_CppTests</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
